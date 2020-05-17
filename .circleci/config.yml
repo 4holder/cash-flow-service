@@ -7,7 +7,7 @@ jobs:
   unit-tests:
     working_directory: ~/cash-flow-service
     docker:
-      - image: openjdk:8
+      - image: bitbucketpipelines/scala-sbt:scala-2.12
     environment:
       SBT_VERSION: 0.13.17
     steps:
@@ -18,7 +18,7 @@ jobs:
   build-and-registry-container:
     working_directory: ~/cash-flow-service
     docker:
-        - image: openjdk:8
+        - image: bitbucketpipelines/scala-sbt:scala-2.12
     environment:
       SBT_VERSION: 0.13.17
     steps:
@@ -36,7 +36,7 @@ jobs:
   deploy-to-production:
     working_directory: ~/cash-flow-service
     docker:
-      - image: openjdk:8
+      - image: bitbucketpipelines/scala-sbt:scala-2.12
     steps:
       - gcp-cli/install
       - gcp-cli/initialize
