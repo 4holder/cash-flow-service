@@ -21,6 +21,7 @@ variable "min_replicas" {}
 variable "max_replicas" {}
 
 variable "application_secret" {}
+variable "http_application_secret" {}
 variable "database_name" {}
 variable "database_host" {}
 variable "database_port" {}

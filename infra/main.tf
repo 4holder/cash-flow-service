@@ -14,6 +14,7 @@ variable "max_replicas" { default = 2 }
 variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:c96dcf46db0f3ccb61597cc42a070838488546fc" }
 
 variable "application_secret" {}
+variable "http_application_secret" {}
 
 variable "database_name" {}
 variable "database_host" {}
@@ -66,4 +67,5 @@ module "cash_flow_service" {
   database_password         = var.database_password
   database_user             = var.database_user
   application_secret        = var.application_secret
+  http_application_secret   = var.http_application_secret
 }
