@@ -27,7 +27,7 @@ jobs:
           sbt dist
           unzip target/universal/cash-flow-service-1.0.zip -d .
           docker build -t $IMAGE_AND_TAG .
-          gcloud auth configure-docker
+          gcloud --quiet auth configure-docker
           docker push $IMAGE_AND_TAG
   deploy-to-production:
     working_directory: ~/cash-flow-service
