@@ -7,20 +7,34 @@ jobs:
   unit-tests:
     working_directory: ~/cash-flow-service
     docker:
-      - image: bitbucketpipelines/scala-sbt:scala-2.12
-    environment:
-      SBT_VERSION: 0.13.17
+      - image: circleci/openjdk:8
     steps:
       - checkout
+      - restore_cache:
+        keys:
+          - app-cache-{{ checksum "build.sbt" }}
+          - app-cache-v1
+      - save_cache:
+        key: app-cache-{{ checksum "build.sbt" }}
+        paths:
+          - target/resolution-cache
+          - target/streams
+          - project/target/resolution-cache
+          - project/target/streams
+          - ~/.sbt
+          - ~/.ivy2/cache
+      - save_cache:
+        key: app-cache-v1
+        paths:
+          - ~/.sbt
+          - ~/.ivy2/cache
       - run:
           name: Unit Test
           command: sbt unit
   build-and-registry-container:
     working_directory: ~/cash-flow-service
     docker:
-        - image: bitbucketpipelines/scala-sbt:scala-2.12
-    environment:
-      SBT_VERSION: 0.13.17
+      - image: circleci/openjdk:8
     steps:
       - checkout
       - setup_remote_docker
@@ -36,7 +50,7 @@ jobs:
   deploy-to-production:
     working_directory: ~/cash-flow-service
     docker:
-      - image: bitbucketpipelines/scala-sbt:scala-2.12
+      - image: circleci/openjdk:8
     steps:
       - gcp-cli/install
       - gcp-cli/initialize
