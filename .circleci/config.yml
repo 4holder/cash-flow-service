@@ -1,0 +1,59 @@
+version: 2.1
+
+orbs:
+  gcp-cli: circleci/gcp-cli@1.8.4
+
+jobs:
+  unit-tests:
+    working_directory: ~/cash-flow-service
+    docker:
+      - image: openjdk:8
+    environment:
+      SBT_VERSION: 0.13.17
+    steps:
+      - checkout
+      - run:
+          name: Unit Test
+          command: sbt unit
+  build-and-registry-container:
+    working_directory: ~/cash-flow-service
+    docker:
+        - image: openjdk:8
+    environment:
+      SBT_VERSION: 0.13.17
+    steps:
+      - checkout
+      - setup_remote_docker
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run: |
+          IMAGE_AND_TAG=gcr.io/fin2you/cash-flow-service:$CIRCLE_SHA1
+          sbt dist
+          unzip target/universal/cash-flow-service-1.0.zip -d .
+          docker build -t $IMAGE_AND_TAG .
+          gcloud auth configure-docker
+          docker push $IMAGE_AND_TAG
+  deploy-to-production:
+    working_directory: ~/cash-flow-service
+    docker:
+      - image: openjdk:8
+    steps:
+      - gcp-cli/install
+      - gcp-cli/initialize
+      - run: |
+          gcloud --quiet components install kubectl
+          gcloud --quiet container clusters get-credentials $K8S_CLUSTER_NAME
+          IMAGE_AND_TAG=gcr.io/fin2you/cash-flow-service:$CIRCLE_SHA1
+          kubectl set image deployment/cash-flow-service-production cash-flow-service=$IMAGE_AND_TAG
+
+workflows:
+  version: 2
+  test-build-deploy:
+    jobs:
+      - unit-tests
+      - build-and-registry-container:
+          requires:
+            - unit-tests
+      - deploy-to-production:
+          requires:
+            - build-and-registry-container

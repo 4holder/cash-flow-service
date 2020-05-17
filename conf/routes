@@ -1,0 +1,4 @@
+GET  /infra/health                   infrastructure.HealthCheckController.health
+
+POST /v1/calculateCLTContract        clt_contract.CLTCalculatorController.calculateCLTContract
+
