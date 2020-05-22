@@ -3,6 +3,24 @@ version: 2.1
 orbs:
   gcp-cli: circleci/gcp-cli@1.8.4
 
+restore_cache: &restore_cache
+  restore_cache:
+    keys:
+      - app-cache-{{ checksum "build.sbt" }}
+      - app-cache-v1
+
+
+save_cache: &save_cache
+  save_cache:
+    key: app-cache-{{ checksum "build.sbt" }}
+    paths:
+      - target/resolution-cache
+      - target/streams
+      - project/target/resolution-cache
+      - project/target/streams
+      - ~/.sbt
+      - ~/.ivy2/cache
+
 jobs:
   unit-tests:
     working_directory: ~/cash-flow-service
@@ -10,9 +28,11 @@ jobs:
       - image: circleci/openjdk:8
     steps:
       - checkout
+      - *restore_cache
       - run:
           name: Unit Test
           command: sbt unit
+      - *save_cache
   integration-tests:
     working_directory: ~/cash-flow-service
     docker:
@@ -24,6 +44,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
     steps:
       - checkout
+      - *restore_cache
       - run:
           name: Run Database Migrations
           command: sbt runDbMigrations

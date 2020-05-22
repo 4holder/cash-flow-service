@@ -1,9 +1,11 @@
 package income_management.models.financial_contract
 
 import com.google.inject.{Inject, Singleton}
+import domain.User
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -15,9 +17,10 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
   import dbConfig._
   import profile.api._
 
-  def getFinancialContracts(page: Int, pageSize: Int): Future[Seq[FinancialContract]] = {
+  def getFinancialContracts(page: Int, pageSize: Int)(implicit user: User): Future[Seq[FinancialContract]] = {
     val query =
       financialContracts
+        .filter(r => r.user_id === user.id)
         .drop(offset(page, pageSize))
         .take(pageSize)
         .sortBy(_.created_at.desc)
