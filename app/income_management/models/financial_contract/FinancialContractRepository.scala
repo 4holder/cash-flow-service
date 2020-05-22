@@ -21,9 +21,9 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
     val query =
       financialContracts
         .filter(r => r.user_id === user.id)
+        .sortBy(_.created_at.desc)
         .drop(offset(page, pageSize))
         .take(pageSize)
-        .sortBy(_.created_at.desc)
 
     db.run(query.result).map(_.map(r => r: FinancialContract))
   }

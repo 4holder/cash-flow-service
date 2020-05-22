@@ -1,5 +1,6 @@
 package integration.repositories
 
+import domain.User
 import income_management.models.financial_contract.{FinancialContract, FinancialContractRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
@@ -8,7 +9,7 @@ import utils.{AsyncTest, DBUtils}
 import utils.builders.{FinancialContractBuilder, UserBuilder}
 
 class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with BeforeAndAfterEach {
-  implicit private val user = UserBuilder().build
+  implicit private val user: User = UserBuilder().build
 
   private val firstFinancialContract = FinancialContractBuilder(
     user = user,
@@ -73,16 +74,16 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
     }
   }
 
-  behavior of "listing financial contracts"
+  behavior of "listing user financial contracts"
   it should """return all financial contracts descending ordered by creation date
                 when on first page with size 3 and there are 3 contracts""" in {
     for {
       _ <- DBUtils.insertFinancialContracts(List(
-        firstNoiseFinancialContract,
         thirdFinancialContract,
+        firstNoiseFinancialContract,
         secondFinancialContract,
-        firstFinancialContract,
-        secondNoiseFinancialContract
+        secondNoiseFinancialContract,
+        firstFinancialContract
       ))
       financialContracts <- repository.getFinancialContracts(1, 3)
     } yield {
@@ -98,13 +99,13 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
                 when on first page with size 2 and there are 5 contracts""" in {
     for {
       _ <- DBUtils.insertFinancialContracts(List(
+        secondFinancialContract,
+        forthFinancialContract,
         firstNoiseFinancialContract,
         firstFinancialContract,
-        secondFinancialContract,
+        secondNoiseFinancialContract,
         thirdFinancialContract,
-        forthFinancialContract,
-        fifthFinancialContract,
-        secondNoiseFinancialContract
+        fifthFinancialContract
       ))
       financialContracts <- repository.getFinancialContracts(1, 2)
     } yield {
@@ -119,12 +120,12 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
                 when on second page with size 2 and there are 5 contracts""" in {
     for {
       _ <- DBUtils.insertFinancialContracts(List(
-        firstNoiseFinancialContract,
         firstFinancialContract,
-        secondFinancialContract,
+        firstNoiseFinancialContract,
+        fifthFinancialContract,
         thirdFinancialContract,
         forthFinancialContract,
-        fifthFinancialContract,
+        secondFinancialContract,
         secondNoiseFinancialContract
       ))
       financialContracts <- repository.getFinancialContracts(2, 2)
@@ -140,12 +141,12 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
                 when on third page with size 2 and there are 5 contracts""" in {
     for {
       _ <- DBUtils.insertFinancialContracts(List(
-        firstNoiseFinancialContract,
         firstFinancialContract,
-        secondFinancialContract,
-        thirdFinancialContract,
+        firstNoiseFinancialContract,
         forthFinancialContract,
+        thirdFinancialContract,
         fifthFinancialContract,
+        secondFinancialContract,
         secondNoiseFinancialContract
       ))
       financialContracts <- repository.getFinancialContracts(3, 2)

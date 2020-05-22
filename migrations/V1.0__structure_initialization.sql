@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS public.financial_contracts (
     currency                VARCHAR(3) NOT NULL default 'BRL',
     start_date              timestamptz,
     end_date                timestamptz,
-    created_at              timestamptz DEFAULT NOW() NOT NULL,
-    modified_at             timestamptz DEFAULT NOW() NOT NULL
+    created_at              timestamptz NOT NULL,
+    modified_at             timestamptz NOT NULL
 );
 
 CREATE INDEX user_id_idx ON public.financial_contracts (user_id);
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS public.incomes(
     is_active               BOOLEAN DEFAULT true NOT NULL,
     income_type             VARCHAR NOT NULL,
     occurrences             VARCHAR NOT NULL,
-    created_at              timestamptz DEFAULT NOW() NOT NULL,
-    modified_at             timestamptz DEFAULT NOW() NOT NULL,
+    created_at              timestamptz NOT NULL,
+    modified_at             timestamptz NOT NULL,
     FOREIGN KEY (financial_contract_id) REFERENCES public.financial_contracts (id)
 );
 
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS public.income_discounts(
     value_in_cents          BIGINT NOT NULL,
     is_active               BOOLEAN DEFAULT true NOT NULL,
     occurrences             VARCHAR NOT NULL,
-    created_at              timestamptz DEFAULT NOW() NOT NULL,
-    modified_at             timestamptz DEFAULT NOW() NOT NULL,
+    created_at              timestamptz NOT NULL,
+    modified_at             timestamptz NOT NULL,
     FOREIGN KEY (income_id) REFERENCES public.incomes (id)
 );
 
