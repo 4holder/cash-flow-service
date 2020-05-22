@@ -1,7 +1,7 @@
 package clt_contract
 
-import domain.{Amount, ContractType, FinancialContract, Income}
+import domain.{Amount, ContractType, Income}
 
-case class CLTContract(grossSalary: Amount, incomes: List[Income]) extends FinancialContract {
-  override val contractType: ContractType.Value = ContractType.CLT
+case class CLTContract(grossSalary: Amount, incomes: List[Income]) {
+  val contractType: ContractType.Value = ContractType.CLT
 }

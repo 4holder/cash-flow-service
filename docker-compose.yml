@@ -1,0 +1,19 @@
+version: '3.5'
+
+services:
+  cash-flow-service-db:
+    hostname: cash-flow-service-db
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  db-migration-dev:
+    image: boxfuse/flyway:5.2.4
+    command: -url=jdbc:postgresql://cash-flow-service-db:5432/postgres -schemas=public -user=postgres -password=postgres -connectRetries=60 migrate
+    volumes:
+      - ./migrations:/flyway/sql
+    depends_on:
+      - cash-flow-service-db

@@ -13,6 +13,20 @@ jobs:
       - run:
           name: Unit Test
           command: sbt unit
+  integration-tests:
+    working_directory: ~/cash-flow-service
+    docker:
+      - image: circleci/openjdk:8
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+    steps:
+      - checkout
+      - run:
+          name: Integration Test
+          command: sbt integration
   build-and-registry-container:
     working_directory: ~/cash-flow-service
     docker:
@@ -47,9 +61,12 @@ workflows:
   test-build-deploy:
     jobs:
       - unit-tests
-      - build-and-registry-container:
+      - integration-tests:
           requires:
             - unit-tests
+      - build-and-registry-container:
+          requires:
+            - integration-tests
       - deploy-to-production:
           requires:
             - build-and-registry-container
