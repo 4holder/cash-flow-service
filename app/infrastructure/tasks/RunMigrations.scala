@@ -13,10 +13,9 @@ import scala.io.Source.fromFile
 /**
  * This is a tech debt.
  *
- * This task run migration in a localhost database because there was a challenging setup
- *  of flyway and circleCI postgres db.
- * The better would be find a way to connection flyway container and postgres in the
- *  pipeline steps.
+ * This task run migration in a localhost database because there was a challenging setup of
+ *  flyway and circleCI postgres db.
+ * The best would be find a way to connect flyway container and postgres in the pipeline steps.
  */
 object RunMigrations {
   private val connectionUrl = "jdbc:postgresql://localhost:5432/postgres?user=postgres&password=postgres"

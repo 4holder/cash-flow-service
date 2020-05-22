@@ -6,7 +6,6 @@ import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
 class FinancialContractRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
                                            (implicit ec: ExecutionContext) {
@@ -27,7 +26,6 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
   }
 
   def insertContract(newFinancialContract: FinancialContract): Future[FinancialContract] = {
-
     db.run(DBIO.seq(
       financialContracts += newFinancialContract
     )).map(_ => newFinancialContract)
