@@ -1,6 +1,10 @@
 package utils
 
-import income_management.models.financial_contract.{FinancialContract, FinancialContractDbRow, FinancialContractTable}
+import income_management.models.financial_contract.{
+  FinancialContract,
+  FinancialContractDbRow,
+  FinancialContractTable
+}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 
@@ -29,7 +33,7 @@ object DBUtils {
 
   def clearDb(): Future[Unit] = {
     db.run(DBIO.seq(
-      sqlu"TRUNCATE public.financial_contracts CASCADE "
+      sqlu"TRUNCATE public.financial_contracts CASCADE"
     ))
   }
 }

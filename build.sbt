@@ -39,3 +39,7 @@ javaOptions in UnitTestConf += s"-Dconfig.file=${baseDirectory.value}/conf/appli
 
 testOptions in IntegrationTestConf := Seq(Tests.Filter(testPackageName => testPackageName.startsWith("integration")))
 javaOptions in IntegrationTestConf += s"-Dconfig.file=${baseDirectory.value}/conf/application-local.conf"
+
+lazy val runDbMigrations = taskKey[Unit]("Run database migrations.")
+
+fullRunTask(runDbMigrations, Compile, "infrastructure.tasks.RunMigrations")

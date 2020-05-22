@@ -25,6 +25,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Run Database Migrations
+          command: sbt runDbMigrations
+      - run:
           name: Integration Test
           command: sbt integration
   build-and-registry-container:
