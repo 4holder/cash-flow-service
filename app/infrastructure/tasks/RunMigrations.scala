@@ -2,11 +2,11 @@ package infrastructure.tasks
 
 import java.io.File
 
+import infrastructure.tasks.DatabaseConnection._
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
-import slick.util.AsyncExecutor
-import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.io.Source.fromFile
 
@@ -18,13 +18,6 @@ import scala.io.Source.fromFile
  * The best would be find a way to connect flyway container and postgres in the pipeline steps.
  */
 object RunMigrations {
-  private val connectionUrl = "jdbc:postgresql://localhost:5432/postgres?user=postgres&password=postgres"
-  val db = Database.forURL(
-    url = connectionUrl,
-    driver = "org.postgresql.Driver",
-    executor = AsyncExecutor("test", queueSize=2, minThreads=1, maxConnections=1, maxThreads=1)
-  )
-
   def main(args: Array[String]): Unit = {
     val projectDir = new File(".").getCanonicalPath
     val migrationsFolder = s"$projectDir/migrations/"

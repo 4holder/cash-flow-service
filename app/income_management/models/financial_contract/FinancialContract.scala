@@ -1,7 +1,5 @@
 package income_management.models.financial_contract
 
-import java.sql.Timestamp
-
 import domain.{Amount, ContractType, Currency, User}
 import org.joda.time.DateTime
 

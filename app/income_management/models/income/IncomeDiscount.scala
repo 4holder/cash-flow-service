@@ -1,4 +1,4 @@
-package income_management.models
+package income_management.models.income
 
 import domain.{Amount, IncomeDiscountType}
 

@@ -15,9 +15,12 @@ libraryDependencies ++= Seq(
   ehcache,
   ws,
   guice,
+  "com.typesafe.play" %% "play-json-joda" % "2.8.+",
+  "com.pauldijou" %% "jwt-core" % "4.2.+",
   "com.typesafe.play" %% "play-slick" % "4.0.+",
   "org.postgresql" % "postgresql" % "42.2.+",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.0.+" % Test
+  "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.+" % Test,
+  "org.mockito" % "mockito-all" % "1.10.+" % Test
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
@@ -43,5 +46,7 @@ testOptions in IntegrationTestConf := Seq(Tests.Filter(testPackageName => testPa
 javaOptions in IntegrationTestConf += s"-Dconfig.file=${baseDirectory.value}/conf/application-local.conf"
 
 lazy val runDbMigrations = taskKey[Unit]("Run database migrations.")
+lazy val seedDatabase = taskKey[Unit]("Seed database with some random values.")
 
 fullRunTask(runDbMigrations, Compile, "infrastructure.tasks.RunMigrations")
+fullRunTask(seedDatabase, Compile, "infrastructure.tasks.SeedDatabase")

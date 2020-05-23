@@ -1,12 +1,12 @@
-package integration.repositories
+package integration.income_management.models.financial_contract
 
 import domain.User
 import income_management.models.financial_contract.{FinancialContract, FinancialContractRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import utils.{AsyncTest, DBUtils}
 import utils.builders.{FinancialContractBuilder, UserBuilder}
+import utils.{AsyncTest, DBUtils}
 
 class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with BeforeAndAfterEach {
   implicit private val user: User = UserBuilder().build

@@ -78,6 +78,7 @@ jobs:
       - image: circleci/openjdk:8
     steps:
       - checkout
+      - *restore_cache
       - setup_remote_docker
       - gcp-cli/install
       - gcp-cli/initialize
