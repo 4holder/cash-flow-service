@@ -31,6 +31,8 @@ lazy val cashFlowService = (project in file("."))
 lazy val unit = TaskKey[Unit]("unit", "Runs all unit tests.")
 lazy val integration = TaskKey[Unit]("integration", "Runs all integration tests.")
 
+coverageExcludedPackages := "<empty>;Reverse.*;Routes.*;RoutesPrefix.*;RunMigrations.*"
+
 unit := (test in UnitTestConf).value
 integration := (test in IntegrationTestConf).value
 

@@ -5,7 +5,6 @@ import domain.User
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
