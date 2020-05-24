@@ -22,8 +22,5 @@ variable "max_replicas" {}
 
 variable "application_secret" {}
 variable "http_application_secret" {}
-variable "database_name" {}
-variable "database_host" {}
-variable "database_port" {}
-variable "database_password" {}
-variable "database_user" {}
+variable "database_connection_string" {}
+
