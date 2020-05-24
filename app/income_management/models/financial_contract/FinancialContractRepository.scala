@@ -33,6 +33,14 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
     )).map(_ => newFinancialContract)
   }
 
+  def deleteFinancialContract(id: String)(implicit user: User): Future[Int] = {
+    db.run(
+      financialContracts
+        .filter(f => f.id === id && f.user_id === user.id)
+        .delete
+    )
+  }
+
   private def offset(page: Int, pageSize: Int) = {
     if(page <= 1)
       0

@@ -156,4 +156,34 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
       financialContracts.head shouldEqual fifthFinancialContract
     }
   }
+
+  behavior of "deleting user financial contract"
+  it should "delete the specified financial contract" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        firstNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      affectedRows <- repository.deleteFinancialContract(firstFinancialContract.id)
+      financialContracts <- DBUtils.allFinancialContractsRows
+    } yield {
+      financialContracts should have length 1
+      affectedRows shouldEqual 1
+      financialContracts.head.id shouldEqual firstNoiseFinancialContract.id
+    }
+  }
+
+  it should "NOT delete the specified financial contract when user missmatch" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        firstNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      affectedRows <- repository.deleteFinancialContract(firstFinancialContract.id)(UserBuilder().build)
+      financialContracts <- DBUtils.allFinancialContractsRows
+    } yield {
+      financialContracts should have length 2
+      affectedRows shouldEqual 0
+    }
+  }
 }

@@ -39,4 +39,12 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
       }
     }}
   }
+
+  def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
+    getUser flatMap { implicit user: User =>
+      repository
+        .deleteFinancialContract(id)
+        .map(_ => NoContent)
+    }
+  }
 }
