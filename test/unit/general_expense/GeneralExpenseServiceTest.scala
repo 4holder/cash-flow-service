@@ -1,13 +1,11 @@
-package general_expense
+package unit.general_expense
 
-
-import domain.Currency
-import general_expense.payload.{GeneralExpenseInput, InvalidExpense}
-import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 import domain.Amount._
+import domain.Currency
 import domain.Occurrences._
-
-import scala.util.Failure
+import general_expense.payload.GeneralExpenseInput
+import general_expense.{GeneralExpense, GeneralExpenseService}
+import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
 class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
   val generalExpenseService = new GeneralExpenseService
