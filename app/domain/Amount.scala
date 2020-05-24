@@ -70,6 +70,7 @@ case class Amount(
 }
 
 object Amount {
+  implicit val amountWrites: Writes[Amount] = Json.writes[Amount]
   val ZERO_REAIS = Amount(0, Currency.BRL)
 
   def BRL(valueInCents: Long) = Amount(valueInCents, Currency.BRL)

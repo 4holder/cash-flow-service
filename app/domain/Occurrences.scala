@@ -10,6 +10,7 @@ case class Occurrences(
 )
 
 object Occurrences {
+  implicit val occurrencesWrites: Writes[Occurrences] = Json.writes[Occurrences]
   private val ALL_MONTHS = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
   private val CRON_SEPARATOR = " "
   private val MONTH_SEPARATOR = ","

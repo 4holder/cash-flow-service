@@ -1,10 +1,11 @@
 package general_expense
 
-import clt_contract.payloads.OccurrencesPayload
+
 import domain.Currency
 import general_expense.payload.GeneralExpenseInput
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
-import wire.AmountPayload
+import domain.Amount._
+import domain.Occurrences._
 
 import scala.util.Failure
 
