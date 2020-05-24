@@ -1,7 +1,7 @@
 package integration.income_management.models.financial_contract
 
 import domain.User
-import income_management.models.financial_contract.{FinancialContract, FinancialContractRepository}
+import domain.financial_contract.{FinancialContract, FinancialContractRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}

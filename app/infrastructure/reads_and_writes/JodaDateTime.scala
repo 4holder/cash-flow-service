@@ -1,4 +1,4 @@
-package income_management.payloads
+package infrastructure.reads_and_writes
 
 import org.joda.time.DateTime
 import play.api.libs.json.{JodaReads, JodaWrites, Reads, Writes}

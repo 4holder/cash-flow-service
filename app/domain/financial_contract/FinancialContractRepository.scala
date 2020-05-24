@@ -1,10 +1,12 @@
-package income_management.models.financial_contract
+package domain.financial_contract
 
 import com.google.inject.{Inject, Singleton}
 import domain.User
+import domain.financial_contract.FinancialContract.FinancialContractTable
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

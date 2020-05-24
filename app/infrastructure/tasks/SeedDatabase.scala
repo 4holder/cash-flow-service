@@ -2,15 +2,15 @@ package infrastructure.tasks
 
 import java.sql.Timestamp
 import java.util.UUID.randomUUID
-
+import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
 import domain.{ContractType, Currency}
-import income_management.models.financial_contract.{FinancialContractDbRow, FinancialContractTable}
 import infrastructure.tasks.DatabaseConnection._
 import org.joda.time.DateTime
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
-import scala.concurrent.duration._
+
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 object SeedDatabase {
   private val userId = "local-user-id"

@@ -1,9 +1,11 @@
-package domain
+package domain.income
 
 import domain.Amount.AmountPayload
+import domain.Amount
 import play.api.libs.json.{Json, Reads, Writes}
 
 case class IncomeDiscount(
+  id: String,
   name: String,
   discountType: IncomeDiscountType.Value,
   amount: Amount,

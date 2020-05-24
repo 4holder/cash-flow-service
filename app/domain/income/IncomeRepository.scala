@@ -1,4 +1,4 @@
-package income_management.models.income
+package domain.income
 
 import com.google.inject.Singleton
 

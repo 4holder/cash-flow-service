@@ -1,13 +1,9 @@
 package utils
 
-import income_management.models.financial_contract.{
-  FinancialContract,
-  FinancialContractDbRow,
-  FinancialContractTable
-}
+import domain.financial_contract.FinancialContract
+import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
-
 import scala.concurrent.Future
 
 object DBUtils {

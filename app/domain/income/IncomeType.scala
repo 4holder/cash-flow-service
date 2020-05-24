@@ -1,4 +1,4 @@
-package domain
+package domain.income
 
 case object IncomeType extends Enumeration {
   val SALARY: IncomeType.Value = Value("SALARY")

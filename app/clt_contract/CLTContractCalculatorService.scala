@@ -1,11 +1,12 @@
 package clt_contract
 
-
 import com.google.inject.Singleton
-import domain.{Amount, Currency, Income, IncomeType, Occurrences}
+import domain.income.Income.IncomePayload
+import domain.income.IncomeType
+import domain.{Amount, Currency, Occurrences}
+import implicits.{inssTable2020, irrfTable2020}
 
 import scala.util.Try
-import implicits.{inssTable, irrfTable}
 
 @Singleton
 class CLTContractCalculatorService {
@@ -25,11 +26,11 @@ class CLTContractCalculatorService {
 
     salaryDiscounts.flatMap { salaryDiscounts =>
       val netSalaryTryable = grossSalaryAmount
-        .subtract(salaryDiscounts.map(_.amount): _*)
-        .map(netSalary => Income(
+        .subtract(salaryDiscounts.map(_.amount : Amount): _*)
+        .map(netSalary => IncomePayload(
           name = "Salary",
           amount = netSalary,
-          incomeType = IncomeType.SALARY,
+          incomeType = IncomeType.SALARY.toString,
           occurrences = Occurrences.builder.day(5).allMonths.build,
           discounts = salaryDiscounts
         ))
@@ -37,19 +38,19 @@ class CLTContractCalculatorService {
       val thirteenthSalaryTyrable =
         grossSalaryAmount
           .divide(2)
-          .subtract(salaryDiscounts.map(_.amount): _*)
-          .map(thirteenthSalary => Income(
+          .subtract(salaryDiscounts.map(_.amount : Amount): _*)
+          .map(thirteenthSalary => IncomePayload(
             name = "Thirteenth Salary",
             amount = thirteenthSalary,
-            incomeType = IncomeType.THIRTEENTH_SALARY,
+            incomeType = IncomeType.THIRTEENTH_SALARY.toString,
             occurrences = Occurrences.builder.day(20).month(12).build,
             discounts = salaryDiscounts
           ))
 
-      val thirteenthSalaryAdvance = Income(
+      val thirteenthSalaryAdvance = IncomePayload(
         name = "Thirteenth Salary Advance",
         amount = grossSalaryAmount.divide(2),
-        incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE,
+        incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE.toString,
         occurrences = Occurrences.builder.day(20).month(11).build,
         discounts = List()
       )

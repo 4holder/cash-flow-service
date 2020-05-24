@@ -1,15 +1,17 @@
 package clt_contract
 
-import domain.{Amount, IncomeDiscountType, IRRFTable, IncomeDiscount}
+import domain.income.IncomeDiscount.IncomeDiscountPayload
+import domain.income.IncomeDiscountType
+import domain.{Amount, IRRFTable}
 
 import scala.util.{Failure, Success, Try}
 
 object CalculateIRRFDiscount {
   def apply(grossSalary: Amount,
-            inssDiscount: IncomeDiscount,
+            inssDiscount: IncomeDiscountPayload,
             dependentQuantity: Int,
             otherDeductions: Amount)
-           (implicit irrfTable: IRRFTable): Try[IncomeDiscount] = {
+           (implicit irrfTable: IRRFTable): Try[IncomeDiscountPayload] = {
     val dependentsDeduction = irrfTable.discountPerDependent.multiply(dependentQuantity)
     val baseSalary = grossSalary.subtract(inssDiscount.amount, otherDeductions, dependentsDeduction)
 
@@ -19,9 +21,9 @@ object CalculateIRRFDiscount {
         val discountInCents = discounts.map(_.valueInCents).sum
         val percentage = grossSalary.percentsFor(discountInCents)
 
-        IncomeDiscount(
+        IncomeDiscountPayload(
           "IRRF",
-          IncomeDiscountType.IRRF,
+          IncomeDiscountType.IRRF.toString,
           Amount(discountInCents, grossSalary.currency),
           percentage
         )

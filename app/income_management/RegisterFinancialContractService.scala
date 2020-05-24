@@ -3,9 +3,9 @@ package income_management
 import java.util.UUID.randomUUID
 
 import com.google.inject.{Inject, Singleton}
+import domain.financial_contract.FinancialContract.FinancialContractPayload
+import domain.financial_contract.{FinancialContract, FinancialContractRepository}
 import domain.{ContractType, User}
-import income_management.models.financial_contract.{FinancialContract, FinancialContractRepository}
-import income_management.payloads.FinancialContractInput
 import org.joda.time.DateTime
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegisterFinancialContractService @Inject()(repository: FinancialContractRepository)
                                                 (implicit ec: ExecutionContext){
   def register(
-    newFinancialContractInput: FinancialContractInput,
+    newFinancialContractInput: FinancialContractPayload,
     id: String = randomUUID().toString,
     now: DateTime = DateTime.now
   )(implicit user: User): Future[FinancialContract] = {

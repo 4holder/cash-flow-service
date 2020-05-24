@@ -1,9 +1,11 @@
 package unit.clt_contract
 
 import clt_contract.CalculateINSSDiscount
-import domain.{Amount, AmountRange, IncomeDiscountType, INSSTable, IncomeDiscount}
+import domain.{Amount, AmountRange, INSSTable}
 import org.scalatest.{FlatSpec, Matchers}
 import domain.Currency.BRL
+import domain.income.IncomeDiscount.IncomeDiscountPayload
+import domain.income.IncomeDiscountType
 
 import scala.util.Success
 
@@ -42,9 +44,9 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
 
     val inssDiscount = CalculateINSSDiscount(grossSalary)
 
-    inssDiscount shouldEqual Success(IncomeDiscount(
+    inssDiscount shouldEqual Success(IncomeDiscountPayload(
       EXPECTED_DISCOUNT_NAME,
-      IncomeDiscountType.INSS,
+      IncomeDiscountType.INSS.toString,
       amount = domain.Amount(15561, BRL),
       grossAmountAliquot = 0.0818
     ))
@@ -55,9 +57,9 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
 
     val inssDiscount = CalculateINSSDiscount(grossSalary)
 
-    inssDiscount shouldEqual Success(IncomeDiscount(
+    inssDiscount shouldEqual Success(IncomeDiscountPayload(
       EXPECTED_DISCOUNT_NAME,
-      IncomeDiscountType.INSS,
+      IncomeDiscountType.INSS.toString,
       amount = domain.Amount(55895, BRL),
       grossAmountAliquot = 0.1118
     ))
@@ -68,9 +70,9 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
 
     val inssDiscount = CalculateINSSDiscount(grossSalary)
 
-    inssDiscount shouldEqual Success(IncomeDiscount(
+    inssDiscount shouldEqual Success(IncomeDiscountPayload(
       EXPECTED_DISCOUNT_NAME,
-      IncomeDiscountType.INSS,
+      IncomeDiscountType.INSS.toString,
       amount = domain.Amount(71310, BRL),
       grossAmountAliquot = 0.0713
     ))
@@ -81,9 +83,9 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
 
     val inssDiscount = CalculateINSSDiscount(grossSalary)
 
-    inssDiscount shouldEqual Success(IncomeDiscount(
+    inssDiscount shouldEqual Success(IncomeDiscountPayload(
       EXPECTED_DISCOUNT_NAME,
-      IncomeDiscountType.INSS,
+      IncomeDiscountType.INSS.toString,
       amount = domain.Amount(71310, BRL),
       grossAmountAliquot = 0.0549
     ))
@@ -94,9 +96,9 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
 
     val inssDiscount = CalculateINSSDiscount(grossSalary)
 
-    inssDiscount shouldEqual Success(IncomeDiscount(
+    inssDiscount shouldEqual Success(IncomeDiscountPayload(
       EXPECTED_DISCOUNT_NAME,
-      IncomeDiscountType.INSS,
+      IncomeDiscountType.INSS.toString,
       amount = domain.Amount.BRL(0),
       grossAmountAliquot = 0.0
     ))

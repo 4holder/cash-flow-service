@@ -2,7 +2,7 @@ import domain.Currency.BRL
 import domain.{Amount, AmountRange, INSSTable, IRRFTable}
 
 package object implicits {
-  implicit val inssTable = INSSTable(
+  implicit val inssTable2020: INSSTable = INSSTable(
     List(
       AmountRange(
         from = Amount(0, BRL),
@@ -28,7 +28,7 @@ package object implicits {
     cap = domain.Amount(610106, BRL)
   )
 
-  implicit val irrfTable = IRRFTable(
+  implicit val irrfTable2020: IRRFTable = IRRFTable(
     ranges = List(
       AmountRange(
         from = Amount(0, BRL),

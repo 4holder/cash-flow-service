@@ -1,4 +1,4 @@
-package domain
+package domain.income
 
 case object IncomeDiscountType extends Enumeration {
   val INSS: IncomeDiscountType.Value = Value("INSS")

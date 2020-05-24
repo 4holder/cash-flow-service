@@ -1,16 +1,18 @@
 package clt_contract
 
-import domain.{Amount, IncomeDiscountType, INSSTable, IncomeDiscount}
+import domain.income.IncomeDiscount.IncomeDiscountPayload
+import domain.income.IncomeDiscountType
+import domain.{Amount, INSSTable}
 
 import scala.util.{Failure, Success, Try}
 
 object CalculateINSSDiscount {
   def apply(grossSalary: Amount)
-           (implicit inssTable: INSSTable): Try[IncomeDiscount] = {
+           (implicit inssTable: INSSTable): Try[IncomeDiscountPayload] = {
     if (grossSalary.valueInCents <= 0) {
-      return Try(IncomeDiscount(
+      return Try(IncomeDiscountPayload(
         "INSS",
-        IncomeDiscountType.INSS,
+        IncomeDiscountType.INSS.toString,
         Amount.ZERO_REAIS,
         0.0
       ))
@@ -23,9 +25,9 @@ object CalculateINSSDiscount {
         val discountInCents = discounts.map(_.valueInCents).sum
         val percentage = grossSalary.percentsFor(discountInCents)
 
-        IncomeDiscount(
+        IncomeDiscountPayload(
           "INSS",
-          IncomeDiscountType.INSS,
+          IncomeDiscountType.INSS.toString,
           Amount(discountInCents, grossSalary.currency),
           percentage
         )

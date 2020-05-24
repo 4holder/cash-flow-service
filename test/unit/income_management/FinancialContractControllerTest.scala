@@ -3,8 +3,8 @@ package unit.income_management
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import domain.User
-import income_management.models.financial_contract.{FinancialContract, FinancialContractRepository}
-import income_management.payloads.FinancialContractInput
+import domain.financial_contract.FinancialContract.FinancialContractPayload
+import domain.financial_contract.FinancialContractRepository
 import income_management.{FinancialContractController, RegisterFinancialContractService}
 import org.joda.time.DateTime
 import org.mockito.Matchers._
@@ -81,7 +81,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    when(service.register(any[FinancialContractInput], any[String], any[DateTime])(any[User]))
+    when(service.register(any[FinancialContractPayload], any[String], any[DateTime])(any[User]))
       .thenReturn(Future.successful(financialContract))
 
     val result = controller.registerNewFinancialContract().apply(request)

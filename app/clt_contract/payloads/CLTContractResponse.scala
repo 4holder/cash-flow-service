@@ -2,7 +2,7 @@ package clt_contract.payloads
 
 import clt_contract.CLTContract
 import domain.Amount.AmountPayload
-import domain.Income.IncomePayload
+import domain.income.Income.IncomePayload
 import play.api.libs.json.{Json, Writes}
 
 case class CLTContractResponse(

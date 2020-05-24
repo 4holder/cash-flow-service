@@ -1,7 +1,10 @@
 package unit.clt_contract
 
 import clt_contract.{CLTContract, CLTContractCalculatorService}
-import domain.{Amount, Income, IncomeDiscount, IncomeDiscountType, IncomeType, Occurrences}
+import domain.income.Income.IncomePayload
+import domain.income.IncomeDiscount.IncomeDiscountPayload
+import domain.income.{IncomeDiscountType, IncomeType}
+import domain.{Amount, Occurrences}
 import org.scalatest.{FlatSpec, Matchers}
 
 class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
@@ -15,15 +18,15 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
 
     val grossSalaryInCents = 200000
     val expectedSalaryDiscounts = List(
-      IncomeDiscount(
+      IncomeDiscountPayload(
         name = IncomeDiscountType.INSS.toString,
-        discountType = IncomeDiscountType.INSS,
+        discountType = IncomeDiscountType.INSS.toString,
         amount = Amount.BRL(16433),
         grossAmountAliquot = 0.0822
       ),
-      IncomeDiscount(
+      IncomeDiscountPayload(
         name = IncomeDiscountType.IRRF.toString,
-        discountType = IncomeDiscountType.IRRF,
+        discountType = IncomeDiscountType.IRRF.toString,
         amount = Amount.ZERO_REAIS,
         grossAmountAliquot = 0.0
       )
@@ -41,24 +44,24 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
     cltContract shouldEqual CLTContract(
       grossSalary = Amount.BRL(grossSalaryInCents),
       incomes = List(
-        Income(
+        IncomePayload(
           name = "Salary",
           amount = Amount.BRL(183567),
-          incomeType = IncomeType.SALARY,
+          incomeType = IncomeType.SALARY.toString,
           occurrences = Occurrences.builder.day(5).allMonths.build,
           discounts = expectedSalaryDiscounts
         ),
-        Income(
+        IncomePayload(
           name = "Thirteenth Salary",
           amount = Amount.BRL(83567),
-          incomeType = IncomeType.THIRTEENTH_SALARY,
+          incomeType = IncomeType.THIRTEENTH_SALARY.toString,
           occurrences = Occurrences.builder.day(20).month(12).build,
           discounts = expectedSalaryDiscounts
         ),
-        Income(
+        IncomePayload(
           name = "Thirteenth Salary Advance",
           amount = Amount.BRL(100000),
-          incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE,
+          incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE.toString,
           occurrences = Occurrences.builder.day(20).month(11).build,
           discounts = List()
         )
@@ -73,15 +76,15 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
 
     val grossSalaryInCents = 1100000
     val expectedSalaryDiscounts = List(
-      IncomeDiscount(
+      IncomeDiscountPayload(
         name = IncomeDiscountType.INSS.toString,
-        discountType = IncomeDiscountType.INSS,
+        discountType = IncomeDiscountType.INSS.toString,
         amount = Amount.BRL(71310),
         grossAmountAliquot = 0.0648
       ),
-      IncomeDiscount(
+      IncomeDiscountPayload(
         name = IncomeDiscountType.IRRF.toString,
-        discountType = IncomeDiscountType.IRRF,
+        discountType = IncomeDiscountType.IRRF.toString,
         amount = Amount.BRL(190740),
         grossAmountAliquot = 0.1734
       )
@@ -99,24 +102,24 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
     cltContract shouldEqual CLTContract(
       grossSalary = Amount.BRL(grossSalaryInCents),
       incomes = List(
-        Income(
+        IncomePayload(
           name = "Salary",
           amount = Amount.BRL(837950),
-          incomeType = IncomeType.SALARY,
+          incomeType = IncomeType.SALARY.toString,
           occurrences = Occurrences.builder.day(5).allMonths.build,
           discounts = expectedSalaryDiscounts
         ),
-        Income(
+        IncomePayload(
           name = "Thirteenth Salary",
           amount = Amount.BRL(287950),
-          incomeType = IncomeType.THIRTEENTH_SALARY,
+          incomeType = IncomeType.THIRTEENTH_SALARY.toString,
           occurrences = Occurrences.builder.day(20).month(12).build,
           discounts = expectedSalaryDiscounts
         ),
-        Income(
+        IncomePayload(
           name = "Thirteenth Salary Advance",
           amount = Amount.BRL(550000),
-          incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE,
+          incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE.toString,
           occurrences = Occurrences.builder.day(20).month(11).build,
           discounts = List()
         )

@@ -1,13 +1,14 @@
 package income_management
 
 import domain.User
-import income_management.models.financial_contract.FinancialContractRepository
-import income_management.payloads.{FinancialContractInput, FinancialContractResponse}
-import javax.inject.Inject
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.json.Json.toJson
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import domain.financial_contract.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
+import domain.financial_contract.FinancialContractRepository
 import infrastructure.AuthorizedUser.getUser
+import javax.inject.Inject
+import play.api.libs.json.Json.toJson
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class FinancialContractController @Inject()(cc: ControllerComponents,
@@ -27,7 +28,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     getUser flatMap { implicit user: User => {
-      request.body.validate[FinancialContractInput].asOpt match {
+      request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           registerService
             .register(input)

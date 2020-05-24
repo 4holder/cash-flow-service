@@ -1,7 +1,7 @@
 package unit.income_management
 
+import domain.financial_contract.FinancialContractRepository
 import income_management.RegisterFinancialContractService
-import income_management.models.financial_contract.FinancialContractRepository
 import org.joda.time.DateTime
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
