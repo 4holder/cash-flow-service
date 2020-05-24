@@ -10,8 +10,7 @@ case class GeneralExpenseInput(amount: AmountPayload,
                                expenseType: Option[ExpenseType],
                                fixedAmount: Option[Boolean])
 
-object GeneralExpenseInput extends AmountPayload.ReadsAndWrites
-  with OccurrencesPayload.ReadsAndWrites {
+object GeneralExpenseInput {
 
   implicit val generalExpenseReads: Reads[GeneralExpenseInput] = Json.reads[GeneralExpenseInput]
 

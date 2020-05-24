@@ -81,10 +81,8 @@ object Amount {
   )
 
   object AmountPayload {
-    trait ReadsAndWrites {
-      implicit val amountPayloadWrites: Writes[AmountPayload] = Json.writes[AmountPayload]
-      implicit val amountPayloadReads: Reads[AmountPayload] = Json.reads[AmountPayload]
-    }
+    implicit val amountPayloadWrites: Writes[AmountPayload] = Json.writes[AmountPayload]
+    implicit val amountPayloadReads: Reads[AmountPayload] = Json.reads[AmountPayload]
 
     implicit def fromAmount(amount: Amount): AmountPayload = {
       AmountPayload(

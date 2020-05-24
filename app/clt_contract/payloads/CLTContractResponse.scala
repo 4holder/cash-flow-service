@@ -10,7 +10,7 @@ case class CLTContractResponse(
   incomes: List[IncomePayload]
 )
 
-object CLTContractResponse extends AmountPayload.ReadsAndWrites with IncomePayload.ReadsAndWrites {
+object CLTContractResponse extends IncomePayload.ReadsAndWrites {
   implicit val cltContractResponseWrites: Writes[CLTContractResponse] = Json.writes[CLTContractResponse]
 
   implicit def fromCLTContract(cltContract: CLTContract): CLTContractResponse = {

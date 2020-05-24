@@ -1,14 +1,13 @@
 package general_expense
 
 import com.google.inject.{Inject, Singleton}
-import general_expense.payload.{GeneralExpenseInput}
+import general_expense.payload.{GeneralExpenseInput, GeneralExpenseResponse}
 import play.api.libs.json.{JsValue, Json}
-import play.api.libs.json.Json._
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import GeneralExpense._
+
 @Singleton
 class GeneralExpenseController @Inject()
 (  cc: ControllerComponents,
@@ -24,7 +23,8 @@ class GeneralExpenseController @Inject()
 
         val expenseContract = geService.generateExpense(input) match {
           case Success(expense: GeneralExpense) => {
-            Future.successful(Ok(Json.toJson(expense)))
+            val responseType: GeneralExpenseResponse = expense
+            Future.successful(Ok(Json.toJson(responseType)))
           }
           case Failure(exception) => {
             Future.successful(BadRequest)

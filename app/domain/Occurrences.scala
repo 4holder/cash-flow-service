@@ -80,10 +80,8 @@ object Occurrences {
   )
 
   object OccurrencesPayload {
-    trait ReadsAndWrites {
-      implicit val occurrencesPayloadWrites: Writes[OccurrencesPayload] = Json.writes[OccurrencesPayload]
-      implicit val occurrencesPayloadReads: Reads[OccurrencesPayload] = Json.reads[OccurrencesPayload]
-    }
+    implicit val occurrencesPayloadWrites: Writes[OccurrencesPayload] = Json.writes[OccurrencesPayload]
+    implicit val occurrencesPayloadReads: Reads[OccurrencesPayload] = Json.reads[OccurrencesPayload]
 
     implicit def fromOccurrences(occurrences: Occurrences): OccurrencesPayload = {
       OccurrencesPayload(

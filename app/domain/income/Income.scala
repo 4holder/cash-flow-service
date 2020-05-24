@@ -25,9 +25,9 @@ object Income {
   )
 
   object IncomePayload {
-    trait ReadsAndWrites extends AmountPayload.ReadsAndWrites
-      with IncomeDiscountPayload.ReadsAndWrites
-      with OccurrencesPayload.ReadsAndWrites {
+    trait ReadsAndWrites extends
+       IncomeDiscountPayload.ReadsAndWrites
+       {
       implicit val incomePayloadWrites: Writes[IncomePayload] = Json.writes[IncomePayload]
       implicit val incomePayloadReads: Reads[IncomePayload] = Json.reads[IncomePayload]
     }

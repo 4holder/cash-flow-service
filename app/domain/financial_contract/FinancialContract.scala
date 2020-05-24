@@ -52,7 +52,7 @@ object FinancialContract {
     endDate: Option[DateTime],
   )
 
-  object FinancialContractPayload extends JodaDateTime with AmountPayload.ReadsAndWrites {
+  object FinancialContractPayload extends JodaDateTime {
     implicit val financialContractInput: Reads[FinancialContractPayload] = Json.reads[FinancialContractPayload]
   }
 
@@ -70,7 +70,6 @@ object FinancialContract {
   )
 
   object FinancialContractResponse extends JodaDateTime
-    with AmountPayload.ReadsAndWrites
     with UserPayload.ReadsAndWrites {
     implicit val financialContractResponse: Writes[FinancialContractResponse] = Json.writes[FinancialContractResponse]
 
