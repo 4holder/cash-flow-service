@@ -1,10 +1,10 @@
 package income_management.payloads
 
+import domain.Amount.AmountPayload
+import domain.User.UserPayload
 import income_management.models.financial_contract.FinancialContract
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Writes}
-import wire.AmountPayload.AmountPayloadImplicits
-import wire.{AmountPayload, UserPayload}
 
 case class FinancialContractResponse(
   id: String,
@@ -19,7 +19,9 @@ case class FinancialContractResponse(
   modifiedAt: DateTime
 )
 
-object FinancialContractResponse extends JodaDateTime with AmountPayloadImplicits {
+object FinancialContractResponse extends JodaDateTime
+  with AmountPayload.ReadsAndWrites
+  with UserPayload.ReadsAndWrites {
   implicit val financialContractResponse: Writes[FinancialContractResponse] = Json.writes[FinancialContractResponse]
 
   implicit def fromFinancialContract(financialContract: FinancialContract): FinancialContractResponse = {

@@ -1,8 +1,7 @@
 package domain
 
-import domain.exceptions.InvalidMonetaryOperation
-import wire.AmountPayload
-
+import domain.exceptions.InvalidMonetaryOperationException
+import play.api.libs.json.{Json, Reads, Writes}
 import scala.util.{Failure, Success, Try}
 
 case class Amount(
@@ -20,7 +19,7 @@ case class Amount(
       val amountToSubtract = amounts.map(_.valueInCents).sum
       Success(this.copy(valueInCents - amountToSubtract))
     } else {
-      Failure(InvalidMonetaryOperation(
+      Failure(InvalidMonetaryOperationException(
         s"Operation not permitted. Currency mismatch"))
     }
   }
@@ -31,7 +30,7 @@ case class Amount(
     if (this.currency.equals(amount.currency)) {
       Success(this.valueInCents < amount.valueInCents)
     } else {
-      Failure(InvalidMonetaryOperation(
+      Failure(InvalidMonetaryOperationException(
         s"Invalid comparison. Currency ${this.currency} mismatch from ${amount.currency}"))
     }
   }
@@ -42,7 +41,7 @@ case class Amount(
     if (this.currency.equals(amount.currency)) {
       Success(this.valueInCents > amount.valueInCents)
     } else {
-      Failure(InvalidMonetaryOperation(
+      Failure(InvalidMonetaryOperationException(
         s"Invalid comparison. Currency ${this.currency} mismatch from ${amount.currency}"))
     }
   }
@@ -75,8 +74,27 @@ object Amount {
 
   def BRL(valueInCents: Long) = Amount(valueInCents, Currency.BRL)
 
-  implicit def fromAmountPayload(amountPayload: AmountPayload): Amount = Amount(
-    valueInCents = amountPayload.valueInCents,
-    currency = Currency.withName(amountPayload.currency)
+  case class AmountPayload(
+    valueInCents: Long,
+    currency: String
   )
+
+  object AmountPayload {
+    trait ReadsAndWrites {
+      implicit val amountPayloadWrites: Writes[AmountPayload] = Json.writes[AmountPayload]
+      implicit val amountPayloadReads: Reads[AmountPayload] = Json.reads[AmountPayload]
+    }
+
+    implicit def fromAmount(amount: Amount): AmountPayload = {
+      AmountPayload(
+        valueInCents = amount.valueInCents,
+        currency = amount.currency.toString
+      )
+    }
+
+    implicit def toAmount(amountPayload: AmountPayload): Amount = Amount(
+      valueInCents = amountPayload.valueInCents,
+      currency = Currency.withName(amountPayload.currency)
+    )
+  }
 }

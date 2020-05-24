@@ -3,12 +3,11 @@ package income_management
 import domain.User
 import income_management.models.financial_contract.FinancialContractRepository
 import income_management.payloads.{FinancialContractInput, FinancialContractResponse}
-import wire.AuthorizedUser.getUser
 import javax.inject.Inject
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.json.Json.toJson
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-
+import infrastructure.AuthorizedUser.getUser
 import scala.concurrent.{ExecutionContext, Future}
 
 class FinancialContractController @Inject()(cc: ControllerComponents,

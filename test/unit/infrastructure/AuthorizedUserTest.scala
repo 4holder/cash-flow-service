@@ -1,6 +1,5 @@
 package unit.infrastructure
 
-import wire.AuthorizedUser.getUser
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -8,6 +7,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach, Matchers}
 import pdi.jwt.Jwt
 import play.api.mvc.{AnyContent, Headers, Request}
+import infrastructure.AuthorizedUser.getUser
 
 class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]

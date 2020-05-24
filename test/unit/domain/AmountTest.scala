@@ -4,7 +4,7 @@ import domain.Amount
 import org.junit.runner.notification.Failure
 import org.scalatest.{FlatSpec, Matchers}
 import domain.Currency.{BRL, USD}
-import domain.exceptions.InvalidMonetaryOperation
+import domain.exceptions.InvalidMonetaryOperationException
 
 import scala.util.{Failure, Success}
 
@@ -76,7 +76,7 @@ class AmountTest extends FlatSpec with Matchers {
     val result = amount - domain.Amount(3, USD)
 
     result.isFailure shouldEqual true
-    result.failed.get shouldBe an[InvalidMonetaryOperation]
+    result.failed.get shouldBe an[InvalidMonetaryOperationException]
   }
 
   behavior of "multiply calculation"
@@ -140,7 +140,7 @@ class AmountTest extends FlatSpec with Matchers {
     val failedComparison = amount < domain.Amount(1, USD)
 
     failedComparison.isFailure shouldEqual true
-    failedComparison.failed.get shouldBe an[InvalidMonetaryOperation]
+    failedComparison.failed.get shouldBe an[InvalidMonetaryOperationException]
   }
 
   behavior of "greater than comparison"
@@ -162,7 +162,7 @@ class AmountTest extends FlatSpec with Matchers {
     val failedComparison = amount > domain.Amount(1, USD)
 
     failedComparison.isFailure shouldEqual true
-    failedComparison.failed.get shouldBe an[InvalidMonetaryOperation]
+    failedComparison.failed.get shouldBe an[InvalidMonetaryOperationException]
   }
 
   behavior of "is negative verification"

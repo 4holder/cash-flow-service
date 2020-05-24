@@ -1,9 +1,8 @@
 package income_management.payloads
 
+import domain.Amount.AmountPayload
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads}
-import wire.AmountPayload
-import wire.AmountPayload.AmountPayloadImplicits
 
 case class FinancialContractInput(
  name: String,
@@ -14,6 +13,6 @@ case class FinancialContractInput(
  endDate: Option[DateTime],
 )
 
-object FinancialContractInput extends JodaDateTime with AmountPayloadImplicits {
+object FinancialContractInput extends JodaDateTime with AmountPayload.ReadsAndWrites {
   implicit val financialContractInput: Reads[FinancialContractInput] = Json.reads[FinancialContractInput]
 }

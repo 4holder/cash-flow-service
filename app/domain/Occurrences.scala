@@ -1,7 +1,7 @@
 package domain
 
 import domain.exceptions.InvalidCronExpressionException
-
+import play.api.libs.json.{Json, Reads, Writes}
 import scala.util.{Failure, Success, Try}
 
 case class Occurrences(
@@ -72,4 +72,23 @@ object Occurrences {
   }
 
   def builder = new OccurrencesBuilder
+
+  case class OccurrencesPayload(
+    day: Int,
+    months: List[Int]
+  )
+
+  object OccurrencesPayload {
+    trait ReadsAndWrites {
+      implicit val occurrencesPayloadWrites: Writes[OccurrencesPayload] = Json.writes[OccurrencesPayload]
+      implicit val occurrencesPayloadReads: Reads[OccurrencesPayload] = Json.reads[OccurrencesPayload]
+    }
+
+    implicit def fromOccurrences(occurrences: Occurrences): OccurrencesPayload = {
+      OccurrencesPayload(
+        day = occurrences.day,
+        months = occurrences.months
+      )
+    }
+  }
 }
