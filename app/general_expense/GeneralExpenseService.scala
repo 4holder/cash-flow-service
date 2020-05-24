@@ -2,30 +2,16 @@ package general_expense
 
 import com.google.inject.Singleton
 import domain.{Amount, Currency, Occurrences}
-import general_expense.payload.GeneralExpenseInput
-
-import scala.util.{Failure, Success, Try}
+import general_expense.payload.{GeneralExpenseInput, InvalidExpense}
 
 @Singleton
 class GeneralExpenseService {
 
-  val validExpenseTypes = List(
-    "generic",
-    "house hold",
-    "transportation",
-    "food",
-    "health",
-    "investments",
-    "work",
-    "shopping",
-    "taxes"
-  )
-
   def validExpenseType(expenseType: Option[String]): Option[String] = {
     if(expenseType.isEmpty) None
-    else validExpenseTypes.contains(expenseType.get) match {
+    else GeneralExpenseInput.validExpenseTypes.contains(expenseType.get) match {
       case true => None
-      case false => Some("invalid expense type")
+      case false => Some(s"invalid expense type: here are the valid options ${GeneralExpenseInput.validExpenseTypes}")
     }
   }
 
@@ -34,7 +20,7 @@ class GeneralExpenseService {
     listOfFaults
   }
 
-  def generateExpense(input: GeneralExpenseInput): Try[GeneralExpense] = {
+  def generateExpense(input: GeneralExpenseInput): Either[GeneralExpense, InvalidExpense] = {
 
     val amount: Amount = Amount(input.amount.valueInCents, Currency.BRL)
     val occurrences: Occurrences = Occurrences(input.occurrences.day, input.occurrences.months)
@@ -43,11 +29,10 @@ class GeneralExpenseService {
 
     val listFaults = validateInput(input)
     if (listFaults.isEmpty)
-      Success(GeneralExpense(amount, occurrences, fixAmount ,expenseType))
+      Left(GeneralExpense(amount, occurrences, fixAmount ,expenseType))
     else
-      Failure(InvalidExpense(input, listFaults))
+      Right(InvalidExpense(listFaults))
   }
 
 }
 
-case class InvalidExpense(input: GeneralExpenseInput, listFaults: List[String]) extends Exception

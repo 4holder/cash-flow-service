@@ -6,7 +6,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @Singleton
 class GeneralExpenseController @Inject()
@@ -22,12 +21,14 @@ class GeneralExpenseController @Inject()
       case Some(input) => {
 
         val expenseContract = geService.generateExpense(input) match {
-          case Success(expense: GeneralExpense) => {
+
+          case Left(expense: GeneralExpense) => {
             val responseType: GeneralExpenseResponse = expense
             Future.successful(Ok(Json.toJson(responseType)))
           }
-          case Failure(exception) => {
-            Future.successful(BadRequest)
+
+          case Right(fail) => {
+            Future.successful(BadRequest(Json.toJson(fail)))
           }
         }
 

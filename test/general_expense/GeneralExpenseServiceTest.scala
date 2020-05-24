@@ -2,7 +2,7 @@ package general_expense
 
 
 import domain.Currency
-import general_expense.payload.GeneralExpenseInput
+import general_expense.payload.{GeneralExpenseInput, InvalidExpense}
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 import domain.Amount._
 import domain.Occurrences._
@@ -19,7 +19,7 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
       val input: GeneralExpenseInput = GeneralExpenseInput(
         AmountPayload(100L, "BRL"),
         OccurrencesPayload(5, List(1,2,3)),None, None)
-      val expense = generalExpenseService.generateExpense(input).get
+      val expense: GeneralExpense = generalExpenseService.generateExpense(input).left.get
 
       assert(expense.amount.valueInCents == 100L, "the value in cents was to be 100")
       assert(expense.amount.currency == Currency.BRL, "the currency is BRL")
@@ -36,7 +36,7 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
         expenseType = Some("house hold"),
         fixedAmount = Some(true))
 
-      val expense = generalExpenseService.generateExpense(input).get
+      val expense = generalExpenseService.generateExpense(input).left.get
 
       assert(expense.amount.valueInCents == 550L, "the value in cents was to be 550")
       assert(expense.amount.currency == Currency.BRL, "the currency is BRL")
@@ -53,10 +53,9 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
         expenseType = Some("crazy type"),
         fixedAmount = None)
 
-      val expense = generalExpenseService.generateExpense(input)
-      val expectedInvalidExpense = InvalidExpense(input, List("invalid expense type"))
+      val expense = generalExpenseService.generateExpense(input).right.get
 
-      assert(expense == Failure(expectedInvalidExpense))
+      assert(expense.listFaults.size == 1)
     }
   }
 
