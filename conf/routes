@@ -1,6 +1,9 @@
 GET     /infra/health                      infrastructure.HealthCheckController.health
 
+
 POST    /v1/calculateCLTContract           clt_contract.CLTCalculatorController.calculateCLTContract
+POST    /v1/calculateExpense               general_expense.GeneralExpenseController.calculateExpense
+
 
 POST    /v1/financial_contracts            income_management.FinancialContractController.registerNewFinancialContract
 GET     /v1/financial_contracts            income_management.FinancialContractController.listFinancialContracts(page: Int, pageSize: Int)
