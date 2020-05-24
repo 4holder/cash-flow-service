@@ -1,3 +1,5 @@
+[![4holder](https://circleci.com/gh/4holder/cash-flow-service.svg?style=svg)](https://app.circleci.com/pipelines/github/4holder/cash-flow-service)
+
 # Cash Flow Service
 
 In a nutshell: this service is responsible for the financial contracts, incomes and expenses management.
