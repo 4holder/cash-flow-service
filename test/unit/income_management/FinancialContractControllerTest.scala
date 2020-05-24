@@ -7,14 +7,14 @@ import domain.financial_contract.FinancialContract.FinancialContractPayload
 import domain.financial_contract.FinancialContractRepository
 import income_management.{FinancialContractController, RegisterFinancialContractService}
 import org.joda.time.DateTime
-import org.mockito.Matchers._
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import pdi.jwt.Jwt
 import play.api.libs.json.Json
 import play.api.mvc.{Headers, Results}
-import play.api.test.Helpers.{contentType, status, _}
+import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import utils.builders.FinancialContractBuilder
 
@@ -96,5 +96,21 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     (jsonContent \ "companyCnpj").as[String] mustEqual financialContract.companyCnpj.get
     (jsonContent \ "grossAmount" \ "valueInCents").as[Long] mustEqual financialContract.grossAmount.valueInCents
     (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
+  }
+
+  "delete an user contract" in {
+    val request = FakeRequest()
+      .withMethod("DELETE")
+      .withHeaders(Headers(("Authorization", Jwt.encode(jwtBody))))
+
+    val financialContract = FinancialContractBuilder(user = user).build
+
+    when(repository.deleteFinancialContract(eqTo(financialContract.id))(any[User])).thenReturn(Future.successful(1))
+
+    val result = controller.deleteFinancialContract(financialContract.id).apply(request)
+
+    contentType(result) mustBe None
+    status(result) mustEqual NO_CONTENT
+    verify(repository, times(1)).deleteFinancialContract(financialContract.id)
   }
 }
