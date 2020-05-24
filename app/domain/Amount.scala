@@ -1,6 +1,7 @@
 package domain
 
 import domain.exceptions.InvalidMonetaryOperation
+import wire.AmountPayload
 
 import scala.util.{Failure, Success, Try}
 
@@ -73,4 +74,9 @@ object Amount {
   val ZERO_REAIS = Amount(0, Currency.BRL)
 
   def BRL(valueInCents: Long) = Amount(valueInCents, Currency.BRL)
+
+  implicit def fromAmountPayload(amountPayload: AmountPayload): Amount = Amount(
+    valueInCents = amountPayload.valueInCents,
+    currency = Currency.withName(amountPayload.currency)
+  )
 }

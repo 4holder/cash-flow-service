@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class FinancialContractRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
                                            (implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  val financialContracts = TableQuery[FinancialContractTable]
+  private val financialContracts = TableQuery[FinancialContractTable]
 
   import dbConfig._
   import profile.api._

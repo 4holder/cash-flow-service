@@ -23,13 +23,13 @@ object FinancialContract {
       user = User(financialContractDbRow.user_id),
       name = financialContractDbRow.name,
       contractType = ContractType.withName(financialContractDbRow.contract_type),
-      companyCnpj = Option(financialContractDbRow.company_cnpj),
+      companyCnpj = financialContractDbRow.company_cnpj,
       grossAmount = Amount(
         valueInCents = financialContractDbRow.gross_amount_in_cents,
         currency = Currency.withName(financialContractDbRow.currency)
       ),
       startDate = new DateTime(financialContractDbRow.start_date),
-      endDate = Option(new DateTime(financialContractDbRow.end_date)),
+      endDate = financialContractDbRow.end_date.map(ed => new DateTime(ed)),
       createdAt = new DateTime(financialContractDbRow.created_at),
       modifiedAt = new DateTime(financialContractDbRow.modified_at)
     )

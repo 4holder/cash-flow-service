@@ -4,6 +4,7 @@ import clt_contract.CLTContract
 import domain.{Income, IncomeDiscount, Occurrences}
 import play.api.libs.json.{Json, Writes}
 import wire.AmountPayload
+import wire.AmountPayload.AmountPayloadImplicits
 
 case class OccurrencesPayload(
   day: Int,
@@ -62,7 +63,7 @@ case class CLTContractResponse(
   incomes: List[IncomePayload]
 )
 
-object CLTContractResponse {
+object CLTContractResponse extends AmountPayloadImplicits {
   implicit val occurrencesPayload: Writes[OccurrencesPayload] = Json.writes[OccurrencesPayload]
   implicit val incomeDiscountPayloadWrites: Writes[IncomeDiscountPayload] = Json.writes[IncomeDiscountPayload]
   implicit val incomePayloadWrites: Writes[IncomePayload] = Json.writes[IncomePayload]

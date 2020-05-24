@@ -1,4 +1,4 @@
-package infrastructure
+package wire
 
 import domain.User
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}

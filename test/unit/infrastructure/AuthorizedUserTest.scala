@@ -1,6 +1,6 @@
 package unit.infrastructure
 
-import infrastructure.AuthorizedUser.getUser
+import wire.AuthorizedUser.getUser
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._

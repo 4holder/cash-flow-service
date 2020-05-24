@@ -37,9 +37,9 @@ object SeedDatabase {
       gross_amount_in_cents = 1235000,
       currency = Currency.BRL.toString,
       is_active = true,
-      company_cnpj = "3311330900014",
+      company_cnpj = Some("3311330900014"),
       start_date = new Timestamp(DateTime.now.getMillis),
-      end_date = new Timestamp(DateTime.now.getMillis),
+      end_date = Some(new Timestamp(DateTime.now.getMillis)),
       created_at = new Timestamp(DateTime.now.getMillis),
       modified_at = new Timestamp(DateTime.now.getMillis)
     )
