@@ -51,7 +51,7 @@ object FinancialContract {
     startDate: DateTime,
     endDate: Option[DateTime],
   )
-  
+
   case class FinancialContractUpdate(
     name: String,
     contractType: ContractType.Value,

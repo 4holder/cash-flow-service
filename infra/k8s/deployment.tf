@@ -48,6 +48,15 @@ resource "kubernetes_deployment" "cash_flow_service" {
             }
           }
 
+          resources {
+            limits {
+              cpu  = "250m"
+            }
+            requests {
+              cpu  = "50m"
+            }
+          }
+
           liveness_probe {
             http_get {
               scheme = "HTTP"
