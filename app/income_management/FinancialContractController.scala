@@ -26,6 +26,15 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
     }
   }
 
+  def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
+    getUser flatMap { implicit user: User =>
+      repository
+        .getFinancialContractById(id)
+        .map(_.map(fc => fc: FinancialContractResponse))
+        .map(financialContract => Ok(toJson(financialContract)))
+    }
+  }
+
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     getUser flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
@@ -37,6 +46,21 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
         case _ =>
           Future.successful(BadRequest(Json.obj("message" -> "Invalid financial contract input.")))
       }
+    }}
+  }
+
+  def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    getUser flatMap { implicit user: User => {
+      request.body.validate[FinancialContractPayload].asOpt match {
+        case Some(input) =>
+          repository
+            .updateFinancialContract(id, input)
+            .flatMap(_ => repository.getFinancialContractById(id))
+            .map(maybeFc => maybeFc.map(fc => fc: FinancialContractResponse))
+            .map(financialContract => Ok(toJson(financialContract)))
+        case _ =>
+          Future.successful(BadRequest(Json.obj("message" -> "Invalid financial contract input.")))
+        }
     }}
   }
 

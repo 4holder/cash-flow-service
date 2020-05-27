@@ -8,3 +8,4 @@ POST    /v1/calculateExpense               general_expense.GeneralExpenseControl
 POST    /v1/financial_contracts            income_management.FinancialContractController.registerNewFinancialContract
 GET     /v1/financial_contracts            income_management.FinancialContractController.listFinancialContracts(page: Int, pageSize: Int)
 DELETE  /v1/financial_contracts/:id        income_management.FinancialContractController.deleteFinancialContract(id: String)
+PUT     /v1/financial_contracts/:id        income_management.FinancialContractController.updateFinancialContract(id: String)

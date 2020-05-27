@@ -1,8 +1,9 @@
 package utils.builders
 
 import java.util.UUID.randomUUID
-import domain.financial_contract.FinancialContract
-import domain.{Amount, ContractType, User}
+
+import domain.financial_contract.{ContractType, FinancialContract}
+import domain.{Amount, User}
 import org.joda.time.DateTime
 
 case class FinancialContractBuilder(

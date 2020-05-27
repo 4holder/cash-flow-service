@@ -34,7 +34,7 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
       endDate = expectedFinancialContract.endDate
     ).build
 
-    when(repository.insertContract(expectedFinancialContract))
+    when(repository.insertFinancialContract(expectedFinancialContract))
         .thenReturn(Future.successful(expectedFinancialContract))
 
     service

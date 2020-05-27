@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import domain.Amount.AmountPayload
 import domain.User.UserPayload
-import domain.{Amount, ContractType, Currency, User}
+import domain.{Amount, Currency, User}
 import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
@@ -47,6 +47,15 @@ object FinancialContract {
     name: String,
     contractType: String,
     grossAmount: AmountPayload,
+    companyCnpj: Option[String],
+    startDate: DateTime,
+    endDate: Option[DateTime],
+  )
+  
+  case class FinancialContractUpdate(
+    name: String,
+    contractType: ContractType.Value,
+    grossAmount: Amount,
     companyCnpj: Option[String],
     startDate: DateTime,
     endDate: Option[DateTime],

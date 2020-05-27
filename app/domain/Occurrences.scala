@@ -7,7 +7,19 @@ import scala.util.{Failure, Success, Try}
 case class Occurrences(
   day: Int,
   months: List[Int]
-)
+) {
+  override def toString: String = {
+    s"$day $monthsToString"
+  }
+
+  private def monthsToString = {
+    if(months == Occurrences.ALL_MONTHS) {
+      "*"
+    } else {
+     months.mkString(Occurrences.MONTH_SEPARATOR)
+    }
+  }
+}
 
 object Occurrences {
   implicit val occurrencesWrites: Writes[Occurrences] = Json.writes[Occurrences]

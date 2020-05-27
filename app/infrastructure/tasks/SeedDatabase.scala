@@ -2,8 +2,10 @@ package infrastructure.tasks
 
 import java.sql.Timestamp
 import java.util.UUID.randomUUID
+
 import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
-import domain.{ContractType, Currency}
+import domain.Currency
+import domain.financial_contract.ContractType
 import infrastructure.tasks.DatabaseConnection._
 import org.joda.time.DateTime
 import slick.dbio.DBIO

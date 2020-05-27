@@ -15,7 +15,7 @@ class CLTCalculatorController @Inject()(
   cltCalculator: CLTContractCalculatorService)
   extends AbstractController(cc) {
 
-  def calculateCLTContract: Action[JsValue] = Action.async(parse.json) { request =>
+  def calculateCLTContract(): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[CalculateCLTContractInput].asOpt match {
       case Some(input) =>
         val cltContract: CLTContractResponse = cltCalculator

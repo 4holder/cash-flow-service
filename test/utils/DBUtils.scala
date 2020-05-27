@@ -2,8 +2,10 @@ package utils
 
 import domain.financial_contract.FinancialContract
 import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
+import domain.income.Income.{IncomeDbRow, IncomeTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
+
 import scala.concurrent.Future
 
 object DBUtils {
@@ -11,12 +13,17 @@ object DBUtils {
   val db = Database.forURL(
     url = connectionUrl,
     driver = "org.postgresql.Driver",
-    executor = AsyncExecutor("test", queueSize=2, minThreads=1, maxConnections=1, maxThreads=1)
+    executor = AsyncExecutor("test", queueSize=100, minThreads=1, maxConnections=1, maxThreads=1)
   )
   val financialContractTable = TableQuery[FinancialContractTable]
+  val incomeTable = TableQuery[IncomeTable]
 
   def allFinancialContractsRows: Future[Seq[FinancialContractDbRow]] = {
     db.run(financialContractTable.result)
+  }
+
+  def allIncomes: Future[Seq[IncomeDbRow]] = {
+    db.run(incomeTable.result)
   }
 
   def insertFinancialContracts(financialContracts: List[FinancialContract]): Future[Unit] = {

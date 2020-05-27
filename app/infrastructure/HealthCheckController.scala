@@ -6,7 +6,7 @@ import play.api.mvc._
 
 @Singleton
 class HealthCheckController @Inject()(cc: ControllerComponents) extends AbstractController(cc) {
-  def health: Action[AnyContent] = Action {
+  def health(): Action[AnyContent] = Action {
     Ok(Json.obj("status" -> "Healthy"))
   }
 }

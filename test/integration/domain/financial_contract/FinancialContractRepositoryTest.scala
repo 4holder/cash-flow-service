@@ -1,14 +1,13 @@
 package integration.domain.financial_contract
 
-import domain.User
 import domain.financial_contract.{FinancialContract, FinancialContractRepository}
+import domain.{Amount, Currency, User}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterEach}
-import utils.builders.{FinancialContractBuilder, UserBuilder}
-import utils.{AsyncTest, DBUtils}
+import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder, UserBuilder}
+import utils.{DBUtils, IntegrationSpec}
 
-class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with BeforeAndAfterEach {
+class FinancialContractRepositoryTest extends IntegrationSpec {
   implicit private val user: User = UserBuilder().build
 
   private val firstFinancialContract = FinancialContractBuilder(
@@ -41,20 +40,12 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
 
   private val repository = new FinancialContractRepository(dbConfig)
 
-  after {
-    DBUtils.clearDb()
-  }
-
-  override def beforeEach {
-    DBUtils.clearDb()
-  }
-
   behavior of "inserting financial contract"
   it should "insert a new financial contract in a empty db" in {
     val newFinancialContract = FinancialContractBuilder().build
 
     for {
-      actualFinancialContract <- repository.insertContract(newFinancialContract)
+      actualFinancialContract <- repository.insertFinancialContract(newFinancialContract)
       contracts <- DBUtils.allFinancialContractsRows
     } yield {
       val storedFinancialContract: FinancialContract = contracts.head
@@ -70,7 +61,7 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
     recoverToSucceededIf[PSQLException] {
       DBUtils
         .insertFinancialContracts(List(newFinancialContract))
-        .flatMap(_ => repository.insertContract(newFinancialContract))
+        .flatMap(_ => repository.insertFinancialContract(newFinancialContract))
     }
   }
 
@@ -157,6 +148,49 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
     }
   }
 
+  behavior of "get user financial contract by id"
+  it should """return the financial contract with the existent id""" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        thirdFinancialContract,
+        firstNoiseFinancialContract,
+        secondFinancialContract,
+        secondNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      financialContract <- repository.getFinancialContractById(secondFinancialContract.id)
+    } yield {
+      financialContract.get shouldEqual secondFinancialContract
+    }
+  }
+
+  it should """return none when user mismatch""" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        thirdFinancialContract,
+        firstNoiseFinancialContract,
+        secondFinancialContract,
+        secondNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      financialContract <- repository.getFinancialContractById(secondFinancialContract.id)(UserBuilder().build)
+    } yield {
+      financialContract shouldEqual None
+    }
+  }
+
+  it should """return none when financial contract does not exist""" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        thirdFinancialContract,
+        firstNoiseFinancialContract,
+      ))
+      financialContract <- repository.getFinancialContractById(forthFinancialContract.id)
+    } yield {
+      financialContract shouldEqual None
+    }
+  }
+
   behavior of "deleting user financial contract"
   it should "delete the specified financial contract" in {
     for {
@@ -184,6 +218,58 @@ class FinancialContractRepositoryTest extends AsyncTest with BeforeAndAfter with
     } yield {
       financialContracts should have length 2
       affectedRows shouldEqual 0
+    }
+  }
+
+  behavior of "updating user financial contract"
+  it should "update the allowed fields" in {
+    val now = DateTime.now
+    val updatePayload = FinancialContractPayloadBuilder().build
+
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        firstNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      affectedRows <- repository.updateFinancialContract(firstFinancialContract.id, updatePayload, now)
+      financialContracts <- DBUtils.allFinancialContractsRows
+    } yield {
+      financialContracts should have length 2
+      affectedRows shouldEqual 1
+
+      val updatedFinancialContract = financialContracts
+        .find(_.id.equals(firstFinancialContract.id))
+        .get: FinancialContract
+      updatedFinancialContract.name shouldEqual updatePayload.name
+      updatedFinancialContract.companyCnpj shouldEqual updatePayload.companyCnpj
+      updatedFinancialContract.contractType.toString shouldEqual updatePayload.contractType
+      updatedFinancialContract.grossAmount.valueInCents shouldEqual updatePayload.grossAmount.valueInCents
+      updatedFinancialContract.grossAmount.currency.toString shouldEqual updatePayload.grossAmount.currency
+      updatedFinancialContract.startDate shouldEqual updatePayload.startDate
+      updatedFinancialContract.endDate shouldEqual updatePayload.endDate
+      updatedFinancialContract.createdAt shouldEqual firstFinancialContract.createdAt
+      updatedFinancialContract.modifiedAt shouldEqual now
+    }
+  }
+
+  it should "not when user mismatch" in {
+    val now = DateTime.now
+    val updatedFirstFinancialContract = FinancialContractPayloadBuilder().build
+
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(
+        firstNoiseFinancialContract,
+        firstFinancialContract
+      ))
+      affectedRows <- repository.updateFinancialContract(firstFinancialContract.id, updatedFirstFinancialContract, now)(UserBuilder().build)
+      financialContracts <- DBUtils.allFinancialContractsRows
+    } yield {
+      financialContracts should have length 2
+      affectedRows shouldEqual 0
+
+      (financialContracts
+        .find(_.id.equals(firstFinancialContract.id))
+        .get : FinancialContract) shouldEqual firstFinancialContract
     }
   }
 }

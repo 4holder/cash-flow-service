@@ -4,9 +4,10 @@ import java.util.UUID.randomUUID
 
 import com.google.inject.{Inject, Singleton}
 import domain.financial_contract.FinancialContract.FinancialContractPayload
-import domain.financial_contract.{FinancialContract, FinancialContractRepository}
-import domain.{ContractType, User}
+import domain.financial_contract.{ContractType, FinancialContract, FinancialContractRepository}
+import domain.User
 import org.joda.time.DateTime
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -30,7 +31,6 @@ class RegisterFinancialContractService @Inject()(repository: FinancialContractRe
       modifiedAt = now
     )
 
-    repository
-      .insertContract(financialContract)
+    repository.insertFinancialContract(financialContract)
   }
 }
