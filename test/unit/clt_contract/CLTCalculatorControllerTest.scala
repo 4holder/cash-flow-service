@@ -2,12 +2,10 @@ package unit.clt_contract
 
 import clt_contract.{CLTCalculatorController, CLTContractCalculatorService}
 import org.scalatestplus.play.PlaySpec
-import pdi.jwt.Jwt
 import play.api.libs.json.Json
-import play.api.mvc.{Headers, Results}
-import play.api.test.Helpers.{contentAsJson, contentType, status}
+import play.api.mvc.Results
+import play.api.test.Helpers.{contentAsJson, contentType, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import play.api.test.Helpers._
 
 class CLTCalculatorControllerTest extends PlaySpec with Results {
 

@@ -1,11 +1,10 @@
 package unit.clt_contract
 
-import clt_contract.CalculateIRRFDiscount
-import domain.{Amount, AmountRange, IRRFTable}
-import org.scalatest.{FlatSpec, Matchers}
+import clt_contract.{CalculateIRRFDiscount, IRRFTable}
 import domain.Currency.BRL
-import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.income.IncomeDiscountType
+import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
+import domain.{Amount, AmountRange}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Success
 

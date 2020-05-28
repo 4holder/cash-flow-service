@@ -1,8 +1,7 @@
 package clt_contract
 
-import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.income.IncomeDiscountType
-import domain.{Amount, IRRFTable}
+import domain.Amount
+import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
 
 import scala.util.{Failure, Success, Try}
 

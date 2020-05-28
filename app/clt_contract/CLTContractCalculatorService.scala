@@ -1,8 +1,7 @@
 package clt_contract
 
 import com.google.inject.Singleton
-import domain.income.Income.IncomePayload
-import domain.income.IncomeType
+import domain.Income.{IncomePayload, IncomeType}
 import domain.{Amount, Currency, Occurrences}
 import implicits.{inssTable2020, irrfTable2020}
 

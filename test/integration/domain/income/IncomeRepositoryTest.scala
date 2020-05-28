@@ -1,6 +1,7 @@
 package integration.domain.income
 
-import domain.income.{Income, IncomeRepository}
+import domain.Income
+import income_management.IncomeRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders.{FinancialContractBuilder, IncomeBuilder}

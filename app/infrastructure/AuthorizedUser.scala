@@ -10,7 +10,7 @@ import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
 object AuthorizedUser {
-  implicit def getUser[A](implicit request: Request[A]): Future[User] = {
+  def authorize[A](implicit request: Request[A]): Future[User] = {
     Future.fromTry(getUserFromRequest(request))
   }
 

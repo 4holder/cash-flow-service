@@ -1,14 +1,11 @@
 package unit.clt_contract
 
-import clt_contract.CalculateINSSDiscount
-import domain.{Amount, AmountRange, INSSTable}
-import org.scalatest.{FlatSpec, Matchers}
+import clt_contract.{CalculateINSSDiscount, INSSTable}
 import domain.Currency.BRL
-import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.income.IncomeDiscountType
-
+import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
+import domain.{Amount, AmountRange}
+import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Success
-
 
 class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
   implicit private val inssTable = INSSTable(

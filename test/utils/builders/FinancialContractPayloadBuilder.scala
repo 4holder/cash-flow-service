@@ -1,8 +1,7 @@
 package utils.builders
 
 import domain.Amount
-import domain.financial_contract.ContractType
-import domain.financial_contract.FinancialContract.FinancialContractPayload
+import domain.FinancialContract.{ContractType, FinancialContractPayload}
 import org.joda.time.DateTime
 
 case class FinancialContractPayloadBuilder(

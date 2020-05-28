@@ -1,9 +1,8 @@
 package unit.clt_contract
 
 import clt_contract.{CLTContract, CLTContractCalculatorService}
-import domain.income.Income.IncomePayload
-import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.income.{IncomeDiscountType, IncomeType}
+import domain.Income.{IncomePayload, IncomeType}
+import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
 import domain.{Amount, Occurrences}
 import org.scalatest.{FlatSpec, Matchers}
 

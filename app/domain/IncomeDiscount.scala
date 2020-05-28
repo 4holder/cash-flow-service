@@ -1,7 +1,7 @@
-package domain.income
+package domain
 
 import domain.Amount.AmountPayload
-import domain.Amount
+import domain.IncomeDiscount.IncomeDiscountType
 import play.api.libs.json.{Json, Reads, Writes}
 
 case class IncomeDiscount(
@@ -13,6 +13,11 @@ case class IncomeDiscount(
 )
 
 object IncomeDiscount {
+  case object IncomeDiscountType extends Enumeration {
+    val INSS: IncomeDiscountType.Value = Value("INSS")
+    val IRRF: IncomeDiscountType.Value = Value("IRRF")
+  }
+
   case class IncomeDiscountPayload(
     name: String,
     discountType: String,

@@ -1,7 +1,7 @@
 package integration.domain.financial_contract
 
-import domain.User
-import domain.financial_contract.{FinancialContract, FinancialContractRepository}
+import domain.{FinancialContract, User}
+import income_management.FinancialContractRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder, UserBuilder}

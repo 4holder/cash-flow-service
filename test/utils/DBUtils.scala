@@ -1,9 +1,8 @@
 package utils
 
-import domain.financial_contract.FinancialContract
-import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
-import domain.income.Income
-import domain.income.Income.{IncomeDbRow, IncomeTable}
+import domain.{FinancialContract, Income}
+import income_management.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
+import income_management.IncomeRepository.{IncomeDbRow, IncomeTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
 

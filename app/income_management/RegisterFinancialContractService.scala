@@ -3,9 +3,8 @@ package income_management
 import java.util.UUID.randomUUID
 
 import com.google.inject.{Inject, Singleton}
-import domain.financial_contract.FinancialContract.FinancialContractPayload
-import domain.financial_contract.{ContractType, FinancialContract, FinancialContractRepository}
-import domain.User
+import domain.FinancialContract.{ContractType, FinancialContractPayload}
+import domain.{FinancialContract, User}
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}

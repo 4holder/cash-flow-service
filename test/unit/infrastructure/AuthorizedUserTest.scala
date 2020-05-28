@@ -3,11 +3,11 @@ package unit.infrastructure
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach, Matchers}
 import pdi.jwt.Jwt
 import play.api.mvc.{AnyContent, Headers, Request}
-import infrastructure.AuthorizedUser.getUser
+import infrastructure.AuthorizedUser.authorize
+import org.scalatestplus.mockito.MockitoSugar
 
 class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]
@@ -22,7 +22,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
-    getUser map { user =>
+    authorize map { user =>
       user.id shouldEqual expectedUserId
     }
   }
@@ -31,7 +31,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers())
 
     recoverToSucceededIf[UserTokenMissingException] {
-      getUser
+      authorize
     }
   }
 
@@ -40,7 +40,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      getUser
+      authorize
     }
   }
 
@@ -48,7 +48,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers(("Authorization", "any string")))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      getUser
+      authorize
     }
   }
 }

@@ -1,45 +1,62 @@
-package domain.income
+package income_management
 
 import java.sql.Timestamp
 
-import domain.Amount.AmountPayload
-import domain.Occurrences.OccurrencesPayload
-import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.{Amount, Currency, Occurrences, RepositoryModel}
+import com.google.inject.{Inject, Singleton}
+import domain.Income.{IncomePayload, IncomeType}
+import domain.{FinancialContract, _}
+import income_management.IncomeRepository.IncomeTable
 import org.joda.time.DateTime
-import play.api.libs.json.{Json, Reads, Writes}
+import play.api.db.slick.DatabaseConfigProvider
+import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
-import slick.lifted.Tag
+import slick.lifted.{TableQuery, Tag}
 
-case class Income(
-  id: String,
-  financialContractId: String,
-  name: String,
-  amount: Amount,
-  incomeType: IncomeType.Value,
-  occurrences: Occurrences,
-  createdAt: DateTime,
-  modifiedAt: DateTime,
-) extends RepositoryModel
+import scala.concurrent.{ExecutionContext, Future}
 
-object Income {
-  case class IncomePayload(
-    name: String,
-    amount: AmountPayload,
-    incomeType: String,
-    occurrences: OccurrencesPayload,
-    discounts: List[IncomeDiscountPayload]
-  )
+@Singleton
+class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+                                (implicit ec: ExecutionContext)
+  extends Repository {
+  private val dbConfig = dbConfigProvider.get[JdbcProfile]
+  private val incomeTable = TableQuery[IncomeTable]
 
-  object IncomePayload {
-    trait ReadsAndWrites extends
-       IncomeDiscountPayload.ReadsAndWrites
-       {
-      implicit val incomePayloadWrites: Writes[IncomePayload] = Json.writes[IncomePayload]
-      implicit val incomePayloadReads: Reads[IncomePayload] = Json.reads[IncomePayload]
-    }
+  import dbConfig._
+  import profile.api._
+
+  def all(page: Int, pageSize: Int)(implicit fc: FinancialContract): Future[Seq[Income]] = {
+    val query = incomeTable
+        .filter(_.financial_contract_id === fc.id)
+        .sortBy(_.created_at.desc)
+        .drop(offset(page, pageSize))
+        .take(pageSize)
+
+    db.run(query.result)
+      .map(_.map(r => r: Income))
   }
 
+  def getById(id: String): Future[Option[Income]] = {
+    db.run(
+      incomeTable.filter(_.id === id).result
+    ).map(r => r.headOption.map(income => income: Income))
+  }
+
+  def register(newIncomes: Income*): Future[Unit] = {
+    db.run(
+      DBIO.seq(
+        newIncomes.map(income => incomeTable += income):_*
+      )
+    )
+  }
+
+  def update(id: String,
+             incomePayload: IncomePayload,
+             now: DateTime = DateTime.now): Future[Int] = ???
+
+  def delete(id: String): Future[Int] = ???
+}
+
+object IncomeRepository {
   case class IncomeDbRow(
     id: String,
     financial_contract_id: String,
@@ -54,7 +71,7 @@ object Income {
   )
 
   object IncomeDbRow {
-    implicit def toIncome(incomeDbRow: IncomeDbRow): Income = Income(
+    implicit def toIncome(incomeDbRow: IncomeDbRow): Income = domain.Income(
       id = incomeDbRow.id,
       financialContractId = incomeDbRow.financial_contract_id,
       name = incomeDbRow.name,

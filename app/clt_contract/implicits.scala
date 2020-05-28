@@ -1,8 +1,9 @@
+import clt_contract.{INSSTable, IRRFTable}
 import domain.Currency.BRL
-import domain.{Amount, AmountRange, INSSTable, IRRFTable}
+import domain.{Amount, AmountRange}
 
 package object implicits {
-  implicit val inssTable2020: INSSTable = INSSTable(
+  implicit val inssTable2020: INSSTable = clt_contract.INSSTable(
     List(
       AmountRange(
         from = Amount(0, BRL),
@@ -28,7 +29,7 @@ package object implicits {
     cap = domain.Amount(610106, BRL)
   )
 
-  implicit val irrfTable2020: IRRFTable = IRRFTable(
+  implicit val irrfTable2020: IRRFTable = clt_contract.IRRFTable(
     ranges = List(
       AmountRange(
         from = Amount(0, BRL),

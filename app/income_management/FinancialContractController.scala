@@ -1,9 +1,8 @@
 package income_management
 
+import domain.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
 import domain.User
-import domain.financial_contract.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
-import domain.financial_contract.FinancialContractRepository
-import infrastructure.AuthorizedUser.getUser
+import infrastructure.AuthorizedUser.authorize
 import javax.inject.Inject
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json}
@@ -18,7 +17,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   extends AbstractController(cc) {
 
   def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
-    getUser flatMap { implicit user: User =>
+    authorize flatMap { implicit user: User =>
       repository
         .all(page, pageSize)
         .map(_.map(fc => fc: FinancialContractResponse))
@@ -27,7 +26,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    getUser flatMap { implicit user: User =>
+    authorize flatMap { implicit user: User =>
       repository
         .getById(id)
         .map(_.map(fc => fc: FinancialContractResponse))
@@ -36,7 +35,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    getUser flatMap { implicit user: User => {
+    authorize flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           registerService
@@ -50,7 +49,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    getUser flatMap { implicit user: User => {
+    authorize flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           repository
@@ -65,7 +64,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    getUser flatMap { implicit user: User =>
+    authorize flatMap { implicit user: User =>
       repository
         .delete(id)
         .map(_ => NoContent)

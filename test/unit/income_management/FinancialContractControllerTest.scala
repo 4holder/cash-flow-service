@@ -1,11 +1,10 @@
 package unit.income_management
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, SystemMaterializer}
+import domain.FinancialContract.FinancialContractPayload
 import domain.User
-import domain.financial_contract.FinancialContract.FinancialContractPayload
-import domain.financial_contract.FinancialContractRepository
-import income_management.{FinancialContractController, RegisterFinancialContractService}
+import income_management.{FinancialContractController, FinancialContractRepository, RegisterFinancialContractService}
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._

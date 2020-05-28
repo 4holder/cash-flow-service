@@ -1,12 +1,11 @@
 package unit.income_management
 
 import domain.User
-import domain.financial_contract.FinancialContractRepository
-import income_management.RegisterFinancialContractService
+import income_management.{FinancialContractRepository, RegisterFinancialContractService}
 import org.joda.time.DateTime
+import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
-import org.mockito.Mockito._
 import utils.builders.{FinancialContractBuilder, FinancialContractInputBuilder, UserBuilder}
 
 import scala.concurrent.Future
@@ -36,7 +35,7 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
     ).build
 
     when(repository.register(expectedFinancialContract))
-        .thenReturn(Future.successful())
+        .thenReturn(Future {})
 
     service
       .register(financialContractInput, expectedFinancialContract.id, now)

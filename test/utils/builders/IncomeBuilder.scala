@@ -2,8 +2,8 @@ package utils.builders
 
 import java.util.UUID.randomUUID
 
-import domain.{Amount, Occurrences}
-import domain.income.{Income, IncomeType}
+import domain.Income.IncomeType
+import domain.{Amount, Income, Occurrences}
 import org.joda.time.DateTime
 
 case class IncomeBuilder(
@@ -16,7 +16,7 @@ case class IncomeBuilder(
   createdAt: DateTime = DateTime.now,
   modifiedAt: DateTime = DateTime.now,
 ) {
-  def build: Income = Income(
+  def build: Income = domain.Income(
     id = id,
     financialContractId = financialContractId,
     name = name,
