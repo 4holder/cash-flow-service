@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import domain.Amount.AmountPayload
 import domain.User.UserPayload
-import domain.{Amount, Currency, User}
+import domain.{Amount, Currency, RepositoryModel, User}
 import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
@@ -22,7 +22,7 @@ case class FinancialContract(
   endDate: Option[DateTime],
   createdAt: DateTime,
   modifiedAt: DateTime
-)
+) extends RepositoryModel
 
 object FinancialContract {
   implicit def fromFinancialContractDbRow(financialContractDbRow: FinancialContractDbRow): FinancialContract = {

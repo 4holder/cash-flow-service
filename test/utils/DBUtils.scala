@@ -2,6 +2,7 @@ package utils
 
 import domain.financial_contract.FinancialContract
 import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractTable}
+import domain.income.Income
 import domain.income.Income.{IncomeDbRow, IncomeTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -30,6 +31,14 @@ object DBUtils {
     db.run(
       DBIO.seq(
         financialContracts.map(fc => financialContractTable += fc):_*
+      )
+    )
+  }
+
+  def insertIncomes(incomes: List[Income]): Future[Unit] = {
+    db.run(
+      DBIO.seq(
+        incomes.map(fc => incomeTable += fc):_*
       )
     )
   }

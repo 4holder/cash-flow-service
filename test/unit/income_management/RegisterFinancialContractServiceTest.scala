@@ -1,5 +1,6 @@
 package unit.income_management
 
+import domain.User
 import domain.financial_contract.FinancialContractRepository
 import income_management.RegisterFinancialContractService
 import org.joda.time.DateTime
@@ -11,7 +12,7 @@ import utils.builders.{FinancialContractBuilder, FinancialContractInputBuilder, 
 import scala.concurrent.Future
 
 class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers with MockitoSugar{
-  private implicit val user = UserBuilder().build
+  private implicit val user: User = UserBuilder().build
 
   private val repository = mock[FinancialContractRepository]
   private val service = new RegisterFinancialContractService(repository)
@@ -34,8 +35,8 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
       endDate = expectedFinancialContract.endDate
     ).build
 
-    when(repository.insertFinancialContract(expectedFinancialContract))
-        .thenReturn(Future.successful(expectedFinancialContract))
+    when(repository.register(expectedFinancialContract))
+        .thenReturn(Future.successful())
 
     service
       .register(financialContractInput, expectedFinancialContract.id, now)

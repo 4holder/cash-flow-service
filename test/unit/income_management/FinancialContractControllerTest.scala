@@ -43,7 +43,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val firstFinancialContract = FinancialContractBuilder(user = user).build
     val secondFinancialContract = FinancialContractBuilder(user = user).build
-    when(repository.getFinancialContracts(1, 2)(user))
+    when(repository.all(1, 2)(user))
       .thenReturn(Future.successful(
         Seq(
           firstFinancialContract,
@@ -105,12 +105,12 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    when(repository.deleteFinancialContract(eqTo(financialContract.id))(any[User])).thenReturn(Future.successful(1))
+    when(repository.delete(eqTo(financialContract.id))).thenReturn(Future.successful(1))
 
     val result = controller.deleteFinancialContract(financialContract.id).apply(request)
 
     contentType(result) mustBe None
     status(result) mustEqual NO_CONTENT
-    verify(repository, times(1)).deleteFinancialContract(financialContract.id)
+    verify(repository, times(1)).delete(financialContract.id)
   }
 }

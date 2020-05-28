@@ -1,7 +1,7 @@
 package integration.domain.financial_contract
 
+import domain.User
 import domain.financial_contract.{FinancialContract, FinancialContractRepository}
-import domain.{Amount, Currency, User}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder, UserBuilder}
@@ -45,13 +45,12 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
     val newFinancialContract = FinancialContractBuilder().build
 
     for {
-      actualFinancialContract <- repository.insertFinancialContract(newFinancialContract)
+      _ <- repository.register(newFinancialContract)
       contracts <- DBUtils.allFinancialContractsRows
     } yield {
       val storedFinancialContract: FinancialContract = contracts.head
 
       storedFinancialContract shouldEqual newFinancialContract
-      actualFinancialContract shouldEqual newFinancialContract
     }
   }
 
@@ -61,7 +60,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
     recoverToSucceededIf[PSQLException] {
       DBUtils
         .insertFinancialContracts(List(newFinancialContract))
-        .flatMap(_ => repository.insertFinancialContract(newFinancialContract))
+        .flatMap(_ => repository.register(newFinancialContract))
     }
   }
 
@@ -76,7 +75,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondNoiseFinancialContract,
         firstFinancialContract
       ))
-      financialContracts <- repository.getFinancialContracts(1, 3)
+      financialContracts <- repository.all(1, 3)
     } yield {
       financialContracts should have length 3
 
@@ -98,7 +97,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         thirdFinancialContract,
         fifthFinancialContract
       ))
-      financialContracts <- repository.getFinancialContracts(1, 2)
+      financialContracts <- repository.all(1, 2)
     } yield {
       financialContracts should have length 2
 
@@ -119,7 +118,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondFinancialContract,
         secondNoiseFinancialContract
       ))
-      financialContracts <- repository.getFinancialContracts(2, 2)
+      financialContracts <- repository.all(2, 2)
     } yield {
       financialContracts should have length 2
 
@@ -140,7 +139,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondFinancialContract,
         secondNoiseFinancialContract
       ))
-      financialContracts <- repository.getFinancialContracts(3, 2)
+      financialContracts <- repository.all(3, 2)
     } yield {
       financialContracts should have length 1
 
@@ -158,24 +157,9 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondNoiseFinancialContract,
         firstFinancialContract
       ))
-      financialContract <- repository.getFinancialContractById(secondFinancialContract.id)
+      financialContract <- repository.getById(secondFinancialContract.id)
     } yield {
       financialContract.get shouldEqual secondFinancialContract
-    }
-  }
-
-  it should """return none when user mismatch""" in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(List(
-        thirdFinancialContract,
-        firstNoiseFinancialContract,
-        secondFinancialContract,
-        secondNoiseFinancialContract,
-        firstFinancialContract
-      ))
-      financialContract <- repository.getFinancialContractById(secondFinancialContract.id)(UserBuilder().build)
-    } yield {
-      financialContract shouldEqual None
     }
   }
 
@@ -185,7 +169,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         thirdFinancialContract,
         firstNoiseFinancialContract,
       ))
-      financialContract <- repository.getFinancialContractById(forthFinancialContract.id)
+      financialContract <- repository.getById(forthFinancialContract.id)
     } yield {
       financialContract shouldEqual None
     }
@@ -198,26 +182,12 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         firstNoiseFinancialContract,
         firstFinancialContract
       ))
-      affectedRows <- repository.deleteFinancialContract(firstFinancialContract.id)
+      affectedRows <- repository.delete(firstFinancialContract.id)
       financialContracts <- DBUtils.allFinancialContractsRows
     } yield {
       financialContracts should have length 1
       affectedRows shouldEqual 1
       financialContracts.head.id shouldEqual firstNoiseFinancialContract.id
-    }
-  }
-
-  it should "NOT delete the specified financial contract when user missmatch" in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(List(
-        firstNoiseFinancialContract,
-        firstFinancialContract
-      ))
-      affectedRows <- repository.deleteFinancialContract(firstFinancialContract.id)(UserBuilder().build)
-      financialContracts <- DBUtils.allFinancialContractsRows
-    } yield {
-      financialContracts should have length 2
-      affectedRows shouldEqual 0
     }
   }
 
@@ -231,7 +201,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         firstNoiseFinancialContract,
         firstFinancialContract
       ))
-      affectedRows <- repository.updateFinancialContract(firstFinancialContract.id, updatePayload, now)
+      affectedRows <- repository.update(firstFinancialContract.id, updatePayload, now)
       financialContracts <- DBUtils.allFinancialContractsRows
     } yield {
       financialContracts should have length 2
@@ -249,27 +219,6 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
       updatedFinancialContract.endDate shouldEqual updatePayload.endDate
       updatedFinancialContract.createdAt shouldEqual firstFinancialContract.createdAt
       updatedFinancialContract.modifiedAt shouldEqual now
-    }
-  }
-
-  it should "not when user mismatch" in {
-    val now = DateTime.now
-    val updatedFirstFinancialContract = FinancialContractPayloadBuilder().build
-
-    for {
-      _ <- DBUtils.insertFinancialContracts(List(
-        firstNoiseFinancialContract,
-        firstFinancialContract
-      ))
-      affectedRows <- repository.updateFinancialContract(firstFinancialContract.id, updatedFirstFinancialContract, now)(UserBuilder().build)
-      financialContracts <- DBUtils.allFinancialContractsRows
-    } yield {
-      financialContracts should have length 2
-      affectedRows shouldEqual 0
-
-      (financialContracts
-        .find(_.id.equals(firstFinancialContract.id))
-        .get : FinancialContract) shouldEqual firstFinancialContract
     }
   }
 }

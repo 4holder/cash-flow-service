@@ -4,7 +4,7 @@ import play.api.libs.json.{Json, Reads, Writes}
 
 case class User(
   id: String
-)
+) extends RepositoryModel
 
 object User {
   case class UserPayload(

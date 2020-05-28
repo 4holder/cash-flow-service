@@ -31,6 +31,8 @@ class RegisterFinancialContractService @Inject()(repository: FinancialContractRe
       modifiedAt = now
     )
 
-    repository.insertFinancialContract(financialContract)
+    repository
+      .register(financialContract)
+      .map(_ => financialContract)
   }
 }

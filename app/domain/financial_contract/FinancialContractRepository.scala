@@ -1,27 +1,26 @@
 package domain.financial_contract
 
 import java.sql.Timestamp
-
 import com.google.inject.{Inject, Singleton}
-import domain.User
-import domain.financial_contract.FinancialContract.{FinancialContractDbRow, FinancialContractPayload, FinancialContractTable}
+import domain.financial_contract.FinancialContract.{FinancialContractPayload, FinancialContractTable}
+import domain.{Repository, User}
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.lifted.TableQuery
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class FinancialContractRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-                                           (implicit ec: ExecutionContext) {
+                                           (implicit ec: ExecutionContext)
+  extends Repository[FinancialContract, FinancialContractPayload, User]{
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val financialContracts = TableQuery[FinancialContractTable]
 
   import dbConfig._
   import profile.api._
 
-  def getFinancialContracts(page: Int, pageSize: Int)(implicit user: User): Future[Seq[FinancialContract]] = {
+  def all(page: Int, pageSize: Int)(implicit user: User): Future[Seq[FinancialContract]] = {
     val query =
       financialContracts
         .filter(r => r.user_id === user.id)
@@ -33,24 +32,29 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
       .map(_.map(r => r: FinancialContract))
   }
 
-  def getFinancialContractById(id: String)(implicit user: User): Future[Option[FinancialContract]] = {
+  def getById(id: String): Future[Option[FinancialContract]] = {
     db.run(
       financialContracts
-        .filter(r => r.id === id && r.user_id === user.id)
+        .filter(r => r.id === id)
         .result
     ).map(r => r.headOption.map(fc => fc: FinancialContract))
   }
 
-  def insertFinancialContract(newFinancialContract: FinancialContract): Future[FinancialContract] = {
-    db.run(financialContracts += newFinancialContract)
-      .map(_ => newFinancialContract)
+  def register(newFinancialContracts: FinancialContract*): Future[Unit] = {
+    db.run(
+      DBIO.seq(
+        newFinancialContracts
+          .map(newFC => financialContracts += newFC):_*
+      )
+    )
   }
 
-  def updateFinancialContract(id: String, financialContract: FinancialContractPayload, now: DateTime = DateTime.now)
-                             (implicit user: User): Future[Int] = {
+  def update(id: String,
+             financialContract: FinancialContractPayload,
+             now: DateTime = DateTime.now): Future[Int] = {
     db.run(
       financialContracts
-        .filter(row => row.id === id && row.user_id === user.id )
+        .filter(row => row.id === id)
         .map(fc => (
           fc.name,
           fc.company_cnpj,
@@ -74,18 +78,11 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
     )
   }
 
-  def deleteFinancialContract(id: String)(implicit user: User): Future[Int] = {
+  def delete(id: String): Future[Int] = {
     db.run(
       financialContracts
-        .filter(f => f.id === id && f.user_id === user.id)
+        .filter(f => f.id === id)
         .delete
     )
-  }
-
-  private def offset(page: Int, pageSize: Int) = {
-    if(page <= 1)
-      0
-    else
-      (page - 1) * pageSize
   }
 }

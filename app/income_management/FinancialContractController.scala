@@ -20,7 +20,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
     getUser flatMap { implicit user: User =>
       repository
-        .getFinancialContracts(page, pageSize)
+        .all(page, pageSize)
         .map(_.map(fc => fc: FinancialContractResponse))
         .map(financialContracts => Ok(toJson(financialContracts)))
     }
@@ -29,7 +29,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
     getUser flatMap { implicit user: User =>
       repository
-        .getFinancialContractById(id)
+        .getById(id)
         .map(_.map(fc => fc: FinancialContractResponse))
         .map(financialContract => Ok(toJson(financialContract)))
     }
@@ -54,8 +54,8 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           repository
-            .updateFinancialContract(id, input)
-            .flatMap(_ => repository.getFinancialContractById(id))
+            .update(id, input)
+            .flatMap(_ => repository.getById(id))
             .map(maybeFc => maybeFc.map(fc => fc: FinancialContractResponse))
             .map(financialContract => Ok(toJson(financialContract)))
         case _ =>
@@ -67,7 +67,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
     getUser flatMap { implicit user: User =>
       repository
-        .deleteFinancialContract(id)
+        .delete(id)
         .map(_ => NoContent)
     }
   }

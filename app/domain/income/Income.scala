@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import domain.Amount.AmountPayload
 import domain.Occurrences.OccurrencesPayload
 import domain.income.IncomeDiscount.IncomeDiscountPayload
-import domain.{Amount, Currency, Occurrences}
+import domain.{Amount, Currency, Occurrences, RepositoryModel}
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 import slick.jdbc.PostgresProfile.api._
@@ -20,7 +20,7 @@ case class Income(
   occurrences: Occurrences,
   createdAt: DateTime,
   modifiedAt: DateTime,
-)
+) extends RepositoryModel
 
 object Income {
   case class IncomePayload(
