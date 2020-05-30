@@ -4,6 +4,7 @@ import authorization.AuthorizationHelper
 import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
 import domain.Amount.AmountPayload
 import domain.Income
+import domain.Income.IncomePayload
 import domain.Occurrences.OccurrencesPayload
 import income_management.IncomeController.IncomeResponse
 import infrastructure.ErrorResponse
@@ -12,13 +13,14 @@ import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{Json, Writes}
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+import play.api.libs.json._
+import play.api.mvc._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class IncomeController @Inject()(
   cc: ControllerComponents,
+  service: RegisterIncomeService,
   repository: IncomeRepository,
   auth: AuthorizationHelper
 )(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
@@ -31,15 +33,47 @@ class IncomeController @Inject()(
           .allByFinancialContractId(financialContractId, page, pageSize)
           .map(_.map(fc => fc: IncomeResponse))
           .map(incomes => Ok(toJson(incomes)))
-      } recover {
-        case _: PermissionDeniedException => NotFound(Json.toJson(ErrorResponse.notFound))
-        case e: AuthorizationException => Unauthorized(Json.toJson(ErrorResponse(e)))
-        case e =>
-          logger.error(e.getMessage, e)
-          InternalServerError(Json.toJson(ErrorResponse(e)))
-      }
+      } recover treatFailure
   }
 
+  def registerNewIncome(financialContractId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    auth.authorizeByFinancialContract(financialContractId) flatMap { _ => {
+      request.body.validate[List[IncomePayload]].asEither match {
+        case Right(input) =>
+          Future.sequence(
+            input.map(incomePayload =>
+              service
+                .register(financialContractId, incomePayload)
+                .map(income => income: IncomeResponse)
+            )
+          ).map(incomes => Ok(toJson(incomes)))
+        case Left(e) => badIncomePayload(e)
+      }
+    }} recover treatFailure
+  }
+
+  def deleteIncome(financialContractId: String, id: String): Action[AnyContent] = Action.async { implicit request =>
+    (
+      for {
+        _ <- auth.authorizeByFinancialContract(id)
+        _ <- repository.delete(id)
+      } yield NoContent
+    ) recover treatFailure
+  }
+
+  private def badIncomePayload(e: Seq[(JsPath, Seq[JsonValidationError])]): Future[Result] = {
+    val message = e.map(error => (error._1.toString(), error._2.map(_.message).mkString(";")))
+    logger.error(s"Invalid contract received. ${message}")
+    Future.successful(BadRequest(Json.toJson(ErrorResponse(s"Invalid income input. ${message}"))))
+  }
+
+  private def treatFailure: PartialFunction[Throwable, Result] = {
+    case _: PermissionDeniedException => NotFound(Json.toJson(ErrorResponse.notFound))
+    case e: AuthorizationException => Unauthorized(Json.toJson(ErrorResponse(e)))
+    case e =>
+      logger.error(e.getMessage, e)
+      InternalServerError(Json.toJson(ErrorResponse(e)))
+  }
 }
 
 object IncomeController {

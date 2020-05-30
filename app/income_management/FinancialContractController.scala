@@ -32,7 +32,7 @@ class FinancialContractController @Inject()(
     } recover treatFailure
   }
 
-  def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
+  def getFinancialContractById(id: String): Action[AnyContent] = Action.async { implicit request =>
     auth.authorizeByFinancialContract(id).flatMap { _ =>
       repository
         .getById(id)
@@ -69,10 +69,12 @@ class FinancialContractController @Inject()(
   }
 
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    for {
-      _ <- auth.authorizeByFinancialContract(id)
-      _ <- repository.delete(id)
-    } yield NoContent
+    (
+      for {
+        _ <- auth.authorizeByFinancialContract(id)
+        _ <- repository.delete(id)
+      } yield NoContent
+    ) recover treatFailure
   }
 
   private def badFinancialInputPayload: Future[Result] = {

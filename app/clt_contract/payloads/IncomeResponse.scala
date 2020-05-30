@@ -14,6 +14,6 @@ case class IncomeResponse(
   discounts: List[IncomeDiscountPayload]
 )
 
-object IncomeResponse extends IncomeDiscountPayload.ReadsAndWrites {
+object IncomeResponse {
   implicit val incomeResponseWrites: Writes[IncomeResponse] = Json.writes[IncomeResponse]
 }

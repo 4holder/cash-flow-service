@@ -120,5 +120,12 @@ object Occurrences {
         months = occurrences.months
       )
     }
+
+    implicit def toOccurrences(occurrences: OccurrencesPayload): Occurrences = {
+      Occurrences(
+        day = occurrences.day,
+        months = occurrences.months
+      )
+    }
   }
 }

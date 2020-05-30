@@ -26,10 +26,8 @@ object IncomeDiscount {
   )
 
   object IncomeDiscountPayload {
-    trait ReadsAndWrites {
-      implicit val incomeDiscountPayloadWrites: Writes[IncomeDiscountPayload] = Json.writes[IncomeDiscountPayload]
-      implicit val incomeDiscountPayloadReads: Reads[IncomeDiscountPayload] = Json.reads[IncomeDiscountPayload]
-    }
+    implicit val incomeDiscountPayloadWrites: Writes[IncomeDiscountPayload] = Json.writes[IncomeDiscountPayload]
+    implicit val incomeDiscountPayloadReads: Reads[IncomeDiscountPayload] = Json.reads[IncomeDiscountPayload]
 
     implicit def fromIncomeDiscount(discount: IncomeDiscount): IncomeDiscountPayload = {
       IncomeDiscountPayload(

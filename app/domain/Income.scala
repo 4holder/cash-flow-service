@@ -2,7 +2,6 @@ package domain
 
 import domain.Amount.AmountPayload
 import domain.Income.IncomeType
-import domain.IncomeDiscount.IncomeDiscountPayload
 import domain.Occurrences.OccurrencesPayload
 import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
@@ -34,11 +33,7 @@ object Income {
   )
 
   object IncomePayload {
-    trait ReadsAndWrites extends
-       IncomeDiscountPayload.ReadsAndWrites
-       {
-      implicit val incomePayloadWrites: Writes[IncomePayload] = Json.writes[IncomePayload]
-      implicit val incomePayloadReads: Reads[IncomePayload] = Json.reads[IncomePayload]
-    }
+    implicit val incomePayloadWrites: Writes[IncomePayload] = Json.writes[IncomePayload]
+    implicit val incomePayloadReads: Reads[IncomePayload] = Json.reads[IncomePayload]
   }
 }
