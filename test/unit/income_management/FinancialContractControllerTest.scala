@@ -2,10 +2,10 @@ package unit.income_management
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, SystemMaterializer}
+import authorization.AuthorizationHelper
 import domain.FinancialContract.FinancialContractPayload
 import domain.User
 import income_management.{FinancialContractController, FinancialContractRepository, RegisterFinancialContractService}
-import infrastructure.AuthorizationService
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
@@ -24,7 +24,7 @@ import scala.concurrent.Future
 class FinancialContractControllerTest extends PlaySpec with Results with MockitoSugar {
   private val service = mock[RegisterFinancialContractService]
   private val repository = mock[FinancialContractRepository]
-  private val auth = mock[AuthorizationService]
+  private val auth = mock[AuthorizationHelper]
 
   private val expectedUserId = "an-user-id"
   private val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""

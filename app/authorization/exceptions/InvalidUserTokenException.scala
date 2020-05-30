@@ -1,4 +1,4 @@
-package infrastructure.exceptions
+package authorization.exceptions
 
 class InvalidUserTokenException(message: String) extends RuntimeException(message)
 

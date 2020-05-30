@@ -1,8 +1,8 @@
 package unit.infrastructure
 
+import authorization.AuthorizationHelper
 import income_management.FinancialContractRepository
-import infrastructure.AuthorizationService
-import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
+import authorization.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach, Matchers}
@@ -10,11 +10,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import pdi.jwt.Jwt
 import play.api.mvc.{AnyContent, Headers, Request}
 
-class AuthorizationServiceTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]
 
   private val repository = mock[FinancialContractRepository]
-  private val auth = new AuthorizationService(repository)
+  private val auth = new AuthorizationHelper(repository)
 
   override def beforeEach {
     Mockito.reset(request)

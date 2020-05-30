@@ -1,8 +1,8 @@
 package income_management
 
+import authorization.AuthorizationHelper
 import domain.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
 import domain.User
-import infrastructure.AuthorizationService
 import javax.inject.Inject
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json}
@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class FinancialContractController @Inject()(cc: ControllerComponents,
                                             repository: FinancialContractRepository,
                                             registerService: RegisterFinancialContractService,
-                                            auth: AuthorizationService)
+                                            auth: AuthorizationHelper)
                                            (implicit ec: ExecutionContext)
   extends AbstractController(cc) {
 

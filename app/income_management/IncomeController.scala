@@ -1,10 +1,12 @@
 package income_management
 
+import authorization.AuthorizationHelper
+import authorization.exceptions.PermissionDeniedException
 import domain.Amount.AmountPayload
 import domain.Income
 import domain.Occurrences.OccurrencesPayload
 import income_management.IncomeController.IncomeResponse
-import infrastructure.AuthorizationService
+import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
 import org.joda.time.DateTime
@@ -12,11 +14,11 @@ import play.api.libs.json.Json.toJson
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class IncomeController @Inject()(cc: ControllerComponents,
                                  repository: IncomeRepository,
-                                 auth: AuthorizationService
+                                 auth: AuthorizationHelper
                                 )
                                 (implicit ec: ExecutionContext)
   extends AbstractController(cc) {
@@ -25,13 +27,14 @@ class IncomeController @Inject()(cc: ControllerComponents,
                   page: Int,
                   pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
     auth.authorizeByFinancialContract(financialContractId)
-      .flatMap {
-        case true =>
-          repository
-            .allByFinancialContractId(financialContractId, page, pageSize)
-            .map(_.map(fc => fc: IncomeResponse))
-            .map(incomes => Ok(toJson(incomes)))
-        case _ => Future.successful(NotFound(Json.obj("message" -> "resource not found")))
+      .flatMap { _ =>
+        repository
+          .allByFinancialContractId(financialContractId, page, pageSize)
+          .map(_.map(fc => fc: IncomeResponse))
+          .map(incomes => Ok(toJson(incomes)))
+      } recover {
+        case _: PermissionDeniedException => NotFound(Json.toJson(ErrorResponse.notFound))
+        case e => BadRequest(Json.toJson(ErrorResponse(e)))
       }
   }
 

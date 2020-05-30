@@ -1,4 +1,4 @@
-package infrastructure.exceptions
+package authorization.exceptions
 
 class UserTokenMissingException(message: String) extends RuntimeException(message)
 
