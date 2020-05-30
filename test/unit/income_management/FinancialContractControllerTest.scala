@@ -5,6 +5,7 @@ import akka.stream.{ActorMaterializer, SystemMaterializer}
 import domain.FinancialContract.FinancialContractPayload
 import domain.User
 import income_management.{FinancialContractController, FinancialContractRepository, RegisterFinancialContractService}
+import infrastructure.AuthorizationService
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
@@ -12,7 +13,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import pdi.jwt.Jwt
 import play.api.libs.json.Json
-import play.api.mvc.{Headers, Results}
+import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import utils.builders.FinancialContractBuilder
@@ -23,6 +24,7 @@ import scala.concurrent.Future
 class FinancialContractControllerTest extends PlaySpec with Results with MockitoSugar {
   private val service = mock[RegisterFinancialContractService]
   private val repository = mock[FinancialContractRepository]
+  private val auth = mock[AuthorizationService]
 
   private val expectedUserId = "an-user-id"
   private val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
@@ -34,7 +36,8 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
   private val controller = new FinancialContractController(
     Helpers.stubControllerComponents(),
     repository,
-    service
+    service,
+    auth
   )
 
   "should list contracts from user" in {
@@ -42,6 +45,9 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val firstFinancialContract = FinancialContractBuilder(user = user).build
     val secondFinancialContract = FinancialContractBuilder(user = user).build
+
+    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
+
     when(repository.all(1, 2)(user))
       .thenReturn(Future.successful(
         Seq(
@@ -80,6 +86,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
+    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
     when(service.register(any[FinancialContractPayload], any[String], any[DateTime])(any[User]))
       .thenReturn(Future.successful(financialContract))
 
@@ -104,6 +111,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
+    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
     when(repository.delete(eqTo(financialContract.id))).thenReturn(Future.successful(1))
 
     val result = controller.deleteFinancialContract(financialContract.id).apply(request)

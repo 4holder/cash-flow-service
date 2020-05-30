@@ -7,9 +7,9 @@ variable "k8s_username" {}
 variable "k8s_password" {}
 variable "k8s_namespace" {}
 variable "cluster_name" {}
-variable "replicas" { default = 2 }
-variable "min_replicas" { default = 2 }
-variable "max_replicas" { default = 5 }
+variable "replicas" { default = 1 }
+variable "min_replicas" { default = 1 }
+variable "max_replicas" { default = 2 }
 
 variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:933c30da62bc531f86d2ee111cad0ead167e6902" }
 

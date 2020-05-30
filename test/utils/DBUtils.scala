@@ -23,7 +23,7 @@ object DBUtils {
   }
 
   def allIncomes: Future[Seq[IncomeDbRow]] = {
-    db.run(incomeTable.result)
+    db.run(incomeTable.sortBy(_.created_at.desc).result)
   }
 
   def insertFinancialContracts(financialContracts: List[FinancialContract]): Future[Unit] = {

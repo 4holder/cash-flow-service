@@ -2,7 +2,7 @@ package income_management
 
 import domain.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
 import domain.User
-import infrastructure.AuthorizedUser.authorize
+import infrastructure.AuthorizationService
 import javax.inject.Inject
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json}
@@ -12,12 +12,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FinancialContractController @Inject()(cc: ControllerComponents,
                                             repository: FinancialContractRepository,
-                                            registerService: RegisterFinancialContractService)
+                                            registerService: RegisterFinancialContractService,
+                                            auth: AuthorizationService)
                                            (implicit ec: ExecutionContext)
   extends AbstractController(cc) {
 
   def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
-    authorize flatMap { implicit user: User =>
+    auth.authorize flatMap { implicit user: User =>
       repository
         .all(page, pageSize)
         .map(_.map(fc => fc: FinancialContractResponse))
@@ -26,7 +27,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    authorize flatMap { implicit user: User =>
+    auth.authorize flatMap { implicit user: User =>
       repository
         .getById(id)
         .map(_.map(fc => fc: FinancialContractResponse))
@@ -35,7 +36,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    authorize flatMap { implicit user: User => {
+    auth.authorize flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           registerService
@@ -49,7 +50,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    authorize flatMap { implicit user: User => {
+    auth.authorize flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           repository
@@ -64,7 +65,7 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
   }
 
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    authorize flatMap { implicit user: User =>
+    auth.authorize flatMap { implicit user: User =>
       repository
         .delete(id)
         .map(_ => NoContent)

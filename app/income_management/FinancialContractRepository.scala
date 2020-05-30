@@ -17,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class FinancialContractRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
                                            (implicit ec: ExecutionContext)
-  extends Repository{
+  extends Repository {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   private val financialContracts = TableQuery[FinancialContractTable]
 
@@ -42,6 +42,15 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
         .filter(r => r.id === id)
         .result
     ).map(r => r.headOption.map(fc => fc: FinancialContract))
+  }
+
+  def belongsToUser(id: String, user: User): Future[Boolean] = {
+    db.run(
+      financialContracts
+        .filter(r => r.id === id && r.user_id === user.id)
+        .length
+        .result
+    ).map(_ > 0)
   }
 
   def register(newFinancialContracts: FinancialContract*): Future[Unit] = {

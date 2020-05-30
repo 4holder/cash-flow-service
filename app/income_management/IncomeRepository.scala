@@ -24,9 +24,9 @@ class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigP
   import dbConfig._
   import profile.api._
 
-  def all(page: Int, pageSize: Int)(implicit fc: FinancialContract): Future[Seq[Income]] = {
+  def allByFinancialContractId(financialContractId: String, page: Int, pageSize: Int): Future[Seq[Income]] = {
     val query = incomeTable
-        .filter(_.financial_contract_id === fc.id)
+        .filter(_.financial_contract_id === financialContractId)
         .sortBy(_.created_at.desc)
         .drop(offset(page, pageSize))
         .take(pageSize)
@@ -51,9 +51,31 @@ class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   def update(id: String,
              incomePayload: IncomePayload,
-             now: DateTime = DateTime.now): Future[Int] = ???
+             now: DateTime = DateTime.now): Future[Int] = {
+    db.run(
+      incomeTable
+        .filter(_.id === id)
+        .map(income => (
+          income.name,
+          income.income_type,
+          income.value_in_cents,
+          income.currency,
+          income.occurrences,
+          income.modified_at,
+        )).update((
+          incomePayload.name,
+          incomePayload.incomeType.toString,
+          incomePayload.amount.valueInCents,
+          incomePayload.amount.currency,
+          incomePayload.occurrences.toString,
+          new Timestamp(now.getMillis),
+        ))
+    )
+  }
 
-  def delete(id: String): Future[Int] = ???
+  def delete(id: String): Future[Int] = {
+    db.run(incomeTable.filter(_.id === id).delete)
+  }
 }
 
 object IncomeRepository {

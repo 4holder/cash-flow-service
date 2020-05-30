@@ -1,31 +1,50 @@
 package domain
 
+import domain.Occurrences.AbstractOccurrences
 import domain.exceptions.InvalidCronExpressionException
 import play.api.libs.json.{Json, Reads, Writes}
+
 import scala.util.{Failure, Success, Try}
 
 case class Occurrences(
   day: Int,
   months: List[Int]
-) {
-  override def toString: String = {
-    s"$day $monthsToString"
-  }
-
-  private def monthsToString = {
-    if(months == Occurrences.ALL_MONTHS) {
-      "*"
-    } else {
-     months.mkString(Occurrences.MONTH_SEPARATOR)
-    }
-  }
-}
+) extends AbstractOccurrences
 
 object Occurrences {
   implicit val occurrencesWrites: Writes[Occurrences] = Json.writes[Occurrences]
   private val ALL_MONTHS = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
   private val CRON_SEPARATOR = " "
   private val MONTH_SEPARATOR = ","
+
+  trait AbstractOccurrences {
+    val day: Int
+    val months: List[Int]
+
+    override def equals(obj: Any): Boolean = {
+      obj match {
+        case payload: OccurrencesPayload  =>
+          this.day.equals(payload.day) &&
+            this.months.equals(payload.months)
+        case occurrences: Occurrences  =>
+          this.day.equals(occurrences.day) &&
+            this.months.equals(occurrences.months)
+        case _ => super.equals(obj)
+      }
+    }
+
+    override def toString: String = {
+      s"$day $monthsToString"
+    }
+
+    private def monthsToString = {
+      if(months == Occurrences.ALL_MONTHS) {
+        "*"
+      } else {
+        months.mkString(Occurrences.MONTH_SEPARATOR)
+      }
+    }
+  }
 
   def apply(cronExpression: String): Try[Occurrences] = {
     validateExpression(cronExpression)
@@ -89,7 +108,7 @@ object Occurrences {
   case class OccurrencesPayload(
     day: Int,
     months: List[Int]
-  )
+  ) extends AbstractOccurrences
 
   object OccurrencesPayload {
     implicit val occurrencesPayloadWrites: Writes[OccurrencesPayload] = Json.writes[OccurrencesPayload]

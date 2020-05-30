@@ -1,16 +1,20 @@
 package unit.infrastructure
 
+import income_management.FinancialContractRepository
+import infrastructure.AuthorizationService
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach, Matchers}
+import org.scalatestplus.mockito.MockitoSugar
 import pdi.jwt.Jwt
 import play.api.mvc.{AnyContent, Headers, Request}
-import infrastructure.AuthorizedUser.authorize
-import org.scalatestplus.mockito.MockitoSugar
 
-class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+class AuthorizationServiceTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]
+
+  private val repository = mock[FinancialContractRepository]
+  private val auth = new AuthorizationService(repository)
 
   override def beforeEach {
     Mockito.reset(request)
@@ -22,7 +26,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
-    authorize map { user =>
+    auth.authorize map { user =>
       user.id shouldEqual expectedUserId
     }
   }
@@ -31,7 +35,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers())
 
     recoverToSucceededIf[UserTokenMissingException] {
-      authorize
+      auth.authorize
     }
   }
 
@@ -40,7 +44,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      authorize
+      auth.authorize
     }
   }
 
@@ -48,7 +52,7 @@ class AuthorizedUserTest extends AsyncFlatSpec with Matchers with MockitoSugar w
     when(request.headers).thenReturn(Headers(("Authorization", "any string")))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      authorize
+      auth.authorize
     }
   }
 }

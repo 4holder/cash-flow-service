@@ -1,7 +1,8 @@
 package clt_contract
 
+import clt_contract.payloads.IncomeResponse
 import com.google.inject.Singleton
-import domain.Income.{IncomePayload, IncomeType}
+import domain.Income.IncomeType
 import domain.{Amount, Currency, Occurrences}
 import implicits.{inssTable2020, irrfTable2020}
 
@@ -26,7 +27,7 @@ class CLTContractCalculatorService {
     salaryDiscounts.flatMap { salaryDiscounts =>
       val netSalaryTryable = grossSalaryAmount
         .subtract(salaryDiscounts.map(_.amount : Amount): _*)
-        .map(netSalary => IncomePayload(
+        .map(netSalary => IncomeResponse(
           name = "Salary",
           amount = netSalary,
           incomeType = IncomeType.SALARY.toString,
@@ -38,7 +39,7 @@ class CLTContractCalculatorService {
         grossSalaryAmount
           .divide(2)
           .subtract(salaryDiscounts.map(_.amount : Amount): _*)
-          .map(thirteenthSalary => IncomePayload(
+          .map(thirteenthSalary => IncomeResponse(
             name = "Thirteenth Salary",
             amount = thirteenthSalary,
             incomeType = IncomeType.THIRTEENTH_SALARY.toString,
@@ -46,7 +47,7 @@ class CLTContractCalculatorService {
             discounts = salaryDiscounts
           ))
 
-      val thirteenthSalaryAdvance = IncomePayload(
+      val thirteenthSalaryAdvance = IncomeResponse(
         name = "Thirteenth Salary Advance",
         amount = grossSalaryAmount.divide(2),
         incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE.toString,

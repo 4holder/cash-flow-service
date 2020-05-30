@@ -1,17 +1,28 @@
 package infrastructure
 
-import domain.User
+import com.google.inject.{Inject, Singleton}
+import domain.{FinancialContract, User}
+import income_management.FinancialContractRepository
 import infrastructure.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import pdi.jwt.{Jwt, JwtOptions}
 import play.api.libs.json.Json
 import play.api.mvc.Request
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
-object AuthorizedUser {
+@Singleton
+class AuthorizationService @Inject()(financialContractRepository: FinancialContractRepository)
+                                    (implicit ec: ExecutionContext) {
   def authorize[A](implicit request: Request[A]): Future[User] = {
     Future.fromTry(getUserFromRequest(request))
+  }
+
+  def authorizeByFinancialContract[A](id: String)
+                                     (implicit request: Request[A]): Future[Boolean] = {
+    Future
+      .fromTry(getUserFromRequest(request))
+      .flatMap(user => financialContractRepository.belongsToUser(id, user))
   }
 
   private def getUserFromRequest[A](request: Request[A]): Try[User] = {

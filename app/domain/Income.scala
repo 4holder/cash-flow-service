@@ -31,7 +31,6 @@ object Income {
     amount: AmountPayload,
     incomeType: String,
     occurrences: OccurrencesPayload,
-    discounts: List[IncomeDiscountPayload]
   )
 
   object IncomePayload {
