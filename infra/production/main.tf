@@ -1,5 +1,5 @@
 variable "gcloud_project_id" { default = "fin2you" }
-variable "credentials_file" { default = "./credentials/account.json" }
+variable "credentials_file" { default = "../credentials/account.json" }
 
 variable "region" {}
 variable "environment" {}
@@ -7,11 +7,11 @@ variable "k8s_username" {}
 variable "k8s_password" {}
 variable "k8s_namespace" {}
 variable "cluster_name" {}
-variable "replicas" { default = 1 }
-variable "min_replicas" { default = 1 }
-variable "max_replicas" { default = 2 }
+variable "replicas" { default = 2 }
+variable "min_replicas" { default = 2 }
+variable "max_replicas" { default = 5 }
 
-variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:c96dcf46db0f3ccb61597cc42a070838488546fc" }
+variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:933c30da62bc531f86d2ee111cad0ead167e6902" }
 
 variable "application_secret" {}
 variable "http_application_secret" {}
@@ -21,7 +21,7 @@ variable "database_connection_string" {}
 variable "gcloud_sql_instance" {}
 
 provider "google" {
-  credentials = file("./credentials/account.json")
+  credentials = file("../credentials/account.json")
   project     = var.gcloud_project_id
   region      = var.region
 }
@@ -30,12 +30,12 @@ terraform {
   backend "gcs" {
     bucket      = "cash_flow_service_production_terraform"
     prefix      = "cash_flow_service_production.tfstate"
-    credentials = "./credentials/account.json"
+    credentials = "../credentials/account.json"
   }
 }
 
 module "cash_flow_service" {
-  source                      = "./k8s"
+  source                      = "../modules/k8s"
   credentials_file            = var.credentials_file
   gcloud_project_id           = var.gcloud_project_id
   gcloud_region               = var.region

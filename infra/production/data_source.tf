@@ -3,6 +3,6 @@ data "terraform_remote_state" "infra_production_state" {
   config = {
     bucket      = "infra_production_terraform"
     prefix      = "production.tfstate"
-    credentials = "./credentials/account.json"
+    credentials = "../credentials/account.json"
   }
 }

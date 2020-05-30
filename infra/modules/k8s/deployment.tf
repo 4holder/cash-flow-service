@@ -1,7 +1,7 @@
 resource "kubernetes_deployment" "cash_flow_service" {
 
   metadata {
-    name = "cash-flow-service-${var.environment}"
+    name = "cash-flow-service"
     labels = {
       service = "cash-flow-service"
       environment = var.environment
@@ -50,7 +50,7 @@ resource "kubernetes_deployment" "cash_flow_service" {
 
           resources {
             limits {
-              cpu  = "250m"
+              cpu  = "200m"
             }
             requests {
               cpu  = "50m"

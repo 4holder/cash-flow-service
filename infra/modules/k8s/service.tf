@@ -1,6 +1,6 @@
 resource "kubernetes_service" "cash_flow_service" {
   metadata {
-    name = "cash-flow-service-service-${var.environment}"
+    name = "cash-flow-service"
     labels = {
       service = "cash-flow-service"
     }

@@ -100,7 +100,7 @@ jobs:
           gcloud --quiet components install kubectl
           gcloud --quiet container clusters get-credentials $K8S_CLUSTER_NAME
           IMAGE_AND_TAG=gcr.io/fin2you/cash-flow-service:$CIRCLE_SHA1
-          kubectl set image deployment/cash-flow-service-production cash-flow-service=$IMAGE_AND_TAG
+          kubectl set image deployment/cash-flow-service cash-flow-service=$IMAGE_AND_TAG
 
 workflows:
   version: 2
