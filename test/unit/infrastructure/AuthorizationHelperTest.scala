@@ -26,7 +26,7 @@ class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSu
     val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
-    auth.authorize map { user =>
+    auth.isLoggedIn map { user =>
       user.id shouldEqual expectedUserId
     }
   }
@@ -35,7 +35,7 @@ class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSu
     when(request.headers).thenReturn(Headers())
 
     recoverToSucceededIf[UserTokenMissingException] {
-      auth.authorize
+      auth.isLoggedIn
     }
   }
 
@@ -44,7 +44,7 @@ class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSu
     when(request.headers).thenReturn(Headers(("Authorization", Jwt.encode(jwtBody))))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      auth.authorize
+      auth.isLoggedIn
     }
   }
 
@@ -52,7 +52,7 @@ class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSu
     when(request.headers).thenReturn(Headers(("Authorization", "any string")))
 
     recoverToSucceededIf[InvalidUserTokenException] {
-      auth.authorize
+      auth.isLoggedIn
     }
   }
 }

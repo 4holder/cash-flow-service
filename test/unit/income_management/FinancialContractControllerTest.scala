@@ -1,7 +1,7 @@
 package unit.income_management
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, SystemMaterializer}
+import akka.stream.ActorMaterializer
 import authorization.AuthorizationHelper
 import domain.FinancialContract.FinancialContractPayload
 import domain.User
@@ -46,9 +46,9 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     val firstFinancialContract = FinancialContractBuilder(user = user).build
     val secondFinancialContract = FinancialContractBuilder(user = user).build
 
-    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
+    when(auth.isLoggedIn[Any](any[Request[Any]])).thenReturn(Future.successful(user))
 
-    when(repository.all(1, 2)(user))
+    when(repository.allByUser(user.id, 1, 2))
       .thenReturn(Future.successful(
         Seq(
           firstFinancialContract,
@@ -86,7 +86,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
+    when(auth.isLoggedIn[Any](any[Request[Any]])).thenReturn(Future.successful(user))
     when(service.register(any[FinancialContractPayload], any[String], any[DateTime])(any[User]))
       .thenReturn(Future.successful(financialContract))
 
@@ -111,8 +111,10 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    when(auth.authorize[Any](any[Request[Any]])).thenReturn(Future.successful(user))
-    when(repository.delete(eqTo(financialContract.id))).thenReturn(Future.successful(1))
+    when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+      .thenReturn(Future.successful(true))
+    when(repository.delete(eqTo(financialContract.id)))
+      .thenReturn(Future.successful(1))
 
     val result = controller.deleteFinancialContract(financialContract.id).apply(request)
 

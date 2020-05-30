@@ -1,56 +1,61 @@
 package income_management
 
 import authorization.AuthorizationHelper
-import domain.FinancialContract.{FinancialContractPayload, FinancialContractResponse}
-import domain.User
+import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
+import domain.Amount.AmountPayload
+import domain.FinancialContract.FinancialContractPayload
+import domain.User.UserPayload
+import domain.{FinancialContract, User}
+import income_management.FinancialContractController.FinancialContractResponse
+import infrastructure.ErrorResponse
+import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
+import org.joda.time.DateTime
+import play.api.Logging
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-
+import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
-class FinancialContractController @Inject()(cc: ControllerComponents,
-                                            repository: FinancialContractRepository,
-                                            registerService: RegisterFinancialContractService,
-                                            auth: AuthorizationHelper)
-                                           (implicit ec: ExecutionContext)
-  extends AbstractController(cc) {
-
+class FinancialContractController @Inject()(
+  cc: ControllerComponents,
+  repository: FinancialContractRepository,
+  registerService: RegisterFinancialContractService,
+  auth: AuthorizationHelper
+)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
   def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorize flatMap { implicit user: User =>
+    auth.isLoggedIn.flatMap { user: User =>
       repository
-        .all(page, pageSize)
+        .allByUser(user.id, page, pageSize)
         .map(_.map(fc => fc: FinancialContractResponse))
         .map(financialContracts => Ok(toJson(financialContracts)))
-    }
+    } recover treatFailure
   }
 
   def getFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorize flatMap { implicit user: User =>
+    auth.authorizeByFinancialContract(id).flatMap { _ =>
       repository
         .getById(id)
         .map(_.map(fc => fc: FinancialContractResponse))
         .map(financialContract => Ok(toJson(financialContract)))
-    }
+    } recover treatFailure
   }
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorize flatMap { implicit user: User => {
+    auth.isLoggedIn flatMap { implicit user: User => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           registerService
             .register(input)
             .map(fc => fc: FinancialContractResponse)
             .map(financialContract => Ok(toJson(financialContract)))
-        case _ =>
-          Future.successful(BadRequest(Json.obj("message" -> "Invalid financial contract input.")))
+        case _ => badFinancialInputPayload
       }
-    }}
+    }} recover treatFailure
   }
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorize flatMap { implicit user: User => {
+    auth.authorizeByFinancialContract(id).flatMap { _ => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           repository
@@ -58,17 +63,62 @@ class FinancialContractController @Inject()(cc: ControllerComponents,
             .flatMap(_ => repository.getById(id))
             .map(maybeFc => maybeFc.map(fc => fc: FinancialContractResponse))
             .map(financialContract => Ok(toJson(financialContract)))
-        case _ =>
-          Future.successful(BadRequest(Json.obj("message" -> "Invalid financial contract input.")))
+        case _ => badFinancialInputPayload
         }
-    }}
+    }} recover treatFailure
   }
 
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorize flatMap { implicit user: User =>
-      repository
-        .delete(id)
-        .map(_ => NoContent)
+    for {
+      _ <- auth.authorizeByFinancialContract(id)
+      _ <- repository.delete(id)
+    } yield NoContent
+  }
+
+  private def badFinancialInputPayload: Future[Result] = {
+    Future.successful(BadRequest(Json.toJson(ErrorResponse("Invalid financial contract input."))))
+  }
+
+  private def treatFailure: PartialFunction[Throwable, Result] = {
+    case _: PermissionDeniedException => NotFound(Json.toJson(ErrorResponse.notFound))
+    case e: AuthorizationException => Unauthorized(Json.toJson(ErrorResponse(e)))
+    case e =>
+      logger.error(e.getMessage, e)
+      InternalServerError(Json.toJson(ErrorResponse(e)))
+  }
+}
+
+object FinancialContractController {
+  case class FinancialContractResponse(
+    id: String,
+    user: UserPayload,
+    name: String,
+    contractType: String,
+    grossAmount: AmountPayload,
+    companyCnpj: Option[String],
+    startDate: DateTime,
+    endDate: Option[DateTime],
+    createdAt: DateTime,
+    modifiedAt: DateTime
+  )
+
+  object FinancialContractResponse extends JodaDateTime
+    with UserPayload.ReadsAndWrites {
+    implicit val financialContractResponse: Writes[FinancialContractResponse] = Json.writes[FinancialContractResponse]
+
+    implicit def fromFinancialContract(financialContract: FinancialContract): FinancialContractResponse = {
+      FinancialContractResponse(
+        id = financialContract.id,
+        user = financialContract.user,
+        name = financialContract.name,
+        contractType = financialContract.contractType.toString,
+        grossAmount = financialContract.grossAmount,
+        companyCnpj = financialContract.companyCnpj,
+        startDate = financialContract.startDate,
+        endDate = financialContract.endDate,
+        createdAt = financialContract.createdAt,
+        modifiedAt = financialContract.modifiedAt
+      )
     }
   }
 }

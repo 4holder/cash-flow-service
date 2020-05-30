@@ -24,10 +24,10 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
   import dbConfig._
   import profile.api._
 
-  def all(page: Int, pageSize: Int)(implicit user: User): Future[Seq[FinancialContract]] = {
+  def allByUser(userId: String, page: Int, pageSize: Int): Future[Seq[FinancialContract]] = {
     val query =
       financialContracts
-        .filter(r => r.user_id === user.id)
+        .filter(r => r.user_id === userId)
         .sortBy(_.created_at.desc)
         .drop(offset(page, pageSize))
         .take(pageSize)

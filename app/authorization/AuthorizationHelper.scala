@@ -15,12 +15,11 @@ import scala.util.{Failure, Try}
 @Singleton
 class AuthorizationHelper @Inject()(financialContractRepository: FinancialContractRepository)
                                    (implicit ec: ExecutionContext) extends Logging {
-  def authorize[A](implicit request: Request[A]): Future[User] = {
+  def isLoggedIn[A](implicit request: Request[A]): Future[User] = {
     Future.fromTry(getUserFromRequest(request))
   }
 
-  def authorizeByFinancialContract[A](id: String)
-                                     (implicit request: Request[A]): Future[Boolean] = {
+  def authorizeByFinancialContract[A](id: String)(implicit request: Request[A]): Future[Boolean] = {
     Future
       .fromTry(getUserFromRequest(request))
       .flatMap(user => {

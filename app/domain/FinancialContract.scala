@@ -47,37 +47,4 @@ object FinancialContract {
   object FinancialContractPayload extends JodaDateTime {
     implicit val financialContractInput: Reads[FinancialContractPayload] = Json.reads[FinancialContractPayload]
   }
-
-  case class FinancialContractResponse(
-    id: String,
-    user: UserPayload,
-    name: String,
-    contractType: String,
-    grossAmount: AmountPayload,
-    companyCnpj: Option[String],
-    startDate: DateTime,
-    endDate: Option[DateTime],
-    createdAt: DateTime,
-    modifiedAt: DateTime
-  )
-
-  object FinancialContractResponse extends JodaDateTime
-    with UserPayload.ReadsAndWrites {
-    implicit val financialContractResponse: Writes[FinancialContractResponse] = Json.writes[FinancialContractResponse]
-
-    implicit def fromFinancialContract(financialContract: FinancialContract): FinancialContractResponse = {
-      FinancialContractResponse(
-        id = financialContract.id,
-        user = financialContract.user,
-        name = financialContract.name,
-        contractType = financialContract.contractType.toString,
-        grossAmount = financialContract.grossAmount,
-        companyCnpj = financialContract.companyCnpj,
-        startDate = financialContract.startDate,
-        endDate = financialContract.endDate,
-        createdAt = financialContract.createdAt,
-        modifiedAt = financialContract.modifiedAt
-      )
-    }
-  }
 }

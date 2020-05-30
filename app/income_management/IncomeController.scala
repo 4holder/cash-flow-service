@@ -1,7 +1,7 @@
 package income_management
 
 import authorization.AuthorizationHelper
-import authorization.exceptions.PermissionDeniedException
+import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
 import domain.Amount.AmountPayload
 import domain.Income
 import domain.Occurrences.OccurrencesPayload
@@ -10,19 +10,18 @@ import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
 import org.joda.time.DateTime
+import play.api.Logging
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
-class IncomeController @Inject()(cc: ControllerComponents,
-                                 repository: IncomeRepository,
-                                 auth: AuthorizationHelper
-                                )
-                                (implicit ec: ExecutionContext)
-  extends AbstractController(cc) {
-
+class IncomeController @Inject()(
+  cc: ControllerComponents,
+  repository: IncomeRepository,
+  auth: AuthorizationHelper
+)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
   def listIncomes(financialContractId: String,
                   page: Int,
                   pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
@@ -34,7 +33,10 @@ class IncomeController @Inject()(cc: ControllerComponents,
           .map(incomes => Ok(toJson(incomes)))
       } recover {
         case _: PermissionDeniedException => NotFound(Json.toJson(ErrorResponse.notFound))
-        case e => BadRequest(Json.toJson(ErrorResponse(e)))
+        case e: AuthorizationException => Unauthorized(Json.toJson(ErrorResponse(e)))
+        case e =>
+          logger.error(e.getMessage, e)
+          InternalServerError(Json.toJson(ErrorResponse(e)))
       }
   }
 

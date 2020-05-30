@@ -8,7 +8,7 @@ import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder
 import utils.{DBUtils, IntegrationSpec}
 
 class FinancialContractRepositoryTest extends IntegrationSpec {
-  implicit private val user: User = UserBuilder().build
+  private val user: User = UserBuilder().build
 
   private val firstFinancialContract = FinancialContractBuilder(
     user = user,
@@ -75,7 +75,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondNoiseFinancialContract,
         firstFinancialContract
       ))
-      financialContracts <- repository.all(1, 3)
+      financialContracts <- repository.allByUser(user.id, 1, 3)
     } yield {
       financialContracts should have length 3
 
@@ -97,7 +97,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         thirdFinancialContract,
         fifthFinancialContract
       ))
-      financialContracts <- repository.all(1, 2)
+      financialContracts <- repository.allByUser(user.id, 1, 2)
     } yield {
       financialContracts should have length 2
 
@@ -118,7 +118,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondFinancialContract,
         secondNoiseFinancialContract
       ))
-      financialContracts <- repository.all(2, 2)
+      financialContracts <- repository.allByUser(user.id, 2, 2)
     } yield {
       financialContracts should have length 2
 
@@ -139,7 +139,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
         secondFinancialContract,
         secondNoiseFinancialContract
       ))
-      financialContracts <- repository.all(3, 2)
+      financialContracts <- repository.allByUser(user.id, 3, 2)
     } yield {
       financialContracts should have length 1
 
