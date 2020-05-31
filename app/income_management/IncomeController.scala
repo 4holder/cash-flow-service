@@ -46,7 +46,7 @@ class IncomeController @Inject()(
                 .register(financialContractId, incomePayload)
                 .map(income => income: IncomeResponse)
             )
-          ).map(incomes => Ok(toJson(incomes)))
+          ).map(incomes => Created(toJson(incomes)))
         case Left(e) => badIncomePayload(e)
       }
     }} recover treatFailure
@@ -61,7 +61,8 @@ class IncomeController @Inject()(
             .flatMap(_ => repository.getById(id))
             .map(_.map(maybeIncome => maybeIncome:IncomeResponse))
             .map(income => Ok(toJson(income)))
-        case Left(e) => badIncomePayload(e)
+        case Left(e) =>
+          badIncomePayload(e)
       }
     }}
   }

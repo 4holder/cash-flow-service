@@ -18,7 +18,6 @@ import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder}
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -29,7 +28,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
   private val expectedUserId = "an-user-id"
   private val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
-  implicit private val user: User = User(expectedUserId)
+  private val user: User = User(expectedUserId)
 
   implicit private val sys = ActorSystem("FinancialContractControllerTest")
   implicit private val mat = ActorMaterializer()
@@ -166,6 +165,4 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     status(result) mustEqual NO_CONTENT
     verify(repository, times(1)).delete(financialContract.id)
   }
-
-
 }
