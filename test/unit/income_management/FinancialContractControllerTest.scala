@@ -6,6 +6,7 @@ import authorization.AuthorizationHelper
 import domain.FinancialContract.FinancialContractPayload
 import domain.User
 import income_management.{FinancialContractController, FinancialContractRepository, RegisterFinancialContractService}
+import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
@@ -16,7 +17,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.FinancialContractBuilder
+import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -30,7 +31,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
   private val jwtBody = s"""{"sub":"$expectedUserId","iat":1516239022}"""
   implicit private val user: User = User(expectedUserId)
 
-  implicit private val sys = ActorSystem("MyTest")
+  implicit private val sys = ActorSystem("FinancialContractControllerTest")
   implicit private val mat = ActorMaterializer()
 
   private val controller = new FinancialContractController(
@@ -104,6 +105,49 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
   }
 
+  "update an user contract" in {
+    val payload = FinancialContractPayloadBuilder().build
+    val body = s"""{
+     |	"name":"${payload.name}",
+     |	"contractType": "${payload.contractType}",
+     |	"grossAmount": {
+     |		"valueInCents": ${payload.grossAmount.valueInCents},
+     |		"currency": "${payload.grossAmount.currency}"
+     |	},
+     |	"companyCnpj": "${payload.companyCnpj.get}",
+     |	"startDate": "${payload.startDate.toString(JodaDateTime.PATTERN)}",
+     |	"endDate": "${payload.endDate.get.toString(JodaDateTime.PATTERN)}"
+     |}""".stripMargin
+    val request = FakeRequest()
+      .withMethod("PUT")
+      .withBody(Json.parse(body))
+      .withHeaders(Headers(("Authorization", Jwt.encode(jwtBody))))
+
+    val financialContract = FinancialContractBuilder(user = user).build
+
+    when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+      .thenReturn(Future.successful(true))
+    when(repository.getById(financialContract.id))
+      .thenReturn(Future.successful(Some(financialContract)))
+    when(repository.update(eqTo(financialContract.id), eqTo(payload), any[DateTime]))
+      .thenReturn(Future.successful(1))
+
+    val result = controller.updateFinancialContract(financialContract.id).apply(request)
+
+    contentType(result) mustBe Some("application/json")
+    status(result) mustEqual OK
+    verify(repository, times(1)).update(financialContract.id, payload)
+
+    val jsonContent = contentAsJson(result)
+
+    jsonContent("id").as[String] mustEqual financialContract.id
+    (jsonContent \ "user" \ "id").as[String] mustEqual financialContract.user.id
+    (jsonContent \ "name").as[String] mustEqual financialContract.name
+    (jsonContent \ "companyCnpj").as[String] mustEqual financialContract.companyCnpj.get
+    (jsonContent \ "grossAmount" \ "valueInCents").as[Long] mustEqual financialContract.grossAmount.valueInCents
+    (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
+  }
+
   "delete an user contract" in {
     val request = FakeRequest()
       .withMethod("DELETE")
@@ -122,4 +166,6 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     status(result) mustEqual NO_CONTENT
     verify(repository, times(1)).delete(financialContract.id)
   }
+
+
 }

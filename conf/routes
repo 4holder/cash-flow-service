@@ -14,3 +14,4 @@ PUT     /v1/financial_contracts/:id        income_management.FinancialContractCo
 GET     /v1/financial_contracts/:financial_contract_id/incomes                 income_management.IncomeController.listIncomes(financial_contract_id: String, page: Int, page_size: Int)
 POST    /v1/financial_contracts/:financial_contract_id/incomes                 income_management.IncomeController.registerNewIncome(financial_contract_id: String)
 DELETE  /v1/financial_contracts/:financial_contract_id/incomes/:income_id      income_management.IncomeController.deleteIncome(financial_contract_id: String, income_id: String)
+PUT     /v1/financial_contracts/:financial_contract_id/incomes/:income_id      income_management.IncomeController.updateIncome(financial_contract_id: String, income_id: String)

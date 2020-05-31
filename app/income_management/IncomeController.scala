@@ -52,6 +52,20 @@ class IncomeController @Inject()(
     }} recover treatFailure
   }
 
+  def updateIncome(financialContractId: String, id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    auth.authorizeByFinancialContract(financialContractId) flatMap { _ => {
+      request.body.validate[IncomePayload].asEither match {
+        case Right(input) =>
+          repository
+            .update(id, input)
+            .flatMap(_ => repository.getById(id))
+            .map(_.map(maybeIncome => maybeIncome:IncomeResponse))
+            .map(income => Ok(toJson(income)))
+        case Left(e) => badIncomePayload(e)
+      }
+    }}
+  }
+
   def deleteIncome(financialContractId: String, id: String): Action[AnyContent] = Action.async { implicit request =>
     (
       for {
