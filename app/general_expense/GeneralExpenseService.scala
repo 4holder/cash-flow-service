@@ -26,10 +26,11 @@ class GeneralExpenseService {
     val occurrences: Occurrences = Occurrences(input.occurrences.day, input.occurrences.months)
     val fixAmount = if(input.fixedAmount.isDefined) input.fixedAmount.get else true
     val expenseType = if(input.expenseType.isDefined) input.expenseType.get else "generic"
+    val predictable = if(input.predictable.isDefined) input.predictable.get else false
 
     val listFaults = validateInput(input)
     if (listFaults.isEmpty)
-      Left(GeneralExpense(amount, occurrences, fixAmount ,expenseType))
+      Left(GeneralExpense(amount, occurrences, fixAmount , predictable, expenseType))
     else
       Right(InvalidExpense(listFaults))
   }

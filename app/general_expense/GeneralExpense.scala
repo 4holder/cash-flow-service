@@ -7,6 +7,7 @@ import play.api.libs.json.{Json, Writes}
 case class GeneralExpense(amount: Amount,
                           occurrences: Occurrences,
                           fixedAmount: Boolean = true,
+                          predictable: Boolean = true,
                           category: String = "generic")
 
 object GeneralExpense {

@@ -4,8 +4,10 @@ import com.google.inject.{Inject, Singleton}
 import general_expense.payload.{GeneralExpenseInput, GeneralExpenseResponse}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
+import payload.GeneralExpenseInput._
 
 import scala.concurrent.Future
+
 
 @Singleton
 class GeneralExpenseController @Inject()
@@ -17,10 +19,10 @@ class GeneralExpenseController @Inject()
 
   def calculateExpense: Action[JsValue] = Action.async(parse.json) { request =>
 
-    request.body.validate[GeneralExpenseInput].asOpt match {
-      case Some(input) => {
+    request.body.validate[GeneralExpenseInput].asEither match {
+      case Right(inp: GeneralExpenseInput) => {
 
-        val expenseContract = geService.generateExpense(input) match {
+        val expenseContract = geService.generateExpense(inp) match {
 
           case Left(expense: GeneralExpense) => {
             val responseType: GeneralExpenseResponse = expense
@@ -34,8 +36,12 @@ class GeneralExpenseController @Inject()
 
         expenseContract
       }
-      case None => {
-        Future.successful(BadRequest)
+
+      case Left(invalid) => {
+        val pretty = invalid.toList.map(_._1.toString).mkString("; ")
+        Future.successful(BadRequest(Json.obj(
+          "error"-> pretty)
+        ))
       }
     }
   }

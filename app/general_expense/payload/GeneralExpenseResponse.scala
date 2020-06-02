@@ -10,6 +10,7 @@ import play.api.libs.json.{Json, Writes}
 case class GeneralExpenseResponse(amount: AmountPayload,
                              occurrences: OccurrencesPayload,
                              expenseType: Option[ExpenseType],
+                             predictable: Option[Boolean],
                              fixedAmount: Option[Boolean])
 
 object GeneralExpenseResponse {
@@ -18,7 +19,8 @@ object GeneralExpenseResponse {
         expense.amount,
         expense.occurrences,
         Some(expense.category),
-        Some(expense.fixedAmount)
+        Some(expense.fixedAmount),
+        Some(expense.predictable)
       )
     }
   }

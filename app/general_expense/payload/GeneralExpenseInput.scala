@@ -8,6 +8,7 @@ import domain.Occurrences.OccurrencesPayload
 case class GeneralExpenseInput(amount: AmountPayload,
                                occurrences: OccurrencesPayload,
                                expenseType: Option[ExpenseType],
+                               predictable: Option[Boolean],
                                fixedAmount: Option[Boolean])
 
 object GeneralExpenseInput {

@@ -16,7 +16,7 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
 
       val input: GeneralExpenseInput = GeneralExpenseInput(
         AmountPayload(100L, "BRL"),
-        OccurrencesPayload(5, List(1,2,3)),None, None)
+        OccurrencesPayload(5, List(1,2,3)),None, None, None)
       val expense: GeneralExpense = generalExpenseService.generateExpense(input).left.get
 
       assert(expense.amount.valueInCents == 100L, "the value in cents was to be 100")
@@ -32,6 +32,7 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
         AmountPayload(550L, "BRL"),
         OccurrencesPayload(10, List(1,2,3,4,5,6,7,8,9,10,11,12)),
         expenseType = Some("house hold"),
+        predictable = Some(false),
         fixedAmount = Some(true))
 
       val expense = generalExpenseService.generateExpense(input).left.get
@@ -49,6 +50,7 @@ class GeneralExpenseServiceTest extends WordSpecLike with BeforeAndAfterAll {
         AmountPayload(550L, "BRL"),
         OccurrencesPayload(10, List(1,2,3,4,5,6,7,8,9,10,11,12)),
         expenseType = Some("crazy type"),
+        predictable = Some(false),
         fixedAmount = None)
 
       val expense = generalExpenseService.generateExpense(input).right.get
