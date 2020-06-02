@@ -2,7 +2,7 @@ package general_expense
 
 import com.google.inject.{Inject, Singleton}
 import general_expense.payload.{GeneralExpenseInput, GeneralExpenseResponse}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsError, JsValue, Json}
 import play.api.mvc.{AbstractController, Action, ControllerComponents}
 import payload.GeneralExpenseInput._
 
@@ -38,9 +38,10 @@ class GeneralExpenseController @Inject()
       }
 
       case Left(invalid) => {
-        val pretty = invalid.toList.map(_._1.toString).mkString("; ")
-        Future.successful(BadRequest(Json.obj(
-          "error"-> pretty)
+        val pretty = "invalid: " + invalid.toList.map(_._1.toJsonString)
+          .mkString("; invalid: ")
+        Future.successful(BadRequest(
+          Json.obj("error"-> pretty)
         ))
       }
     }
