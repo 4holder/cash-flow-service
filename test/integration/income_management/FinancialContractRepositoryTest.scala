@@ -1,4 +1,4 @@
-package integration.domain.financial_contract
+package integration.income_management
 
 import domain.{FinancialContract, User}
 import income_management.FinancialContractRepository

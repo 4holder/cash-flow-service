@@ -1,7 +1,7 @@
-package integration.domain.income
+package integration.income_management
 
 import domain.Income.IncomeType
-import domain.{Amount, Currency, FinancialContract, Income, Occurrences}
+import domain._
 import income_management.IncomeRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
@@ -114,9 +114,9 @@ class IncomeRepositoryTest extends IntegrationSpec {
     for {
       _ <- DBUtils.insertFinancialContracts(financialContractList)
       _ <- DBUtils.insertIncomes(incomeList)
-      financialContract <- repository.getById(forthIncome.id)
+      income <- repository.getById(forthIncome.id)
     } yield {
-      financialContract.get shouldEqual forthIncome
+      income.get shouldEqual forthIncome
     }
   }
 
@@ -124,9 +124,9 @@ class IncomeRepositoryTest extends IntegrationSpec {
     for {
       _ <- DBUtils.insertFinancialContracts(financialContractList)
       _ <- DBUtils.insertIncomes(incomeList)
-      financialContract <- repository.getById("not-existent-id")
+      income <- repository.getById("not-existent-id")
     } yield {
-      financialContract shouldEqual None
+      income shouldEqual None
     }
   }
 

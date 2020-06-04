@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
 import domain.Income.{IncomePayload, IncomeType}
-import domain.{FinancialContract, _}
+import domain.{Repository, Income, Amount, Currency, Occurrences}
 import income_management.IncomeRepository.IncomeTable
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider

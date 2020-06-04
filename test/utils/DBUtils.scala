@@ -1,7 +1,8 @@
 package utils
 
-import domain.{FinancialContract, Income}
+import domain.{FinancialContract, Income, IncomeDiscount}
 import income_management.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
+import income_management.IncomeDiscountRepository.IncomeDiscountTable
 import income_management.IncomeRepository.{IncomeDbRow, IncomeTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -17,6 +18,7 @@ object DBUtils {
   )
   val financialContractTable = TableQuery[FinancialContractTable]
   val incomeTable = TableQuery[IncomeTable]
+  val incomeDiscountTable = TableQuery[IncomeDiscountTable]
 
   def allFinancialContractsRows: Future[Seq[FinancialContractDbRow]] = {
     db.run(financialContractTable.result)
@@ -38,6 +40,14 @@ object DBUtils {
     db.run(
       DBIO.seq(
         incomes.map(fc => incomeTable += fc):_*
+      )
+    )
+  }
+
+  def insertIncomeDiscounts(incomeDiscounts: List[IncomeDiscount]): Future[Unit] = {
+    db.run(
+      DBIO.seq(
+        incomeDiscounts.map(fc => incomeDiscountTable += fc):_*
       )
     )
   }

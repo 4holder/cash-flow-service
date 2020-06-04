@@ -2,14 +2,18 @@ package domain
 
 import domain.Amount.AmountPayload
 import domain.IncomeDiscount.IncomeDiscountType
+import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 
 case class IncomeDiscount(
-  id: String,
-  name: String,
-  discountType: IncomeDiscountType.Value,
-  amount: Amount,
-  grossAmountAliquot: Double
+                           id: String,
+                           incomeId: String,
+                           name: String,
+                           discountType: IncomeDiscountType.Value,
+                           amount: Amount,
+                           aliquot: Double,
+                           createdAt: DateTime,
+                           modifiedAt: DateTime,
 )
 
 object IncomeDiscount {
@@ -34,7 +38,7 @@ object IncomeDiscount {
         name = discount.name,
         discountType = discount.discountType.toString,
         amount = discount.amount,
-        grossAmountAliquot = discount.grossAmountAliquot
+        grossAmountAliquot = discount.aliquot
       )
     }
   }
