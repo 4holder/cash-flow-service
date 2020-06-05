@@ -2,7 +2,7 @@ package utils
 
 import domain.{FinancialContract, Income, IncomeDiscount}
 import income_management.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
-import income_management.IncomeDiscountRepository.IncomeDiscountTable
+import income_management.IncomeDiscountRepository.{IncomeDiscountDbRow, IncomeDiscountTable}
 import income_management.IncomeRepository.{IncomeDbRow, IncomeTable}
 import slick.dbio.DBIO
 import slick.jdbc.PostgresProfile.api._
@@ -26,6 +26,10 @@ object DBUtils {
 
   def allIncomes: Future[Seq[IncomeDbRow]] = {
     db.run(incomeTable.sortBy(_.created_at.desc).result)
+  }
+
+  def allIncomeDiscounts: Future[Seq[IncomeDiscountDbRow]] = {
+    db.run(incomeDiscountTable.sortBy(_.created_at.desc).result)
   }
 
   def insertFinancialContracts(financialContracts: List[FinancialContract]): Future[Unit] = {

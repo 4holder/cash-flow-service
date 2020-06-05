@@ -3,6 +3,7 @@ package integration.income_management
 import domain.{FinancialContract, IncomeDiscount}
 import income_management.IncomeDiscountRepository
 import org.joda.time.DateTime
+import org.postgresql.util.PSQLException
 import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomeDiscountBuilder}
 import utils.{DBUtils, IntegrationSpec}
 
@@ -141,6 +142,27 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
       incomeDiscount <- repository.getById("not-existent-id")
     } yield {
       incomeDiscount shouldEqual None
+    }
+  }
+
+  behavior of "inserting income discounts"
+  it should "insert a list of valid income discounts" in {
+    val newIncomeDiscounts = List(firstIncomeDiscount, secondIncomeDiscount, thirdIncomeDiscount)
+    for {
+      _ <- DBUtils.insertFinancialContracts(List(financialContract))
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- repository.register(newIncomeDiscounts:_*)
+      allIncomeDiscounts <- DBUtils.allIncomeDiscounts
+    } yield {
+      allIncomeDiscounts should have length 3
+
+      allIncomeDiscounts.map(incomeDiscount => incomeDiscount: IncomeDiscount) shouldEqual newIncomeDiscounts
+    }
+  }
+
+  it should "not insert a list of valid income discounts when income does not exist" in {
+    recoverToSucceededIf[PSQLException] {
+      repository.register(firstIncomeDiscount, secondIncomeDiscount, thirdIncomeDiscount)
     }
   }
 }

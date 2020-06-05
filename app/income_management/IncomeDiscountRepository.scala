@@ -40,6 +40,14 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
       incomeDiscountTable.filter(_.id === id).result
     ).map(r => r.headOption.map(incomeDiscount => incomeDiscount: IncomeDiscount))
   }
+
+  def register(newIncomeDiscounts: IncomeDiscount*): Future[Unit] = {
+    db.run(
+      DBIO.seq(
+        newIncomeDiscounts.map(incomeDiscount => incomeDiscountTable += incomeDiscount):_*
+      )
+    )
+  }
 }
 
 object IncomeDiscountRepository {
