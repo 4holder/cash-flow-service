@@ -24,6 +24,17 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
   import dbConfig._
   import profile.api._
 
+  def allByIncomeId(incomeId: String, page: Int, pageSize: Int): Future[Seq[IncomeDiscount]] = {
+    val query = incomeDiscountTable
+      .filter(_.income_id === incomeId)
+      .sortBy(_.created_at.desc)
+      .drop(offset(page, pageSize))
+      .take(pageSize)
+
+    db.run(query.result)
+      .map(_.map(r => r: IncomeDiscount))
+  }
+
   def getById(id: String): Future[Option[IncomeDiscount]] = {
     db.run(
       incomeDiscountTable.filter(_.id === id).result
