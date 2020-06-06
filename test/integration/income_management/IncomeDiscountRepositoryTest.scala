@@ -1,18 +1,18 @@
 package integration.income_management
 
-import domain.Income.IncomeType
 import domain.IncomeDiscount.IncomeDiscountType
-import domain.{Amount, Currency, FinancialContract, Income, IncomeDiscount, Occurrences}
+import domain.{Amount, Currency, FinancialContract, IncomeDiscount}
 import income_management.IncomeDiscountRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomeDiscountBuilder, IncomeDiscountPayloadBuilder, IncomePayloadBuilder}
+import utils.builders._
 import utils.{DBUtils, IntegrationSpec}
 
 class IncomeDiscountRepositoryTest extends IntegrationSpec  {
   private val repository = new IncomeDiscountRepository(dbConfig)
+  private val user = UserBuilder().build
   private val now = DateTime.now
-  private val financialContract: FinancialContract = FinancialContractBuilder().build
+  private val financialContract: FinancialContract = FinancialContractBuilder(user = user).build
   private val noiseFinancialContract = FinancialContractBuilder().build
   private val income = IncomeBuilder(financialContractId = financialContract.id).build
   private val noiseIncome = IncomeBuilder(financialContractId = financialContract.id).build
@@ -211,6 +211,41 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
       updatedIncome.discountType.toString shouldEqual updatePayload.discountType
       updatedIncome.createdAt shouldEqual secondIncomeDiscount.createdAt
       updatedIncome.modifiedAt shouldEqual now
+    }
+  }
+
+  behavior of "belongs to"
+  it should "NOT belong to an user which does not owns the financial contract" in {
+    val anotherUser = UserBuilder().build
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
+      belongsTo <- repository.belongsToUser(thirdIncomeDiscount.id, anotherUser)
+    } yield {
+      belongsTo shouldEqual false
+    }
+  }
+
+  it should "NOT belong when discount is from another user" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
+      belongsTo <- repository.belongsToUser(noiseIncome.id, user)
+    } yield {
+      belongsTo shouldEqual false
+    }
+  }
+
+  it should "belong to an user which owns the financial contract and income" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
+      belongsTo <- repository.belongsToUser(thirdIncomeDiscount.id, user)
+    } yield {
+      belongsTo shouldEqual true
     }
   }
 }

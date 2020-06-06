@@ -4,28 +4,28 @@ import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
 import domain.Income.{IncomePayload, IncomeType}
-import domain.{Repository, Income, Amount, Currency, Occurrences}
-import income_management.IncomeRepository.IncomeTable
+import domain._
+import income_management.FinancialContractRepository.financialContracts
+import income_management.IncomeRepository.incomes
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{TableQuery, Tag}
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+class IncomeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)
                                 (implicit ec: ExecutionContext)
   extends Repository {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  private val incomeTable = TableQuery[IncomeTable]
 
   import dbConfig._
   import profile.api._
 
   def allByFinancialContractId(financialContractId: String, page: Int, pageSize: Int): Future[Seq[Income]] = {
-    val query = incomeTable
+    val query =
+      incomes
         .filter(_.financial_contract_id === financialContractId)
         .sortBy(_.created_at.desc)
         .drop(offset(page, pageSize))
@@ -37,14 +37,14 @@ class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigP
 
   def getById(id: String): Future[Option[Income]] = {
     db.run(
-      incomeTable.filter(_.id === id).result
+      incomes.filter(_.id === id).result
     ).map(r => r.headOption.map(income => income: Income))
   }
 
   def register(newIncomes: Income*): Future[Unit] = {
     db.run(
       DBIO.seq(
-        newIncomes.map(income => incomeTable += income):_*
+        newIncomes.map(income => incomes += income):_*
       )
     )
   }
@@ -53,7 +53,7 @@ class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigP
              incomePayload: IncomePayload,
              now: DateTime = DateTime.now): Future[Int] = {
     db.run(
-      incomeTable
+      incomes
         .filter(_.id === id)
         .map(income => (
           income.name,
@@ -74,11 +74,24 @@ class IncomeRepository @Inject()(protected val dbConfigProvider: DatabaseConfigP
   }
 
   def delete(id: String): Future[Int] = {
-    db.run(incomeTable.filter(_.id === id).delete)
+    db.run(incomes.filter(_.id === id).delete)
+  }
+
+  def belongsToUser(id: String, user: User): Future[Boolean] = {
+    db.run(
+      incomes
+        .join(financialContracts)
+        .on(_.financial_contract_id === _.id)
+        .filter(tuple => tuple._1.id === id && tuple._2.user_id === user.id)
+        .length
+        .result
+    ).map(_ > 0)
   }
 }
 
 object IncomeRepository {
+  val incomes = TableQuery[IncomeTable]
+
   case class IncomeDbRow(
     id: String,
     financial_contract_id: String,

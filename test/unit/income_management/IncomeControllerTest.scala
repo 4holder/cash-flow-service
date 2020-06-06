@@ -1,9 +1,7 @@
 package unit.income_management
 
 import authorization.AuthorizationHelper
-import domain.User
 import income_management.{IncomeController, IncomeRepository, RegisterIncomeService}
-import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -12,29 +10,26 @@ import org.scalatestplus.play.PlaySpec
 import pdi.jwt.Jwt
 import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
-import play.api.test.Helpers.{contentAsJson, contentType, status}
+import play.api.test.Helpers.{contentAsJson, contentType, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder, IncomeBuilder, IncomePayloadBuilder}
-import play.api.test.Helpers._
+import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
   private val service = mock[RegisterIncomeService]
-  private val repository = mock[IncomeRepository]
+  implicit private val repository = mock[IncomeRepository]
   private val auth = mock[AuthorizationHelper]
 
   private val expectedUserId = "an-user-id"
   private val jwtToken = Jwt.encode(s"""{"sub":"$expectedUserId","iat":1516239022}""")
-  private val user: User = User(expectedUserId)
 
   private val financialContract = FinancialContractBuilder().build
 
   private val controller = new IncomeController(
     Helpers.stubControllerComponents(),
     service,
-    repository,
     auth,
   )
 
@@ -44,8 +39,8 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
       val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
       val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
-
-      when(auth.authorizeByFinancialContract[Any](eqTo(financialContract.id))(any[Request[Any]]))
+      // Intellij is an error in next line. It is a highlight error.
+      when(auth.authorize[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
 
       when(repository.allByFinancialContractId(financialContract.id, 1, 2))
@@ -106,11 +101,10 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
         .withHeaders(Headers(("Authorization", jwtToken)))
         .withBody(Json.parse(body))
 
-      val now = DateTime.now
       val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
       val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
-
-      when(auth.authorizeByFinancialContract[Any](eqTo(financialContract.id))(any[Request[Any]]))
+      // Intellij is an error in next line. It is a highlight error.
+      when(auth.authorize[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(service.register(eqTo(financialContract.id), eqTo(firstIncomePayload), any[String], any[DateTime]))
         .thenReturn(Future.successful(firstIncome))
@@ -143,8 +137,8 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
         .withHeaders(Headers(("Authorization", jwtToken)))
 
       val income = IncomeBuilder().build
-
-      when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+      // Intellij is an error in next line. It is a highlight error.
+      when(auth.authorize[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(repository.delete(eqTo(income.id)))
         .thenReturn(Future.successful(1))
@@ -177,7 +171,7 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
       val income = IncomeBuilder().build
 
-      when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+      when(auth.authorize[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(repository.getById(income.id)).thenReturn(Future.successful(Some(income)))
       when(repository.update(eqTo(income.id), eqTo(firstIncomePayload), any[DateTime]))

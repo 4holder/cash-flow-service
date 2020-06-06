@@ -21,13 +21,12 @@ import scala.concurrent.{ExecutionContext, Future}
 class IncomeController @Inject()(
   cc: ControllerComponents,
   service: RegisterIncomeService,
-  repository: IncomeRepository,
   auth: AuthorizationHelper
-)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+)(implicit repository: IncomeRepository, ec: ExecutionContext) extends AbstractController(cc) with Logging {
   def listIncomes(financialContractId: String,
                   page: Int,
                   pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorizeByFinancialContract(financialContractId)
+    auth.authorize(financialContractId)
       .flatMap { _ =>
         repository
           .allByFinancialContractId(financialContractId, page, pageSize)
@@ -37,7 +36,7 @@ class IncomeController @Inject()(
   }
 
   def registerNewIncome(financialContractId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorizeByFinancialContract(financialContractId) flatMap { _ => {
+    auth.authorize(financialContractId) flatMap { _ => {
       request.body.validate[List[IncomePayload]].asEither match {
         case Right(input) =>
           Future.sequence(
@@ -53,7 +52,7 @@ class IncomeController @Inject()(
   }
 
   def updateIncome(financialContractId: String, id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorizeByFinancialContract(financialContractId) flatMap { _ => {
+    auth.authorize(financialContractId) flatMap { _ => {
       request.body.validate[IncomePayload].asEither match {
         case Right(input) =>
           repository
@@ -70,7 +69,7 @@ class IncomeController @Inject()(
   def deleteIncome(financialContractId: String, id: String): Action[AnyContent] = Action.async { implicit request =>
     (
       for {
-        _ <- auth.authorizeByFinancialContract(id)
+        _ <- auth.authorize(id)
         _ <- repository.delete(id)
       } yield NoContent
     ) recover treatFailure

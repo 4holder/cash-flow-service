@@ -19,10 +19,9 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FinancialContractController @Inject()(
   cc: ControllerComponents,
-  repository: FinancialContractRepository,
   registerService: RegisterFinancialContractService,
   auth: AuthorizationHelper
-)(implicit ec: ExecutionContext) extends AbstractController(cc) with Logging {
+)(implicit ec: ExecutionContext, repository: FinancialContractRepository) extends AbstractController(cc) with Logging {
   def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
     auth.isLoggedIn.flatMap { user: User =>
       repository
@@ -33,7 +32,7 @@ class FinancialContractController @Inject()(
   }
 
   def getFinancialContractById(id: String): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorizeByFinancialContract(id).flatMap { _ =>
+    auth.authorize(id).flatMap { _ =>
       repository
         .getById(id)
         .map(_.map(fc => fc: FinancialContractResponse))
@@ -55,7 +54,7 @@ class FinancialContractController @Inject()(
   }
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorizeByFinancialContract(id).flatMap { _ => {
+    auth.authorize(id).flatMap { _ => {
       request.body.validate[FinancialContractPayload].asOpt match {
         case Some(input) =>
           repository
@@ -71,7 +70,7 @@ class FinancialContractController @Inject()(
   def deleteFinancialContract(id: String): Action[AnyContent] = Action.async { implicit request =>
     (
       for {
-        _ <- auth.authorizeByFinancialContract(id)
+        _ <- auth.authorize(id)
         _ <- repository.delete(id)
       } yield NoContent
     ) recover treatFailure

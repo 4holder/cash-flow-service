@@ -1,7 +1,6 @@
-package unit.infrastructure
+package unit.authorization
 
 import authorization.AuthorizationHelper
-import income_management.FinancialContractRepository
 import authorization.exceptions.{InvalidUserTokenException, UserTokenMissingException}
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -13,8 +12,7 @@ import play.api.mvc.{AnyContent, Headers, Request}
 class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]
 
-  private val repository = mock[FinancialContractRepository]
-  private val auth = new AuthorizationHelper(repository)
+  private val auth = new AuthorizationHelper()
 
   override def beforeEach {
     Mockito.reset(request)

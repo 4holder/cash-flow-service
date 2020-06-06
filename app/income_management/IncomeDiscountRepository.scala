@@ -4,8 +4,10 @@ import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
 import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
-import domain.{Amount, Currency, IncomeDiscount, Repository}
+import domain._
+import income_management.FinancialContractRepository.financialContracts
 import income_management.IncomeDiscountRepository.IncomeDiscountTable
+import income_management.IncomeRepository.incomes
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
@@ -75,6 +77,19 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
 
   def delete(id: String): Future[Int] = {
     db.run(incomeDiscountTable.filter(_.id === id).delete)
+  }
+
+  def belongsToUser(id: String, user: User): Future[Boolean] = {
+    db.run(
+      incomeDiscountTable
+        .join(incomes)
+        .on(_.income_id === _.id)
+        .join(financialContracts)
+        .on(_._2.financial_contract_id === _.id)
+        .filter(tuple => tuple._1._1.id === id && tuple._2.user_id === user.id)
+        .length
+        .result
+    ).map(_ > 0)
   }
 }
 

@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import com.google.inject.{Inject, Singleton}
 import domain.FinancialContract.{ContractType, FinancialContractPayload}
 import domain._
-import income_management.FinancialContractRepository.FinancialContractTable
+import income_management.FinancialContractRepository.{FinancialContractTable, financialContracts}
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
@@ -19,7 +19,6 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
                                            (implicit ec: ExecutionContext)
   extends Repository {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
-  private val financialContracts = TableQuery[FinancialContractTable]
 
   import dbConfig._
   import profile.api._
@@ -101,6 +100,8 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
 }
 
 object FinancialContractRepository {
+  val financialContracts = TableQuery[FinancialContractTable]
+
   case class FinancialContractDbRow(
     id: String,
     user_id: String,

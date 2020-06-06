@@ -18,12 +18,13 @@ import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class FinancialContractControllerTest extends PlaySpec with Results with MockitoSugar {
   private val service = mock[RegisterFinancialContractService]
-  private val repository = mock[FinancialContractRepository]
+  implicit private val repository = mock[FinancialContractRepository]
   private val auth = mock[AuthorizationHelper]
 
   private val expectedUserId = "an-user-id"
@@ -35,7 +36,6 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
   private val controller = new FinancialContractController(
     Helpers.stubControllerComponents(),
-    repository,
     service,
     auth
   )
@@ -124,7 +124,8 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+    // Intellij is an error in next line. It is a highlight error.
+    when(auth.authorize[Any](any[String])(any[Request[Any]], any[FinancialContractRepository]))
       .thenReturn(Future.successful(true))
     when(repository.getById(financialContract.id))
       .thenReturn(Future.successful(Some(financialContract)))
@@ -153,8 +154,8 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
       .withHeaders(Headers(("Authorization", Jwt.encode(jwtBody))))
 
     val financialContract = FinancialContractBuilder(user = user).build
-
-    when(auth.authorizeByFinancialContract[Any](any[String])(any[Request[Any]]))
+    // Intellij is an error in next line. It is a highlight error.
+    when(auth.authorize[Any](any[String])(any[Request[Any]], any[FinancialContractRepository]))
       .thenReturn(Future.successful(true))
     when(repository.delete(eqTo(financialContract.id)))
       .thenReturn(Future.successful(1))

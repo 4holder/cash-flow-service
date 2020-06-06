@@ -5,13 +5,14 @@ import domain._
 import income_management.IncomeRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder}
+import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder, UserBuilder}
 import utils.{DBUtils, IntegrationSpec}
 
 class IncomeRepositoryTest extends IntegrationSpec {
   private val repository = new IncomeRepository(dbConfig)
   private val now = DateTime.now
-  private val financialContract: FinancialContract = FinancialContractBuilder().build
+  private val user = UserBuilder().build
+  private val financialContract: FinancialContract = FinancialContractBuilder(user = user).build
   private val noiseFinancialContract = FinancialContractBuilder().build
   private val firstIncome = IncomeBuilder(
     financialContractId = financialContract.id,
@@ -198,6 +199,38 @@ class IncomeRepositoryTest extends IntegrationSpec {
       updatedIncome.occurrences shouldEqual updatePayload.occurrences
       updatedIncome.createdAt shouldEqual secondIncome.createdAt
       updatedIncome.modifiedAt shouldEqual now
+    }
+  }
+
+  behavior of "belongs to"
+  it should "NOT belong to an user which does not owns the financial contract" in {
+    val anotherUser = UserBuilder().build
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(List(fifthIncome, thirdIncome, firstIncome))
+      belongsTo <- repository.belongsToUser(thirdIncome.id, anotherUser)
+    } yield {
+      belongsTo shouldEqual false
+    }
+  }
+
+  it should "belong to an user which owns the financial contract" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(List(fifthIncome, thirdIncome, firstIncome))
+      belongsTo <- repository.belongsToUser(thirdIncome.id, user)
+    } yield {
+      belongsTo shouldEqual true
+    }
+  }
+
+  it should "NOT belong when the incomes is from another user" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(List(fifthIncome, thirdIncome, firstIncome, firstNoiseIncome))
+      belongsTo <- repository.belongsToUser(firstNoiseIncome.id, user)
+    } yield {
+      belongsTo shouldEqual false
     }
   }
 }
