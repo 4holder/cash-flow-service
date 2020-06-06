@@ -110,9 +110,6 @@ workflows:
       - integration-tests:
           requires:
             - unit-tests
-      - test-coverage:
-          requires:
-            - integration-tests
       - build-and-registry-container:
           requires:
             - integration-tests
