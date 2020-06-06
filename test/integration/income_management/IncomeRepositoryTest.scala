@@ -173,7 +173,7 @@ class IncomeRepositoryTest extends IntegrationSpec {
   it should "update the allowed fields" in {
     val now = DateTime.now
     val updatePayload = IncomePayloadBuilder(
-      name = "Updated Awesome Name",
+      name = "Awesome Updated Name",
       amount = Amount(391283, Currency.USD),
       incomeType = IncomeType.THIRTEENTH_SALARY_ADVANCE,
       occurrences = Occurrences.builder.day(28).allMonths.build,

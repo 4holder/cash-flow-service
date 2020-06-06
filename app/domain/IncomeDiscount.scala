@@ -6,14 +6,14 @@ import org.joda.time.DateTime
 import play.api.libs.json.{Json, Reads, Writes}
 
 case class IncomeDiscount(
-                           id: String,
-                           incomeId: String,
-                           name: String,
-                           discountType: IncomeDiscountType.Value,
-                           amount: Amount,
-                           aliquot: Double,
-                           createdAt: DateTime,
-                           modifiedAt: DateTime,
+  id: String,
+  incomeId: String,
+  name: String,
+  discountType: IncomeDiscountType.Value,
+  amount: Amount,
+  aliquot: Double,
+  createdAt: DateTime,
+  modifiedAt: DateTime,
 )
 
 object IncomeDiscount {
@@ -26,7 +26,7 @@ object IncomeDiscount {
     name: String,
     discountType: String,
     amount: AmountPayload,
-    grossAmountAliquot: Double
+    aliquot: Double
   )
 
   object IncomeDiscountPayload {
@@ -38,7 +38,7 @@ object IncomeDiscount {
         name = discount.name,
         discountType = discount.discountType.toString,
         amount = discount.amount,
-        grossAmountAliquot = discount.aliquot
+        aliquot = discount.aliquot
       )
     }
   }

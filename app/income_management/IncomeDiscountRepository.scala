@@ -3,7 +3,7 @@ package income_management
 import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
-import domain.IncomeDiscount.IncomeDiscountType
+import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
 import domain.{Amount, Currency, IncomeDiscount, Repository}
 import income_management.IncomeDiscountRepository.IncomeDiscountTable
 import org.joda.time.DateTime
@@ -47,6 +47,34 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
         newIncomeDiscounts.map(incomeDiscount => incomeDiscountTable += incomeDiscount):_*
       )
     )
+  }
+
+  def update(id: String,
+             incomeDiscountPayload: IncomeDiscountPayload,
+             now: DateTime = DateTime.now): Future[Int] = {
+    db.run(
+      incomeDiscountTable
+        .filter(_.id === id)
+        .map(incomeDiscount => (
+          incomeDiscount.name,
+          incomeDiscount.discount_type,
+          incomeDiscount.value_in_cents,
+          incomeDiscount.currency,
+          incomeDiscount.aliquot,
+          incomeDiscount.modified_at,
+        )).update((
+        incomeDiscountPayload.name,
+        incomeDiscountPayload.discountType.toString,
+        incomeDiscountPayload.amount.valueInCents,
+        incomeDiscountPayload.amount.currency,
+        incomeDiscountPayload.aliquot,
+        new Timestamp(now.getMillis),
+      ))
+    )
+  }
+
+  def delete(id: String): Future[Int] = {
+    db.run(incomeDiscountTable.filter(_.id === id).delete)
   }
 }
 

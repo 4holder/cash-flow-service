@@ -13,7 +13,7 @@ case class IncomeDiscountBuilder(
   name: String = "An Awesome Income",
   amount: Amount = Amount.BRL(132000),
   discountType: IncomeDiscountType.Value = IncomeDiscountType.INSS,
-  grossAmountAliquot: Double =  19283.01,
+  aliquot: Double =  0.27,
   createdAt: DateTime = DateTime.now,
   modifiedAt: DateTime = DateTime.now,
 ) {
@@ -23,7 +23,7 @@ case class IncomeDiscountBuilder(
     name = name,
     amount = amount,
     discountType = discountType,
-    aliquot = grossAmountAliquot,
+    aliquot = aliquot,
     createdAt = createdAt,
     modifiedAt = modifiedAt,
   )

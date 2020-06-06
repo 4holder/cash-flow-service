@@ -22,13 +22,13 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
         name = IncomeDiscountType.INSS.toString,
         discountType = IncomeDiscountType.INSS.toString,
         amount = Amount.BRL(16433),
-        grossAmountAliquot = 0.0822
+        aliquot = 0.0822
       ),
       IncomeDiscountPayload(
         name = IncomeDiscountType.IRRF.toString,
         discountType = IncomeDiscountType.IRRF.toString,
         amount = Amount.ZERO_REAIS,
-        grossAmountAliquot = 0.0
+        aliquot = 0.0
       )
     )
 
@@ -80,13 +80,13 @@ class CLTContractCalculatorServiceTest extends FlatSpec with Matchers {
         name = IncomeDiscountType.INSS.toString,
         discountType = IncomeDiscountType.INSS.toString,
         amount = Amount.BRL(71310),
-        grossAmountAliquot = 0.0648
+        aliquot = 0.0648
       ),
       IncomeDiscountPayload(
         name = IncomeDiscountType.IRRF.toString,
         discountType = IncomeDiscountType.IRRF.toString,
         amount = Amount.BRL(190740),
-        grossAmountAliquot = 0.1734
+        aliquot = 0.1734
       )
     )
 

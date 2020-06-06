@@ -1,10 +1,12 @@
 package integration.income_management
 
-import domain.{FinancialContract, IncomeDiscount}
+import domain.Income.IncomeType
+import domain.IncomeDiscount.IncomeDiscountType
+import domain.{Amount, Currency, FinancialContract, Income, IncomeDiscount, Occurrences}
 import income_management.IncomeDiscountRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomeDiscountBuilder}
+import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomeDiscountBuilder, IncomeDiscountPayloadBuilder, IncomePayloadBuilder}
 import utils.{DBUtils, IntegrationSpec}
 
 class IncomeDiscountRepositoryTest extends IntegrationSpec  {
@@ -163,6 +165,52 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
   it should "not insert a list of valid income discounts when income does not exist" in {
     recoverToSucceededIf[PSQLException] {
       repository.register(firstIncomeDiscount, secondIncomeDiscount, thirdIncomeDiscount)
+    }
+  }
+
+  behavior of "deleting income discount"
+  it should "delete specified income discount" in {
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- DBUtils.insertIncomeDiscounts(List(firstIncomeDiscount, secondIncomeDiscount, thirdIncomeDiscount))
+      result <- repository.delete(secondIncomeDiscount.id)
+      allIncomeDiscounts <- DBUtils.allIncomeDiscounts
+    } yield {
+      allIncomeDiscounts should have length 2
+
+      result shouldEqual 1
+    }
+  }
+
+  behavior of "updating income discount"
+  it should "update the allowed fields" in {
+    val now = DateTime.now
+    val updatePayload = IncomeDiscountPayloadBuilder(
+      name = "Awesome Updated Name",
+      amount = Amount(391283, Currency.USD),
+      discountType = IncomeDiscountType.INSS,
+    ).build
+
+    for {
+      _ <- DBUtils.insertFinancialContracts(financialContractList)
+      _ <- DBUtils.insertIncomes(incomeList)
+      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
+      affectedRows <- repository.update(secondIncomeDiscount.id, updatePayload, now)
+      allIncomeDiscounts <- DBUtils.allIncomeDiscounts
+    } yield {
+      allIncomeDiscounts should have length 7
+      affectedRows shouldEqual 1
+
+      val updatedIncome = allIncomeDiscounts
+        .find(_.id.equals(secondIncomeDiscount.id))
+        .get: IncomeDiscount
+      updatedIncome.name shouldEqual updatePayload.name
+      updatedIncome.amount.valueInCents shouldEqual updatePayload.amount.valueInCents
+      updatedIncome.amount.currency.toString shouldEqual updatePayload.amount.currency
+      updatedIncome.discountType.toString shouldEqual updatePayload.discountType
+      updatedIncome.createdAt shouldEqual secondIncomeDiscount.createdAt
+      updatedIncome.modifiedAt shouldEqual now
     }
   }
 }
