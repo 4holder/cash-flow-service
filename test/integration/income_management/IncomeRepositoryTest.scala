@@ -2,43 +2,49 @@ package integration.income_management
 
 import domain.Income.IncomeType
 import domain._
-import income_management.IncomeRepository
+import income_management.{FinancialContractRepository, IncomeRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder, UserBuilder}
 import utils.{DBUtils, IntegrationSpec}
 
 class IncomeRepositoryTest extends IntegrationSpec {
-  private val repository = new IncomeRepository(dbConfig)
+  private val financialContractRepository = new FinancialContractRepository(dbConfig)
+  private val repository = new IncomeRepository(dbConfig, financialContractRepository)
   private val now = DateTime.now
   private val user = UserBuilder().build
-  private val financialContract: FinancialContract = FinancialContractBuilder(user = user).build
+  private val firstFinancialContract: FinancialContract = FinancialContractBuilder(user = user).build
+  private val secondFinancialContract: FinancialContract = FinancialContractBuilder(user = user).build
   private val noiseFinancialContract = FinancialContractBuilder().build
   private val firstIncome = IncomeBuilder(
-    financialContractId = financialContract.id,
+    financialContractId = firstFinancialContract.id,
     createdAt = now.minusDays(1),
   ).build
   private val secondIncome = IncomeBuilder(
-    financialContractId = financialContract.id,
+    financialContractId = firstFinancialContract.id,
     createdAt = now.minusDays(2),
   ).build
   private val thirdIncome = IncomeBuilder(
-    financialContractId = financialContract.id,
+    financialContractId = firstFinancialContract.id,
     createdAt = now.minusDays(3),
   ).build
   private val forthIncome = IncomeBuilder(
-    financialContractId = financialContract.id,
+    financialContractId = secondFinancialContract.id,
     createdAt = now.minusDays(4),
   ).build
   private val fifthIncome = IncomeBuilder(
-    financialContractId = financialContract.id,
+    financialContractId = firstFinancialContract.id,
     createdAt = now.minusDays(5),
   ).build
   private val firstNoiseIncome = IncomeBuilder(
     financialContractId = noiseFinancialContract.id,
   ).build
 
-  private val financialContractList = List(financialContract, noiseFinancialContract)
+  private val financialContractList = List(
+    firstFinancialContract,
+    secondFinancialContract,
+    noiseFinancialContract
+  )
   private lazy val incomeList = List(
     fifthIncome,
     firstIncome,
@@ -49,64 +55,23 @@ class IncomeRepositoryTest extends IntegrationSpec {
   )
 
   behavior of "listing incomes"
-  it should """return all incomes descending ordered by creation date
-              |when on first page with size 3 and there are 3 incomes""".stripMargin in {
+  it should "return all incomes of first and second financial contracts" in {
     for {
       _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(List(firstIncome, firstNoiseIncome, secondIncome, thirdIncome))
-      incomes <- repository.allByFinancialContractId(financialContract.id, 1, 3)
+      _ <- DBUtils.insertIncomes(incomeList)
+      incomes <- repository.allByFinancialContractIds(
+        List(firstFinancialContract.id, secondFinancialContract.id)
+      )
     } yield {
-      incomes should have length 3
+      incomes should have length 5
 
       incomes.map(income => income: Income) shouldEqual List(
         firstIncome,
         secondIncome,
-        thirdIncome,
-      )
-    }
-  }
-
-  it should """return the first 2 incomes ordered by creation date
-              |when on first page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      incomes <- repository.allByFinancialContractId(financialContract.id,1, 2)
-    } yield {
-      incomes should have length 2
-
-      incomes.map(income => income: Income) shouldEqual List(
-        firstIncome,
-        secondIncome,
-      )
-    }
-  }
-
-  it should """return 2 incomes ordered by creation date
-              |when on second page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      incomes <- repository.allByFinancialContractId(financialContract.id,2, 2)
-    } yield {
-      incomes should have length 2
-
-      incomes.map(income => income: Income) shouldEqual List(
         thirdIncome,
         forthIncome,
+        fifthIncome
       )
-    }
-  }
-
-  it should """return 1 income when on last page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      incomes <- repository.allByFinancialContractId(financialContract.id,3, 2)
-    } yield {
-      incomes should have length 1
-
-      incomes.map(income => income: Income) shouldEqual List(fifthIncome)
     }
   }
 
@@ -135,7 +100,7 @@ class IncomeRepositoryTest extends IntegrationSpec {
   it should "insert a list of valid incomes" in {
     val newIncomes = List(firstIncome, secondIncome, thirdIncome)
     for {
-      _ <- DBUtils.insertFinancialContracts(List(financialContract))
+      _ <- DBUtils.insertFinancialContracts(List(firstFinancialContract))
       _ <- repository.register(newIncomes:_*)
       allIncomes <- DBUtils.allIncomes
     } yield {

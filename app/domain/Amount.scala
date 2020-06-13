@@ -24,7 +24,24 @@ case class Amount(
     }
   }
 
-  def -(amounts: Amount): Try[Amount] = subtract(amounts)
+  def -(amount: Amount): Try[Amount] = subtract(amount)
+
+  def sum(amount: Try[Amount]): Try[Amount] = {
+    amount.flatMap(_ + this)
+  }
+
+  def sum(amounts: Amount*): Try[Amount] = {
+    if(amounts.forall(_.currency.equals(this.currency))){
+      val amountToSum = amounts.map(_.valueInCents).sum
+      Success(this.copy(valueInCents + amountToSum))
+    } else {
+      Failure(InvalidMonetaryOperationException(
+        s"Operation not permitted. Currency mismatch"))
+    }
+  }
+
+  def +(amount: Amount): Try[Amount] = sum(amount)
+  def +(amount: Try[Amount]): Try[Amount] = sum(amount)
 
   def isLessThan(amount: Amount): Try[Boolean] = {
     if (this.currency.equals(amount.currency)) {

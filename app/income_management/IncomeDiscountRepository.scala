@@ -17,7 +17,8 @@ import slick.lifted.{TableQuery, Tag}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
+class IncomeDiscountRepository @Inject()(dbConfigProvider: DatabaseConfigProvider,
+                                         incomeRepository: IncomeRepository)
                                         (implicit ec: ExecutionContext)
   extends Repository {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
@@ -26,12 +27,10 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
   import dbConfig._
   import profile.api._
 
-  def allByIncomeId(incomeId: String, page: Int, pageSize: Int): Future[Seq[IncomeDiscount]] = {
+  def allByIncomeIds(incomeIds: Seq[String]): Future[Seq[IncomeDiscount]] = {
     val query = incomeDiscountTable
-      .filter(_.income_id === incomeId)
+      .filter(_.income_id inSet incomeIds)
       .sortBy(_.created_at.desc)
-      .drop(offset(page, pageSize))
-      .take(pageSize)
 
     db.run(query.result)
       .map(_.map(r => r: IncomeDiscount))
@@ -90,6 +89,10 @@ class IncomeDiscountRepository @Inject()(protected val dbConfigProvider: Databas
         .length
         .result
     ).map(_ > 0)
+  }
+
+  override def parentBelongsToUser(parentId: String, user: User): Future[Boolean] = {
+    incomeRepository.belongsToUser(parentId, user)
   }
 }
 

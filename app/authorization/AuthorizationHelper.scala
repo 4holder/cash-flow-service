@@ -18,8 +18,8 @@ class AuthorizationHelper @Inject()(implicit ec: ExecutionContext) extends Loggi
     Future.fromTry(getUserFromRequest(request))
   }
 
-  def authorize[A](id: String)
-                  (implicit request: Request[A], repository: Repository): Future[Boolean] = {
+  def authorizeObject[A](id: String)
+                        (implicit request: Request[A], repository: Repository): Future[Boolean] = {
     Future
       .fromTry(getUserFromRequest(request))
       .flatMap(user => {
@@ -27,10 +27,26 @@ class AuthorizationHelper @Inject()(implicit ec: ExecutionContext) extends Loggi
           .belongsToUser(id, user) map {
             case true => true
             case false =>
-              val failureMessage = s"Financial contract '$id' is not associated with '${user.id}'. Access Denied."
+              val failureMessage = s"Object '$id' is not associated with '${user.id}'. Access Denied."
               logger.info(failureMessage)
               throw PermissionDeniedException(failureMessage)
           }
+      })
+  }
+
+  def authorizeParent[A](id: String)
+                        (implicit request: Request[A], repository: Repository): Future[Boolean] = {
+    Future
+      .fromTry(getUserFromRequest(request))
+      .flatMap(user => {
+        repository
+          .parentBelongsToUser(id, user) map {
+          case true => true
+          case false =>
+            val failureMessage = s"Object '$id' is not associated with '${user.id}'. Access Denied."
+            logger.info(failureMessage)
+            throw PermissionDeniedException(failureMessage)
+        }
       })
   }
 

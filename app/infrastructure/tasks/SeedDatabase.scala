@@ -6,7 +6,9 @@ import java.util.UUID.randomUUID
 import domain.Currency
 import domain.FinancialContract.ContractType
 import domain.Income.IncomeType
+import domain.IncomeDiscount.IncomeDiscountType
 import income_management.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
+import income_management.IncomeDiscountRepository.{IncomeDiscountDbRow, IncomeDiscountTable}
 import income_management.IncomeRepository.{IncomeDbRow, IncomeTable}
 import infrastructure.tasks.DatabaseConnection._
 import org.joda.time.DateTime
@@ -23,6 +25,8 @@ object SeedDatabase {
   def main(args: Array[String]): Unit = {
     val financialContractTable = TableQuery[FinancialContractTable]
     val incomeTable = TableQuery[IncomeTable]
+    val incomeDiscountTable = TableQuery[IncomeDiscountTable]
+
     println("Seeding database with contracts. User id = " + userId)
 
     val financialContracts = List(randomFinancialContract, randomFinancialContract)
@@ -32,12 +36,21 @@ object SeedDatabase {
       randomIncome(fc),
     ))
 
+    val discounts = incomes.flatMap(income => List(
+      randomIncomeDiscount(income),
+      randomIncomeDiscount(income),
+    ))
+
     Await.result(db.run(DBIO.seq(
       financialContracts.map(fc => financialContractTable += fc):_*
     )), 10 seconds)
 
     Await.result(db.run(DBIO.seq(
       incomes.map(income => incomeTable += income):_*
+    )), 10 seconds)
+
+    Await.result(db.run(DBIO.seq(
+      discounts.map(discount => incomeDiscountTable += discount):_*
     )), 10 seconds)
   }
 
@@ -71,6 +84,22 @@ object SeedDatabase {
       currency = Currency.BRL.toString,
       income_type = IncomeType.SALARY.toString,
       occurrences = "5 *",
+      created_at = now,
+      modified_at = now,
+    )
+  }
+
+  private def randomIncomeDiscount(fc: IncomeDbRow): IncomeDiscountDbRow = {
+    val id = randomUUID().toString
+    println(s"Income Discount Id: $id")
+    IncomeDiscountDbRow(
+      id,
+      income_id = fc.id,
+      name = "A bad discount",
+      value_in_cents = 19313,
+      currency = Currency.BRL.toString,
+      discount_type = IncomeDiscountType.INSS.toString,
+      aliquot = 0.12,
       created_at = now,
       modified_at = now,
     )

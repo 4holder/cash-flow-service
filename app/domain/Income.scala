@@ -15,7 +15,9 @@ case class Income(
   occurrences: Occurrences,
   createdAt: DateTime,
   modifiedAt: DateTime,
-)
+) {
+  def yearlyGrossAmount = amount * occurrences.months.length
+}
 
 object Income {
   case object IncomeType extends Enumeration {

@@ -12,10 +12,8 @@ object User {
   )
 
   object UserPayload {
-    trait ReadsAndWrites {
-      implicit val userPayloadWrites: Writes[UserPayload] = Json.writes[UserPayload]
-      implicit val userPayloadReads: Reads[UserPayload] = Json.reads[UserPayload]
-    }
+    implicit val userPayloadWrites: Writes[UserPayload] = Json.writes[UserPayload]
+    implicit val userPayloadReads: Reads[UserPayload] = Json.reads[UserPayload]
 
     implicit def fromUser(user: User): UserPayload = {
       UserPayload(

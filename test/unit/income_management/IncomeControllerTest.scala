@@ -34,39 +34,6 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
   )
 
   "Income Controller" should {
-    "list incomes" in {
-      val request = FakeRequest().withHeaders(Headers(("Authorization", jwtToken)))
-
-      val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
-      val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
-      // Intellij is an error in next line. It is a highlight error.
-      when(auth.authorize[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
-        .thenReturn(Future.successful(true))
-
-      when(repository.allByFinancialContractId(financialContract.id, 1, 2))
-        .thenReturn(Future.successful(
-          Seq(
-            firstIncome,
-            secondIncome
-          )
-        ))
-
-      val result = controller.listIncomes(financialContract.id, 1, 2).apply(request)
-
-      contentType(result) mustBe Some("application/json")
-      status(result) mustEqual OK
-      val jsonContent = contentAsJson(result)
-
-      jsonContent.head("id").as[String] mustEqual firstIncome.id
-      jsonContent.last("id").as[String] mustEqual secondIncome.id
-      (jsonContent.head \ "name").as[String] mustEqual firstIncome.name
-      (jsonContent.last \ "name").as[String] mustEqual secondIncome.name
-      (jsonContent.head \ "amount" \ "valueInCents").as[Long] mustEqual firstIncome.amount.valueInCents
-      (jsonContent.last \ "amount" \ "valueInCents").as[Long] mustEqual secondIncome.amount.valueInCents
-      (jsonContent.head \ "amount" \ "currency").as[String] mustEqual firstIncome.amount.currency.toString
-      (jsonContent.last \ "amount" \ "currency").as[String] mustEqual secondIncome.amount.currency.toString
-    }
-
     "register new income" in {
       val firstIncomePayload = IncomePayloadBuilder(name = "first income").build
       val secondIncomePayload = IncomePayloadBuilder(name = "second income").build
@@ -103,8 +70,8 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
       val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
       val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
-      // Intellij is an error in next line. It is a highlight error.
-      when(auth.authorize[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
+      // Intellij is point an error in next line. It is a highlight error.
+      when(auth.authorizeParent[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(service.register(eqTo(financialContract.id), eqTo(firstIncomePayload), any[String], any[DateTime]))
         .thenReturn(Future.successful(firstIncome))
@@ -137,13 +104,13 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
         .withHeaders(Headers(("Authorization", jwtToken)))
 
       val income = IncomeBuilder().build
-      // Intellij is an error in next line. It is a highlight error.
-      when(auth.authorize[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
+      // Intellij is point an error in next line. It is a highlight error.
+      when(auth.authorizeObject[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(repository.delete(eqTo(income.id)))
         .thenReturn(Future.successful(1))
 
-      val result = controller.deleteIncome(financialContract.id, income.id).apply(request)
+      val result = controller.deleteIncome(income.id).apply(request)
 
       contentType(result) mustBe None
       status(result) mustEqual NO_CONTENT
@@ -171,13 +138,14 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
       val income = IncomeBuilder().build
 
-      when(auth.authorize[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
+      // Intellij is point an error in next line. It is a highlight error.
+      when(auth.authorizeObject[Any](any[String])(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
       when(repository.getById(income.id)).thenReturn(Future.successful(Some(income)))
       when(repository.update(eqTo(income.id), eqTo(firstIncomePayload), any[DateTime]))
         .thenReturn(Future.successful(1))
 
-      val result = controller.updateIncome(financialContract.id, income.id).apply(request)
+      val result = controller.updateIncome(income.id).apply(request)
 
       contentType(result) mustBe Some("application/json")
       status(result) mustEqual OK

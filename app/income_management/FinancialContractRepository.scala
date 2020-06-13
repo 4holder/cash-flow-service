@@ -43,15 +43,6 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
     ).map(r => r.headOption.map(fc => fc: FinancialContract))
   }
 
-  def belongsToUser(id: String, user: User): Future[Boolean] = {
-    db.run(
-      financialContracts
-        .filter(r => r.id === id && r.user_id === user.id)
-        .length
-        .result
-    ).map(_ > 0)
-  }
-
   def register(newFinancialContracts: FinancialContract*): Future[Unit] = {
     db.run(
       DBIO.seq(
@@ -96,6 +87,15 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
         .filter(f => f.id === id)
         .delete
     )
+  }
+
+  def belongsToUser(id: String, user: User): Future[Boolean] = {
+    db.run(
+      financialContracts
+        .filter(r => r.id === id && r.user_id === user.id)
+        .length
+        .result
+    ).map(_ > 0)
   }
 }
 

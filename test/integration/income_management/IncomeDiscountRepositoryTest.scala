@@ -2,38 +2,41 @@ package integration.income_management
 
 import domain.IncomeDiscount.IncomeDiscountType
 import domain.{Amount, Currency, FinancialContract, IncomeDiscount}
-import income_management.IncomeDiscountRepository
+import income_management.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders._
 import utils.{DBUtils, IntegrationSpec}
 
 class IncomeDiscountRepositoryTest extends IntegrationSpec  {
-  private val repository = new IncomeDiscountRepository(dbConfig)
+  private val financialContractRepository = new FinancialContractRepository(dbConfig)
+  private val incomeRepository = new IncomeRepository(dbConfig, financialContractRepository)
+  private val repository = new IncomeDiscountRepository(dbConfig, incomeRepository)
   private val user = UserBuilder().build
   private val now = DateTime.now
   private val financialContract: FinancialContract = FinancialContractBuilder(user = user).build
   private val noiseFinancialContract = FinancialContractBuilder().build
-  private val income = IncomeBuilder(financialContractId = financialContract.id).build
+  private val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
+  private val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
   private val noiseIncome = IncomeBuilder(financialContractId = financialContract.id).build
   private val firstIncomeDiscount = IncomeDiscountBuilder(
-    incomeId = income.id,
+    incomeId = firstIncome.id,
     createdAt = now.minusDays(1),
   ).build
   private val secondIncomeDiscount = IncomeDiscountBuilder(
-    incomeId = income.id,
+    incomeId = firstIncome.id,
     createdAt = now.minusDays(2),
   ).build
   private val thirdIncomeDiscount = IncomeDiscountBuilder(
-    incomeId = income.id,
+    incomeId = secondIncome.id,
     createdAt = now.minusDays(3),
   ).build
   private val forthIncomeDiscount = IncomeDiscountBuilder(
-    incomeId = income.id,
+    incomeId = firstIncome.id,
     createdAt = now.minusDays(4),
   ).build
   private val fifthIncomeDiscount = IncomeDiscountBuilder(
-    incomeId = income.id,
+    incomeId = secondIncome.id,
     createdAt = now.minusDays(5),
   ).build
   private val firstIncomeDiscountNoise = IncomeDiscountBuilder(
@@ -44,7 +47,7 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
   ).build
 
   private val financialContractList = List(financialContract, noiseFinancialContract)
-  private lazy val incomeList = List(income, noiseIncome)
+  private lazy val incomeList = List(firstIncome, noiseIncome, secondIncome)
   private lazy val incomeDiscountList = List(
     firstIncomeDiscount,
     firstIncomeDiscountNoise,
@@ -56,13 +59,12 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
   )
 
   behavior of "listing income discounts"
-  it should """return all income discounts ordered by creation date descending
-              |when on first page with size 5 and there are 5 incomes""".stripMargin in {
+  it should "return all income discounts of first and second financial contracts" in {
     for {
       _ <- DBUtils.insertFinancialContracts(financialContractList)
       _ <- DBUtils.insertIncomes(incomeList)
       _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
-      incomeDiscounts <- repository.allByIncomeId(income.id, 1, 5)
+      incomeDiscounts <- repository.allByIncomeIds(List(firstIncome.id, secondIncome.id))
     } yield {
       incomeDiscounts should have length 5
 
@@ -73,54 +75,6 @@ class IncomeDiscountRepositoryTest extends IntegrationSpec  {
         forthIncomeDiscount,
         fifthIncomeDiscount,
       )
-    }
-  }
-
-  it should """return the first 2 income discounts ordered by creation date
-              |when on first page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
-      incomeDiscounts <- repository.allByIncomeId(income.id, 1, 2)
-    } yield {
-      incomeDiscounts should have length 2
-
-      incomeDiscounts.map(income => income: IncomeDiscount) shouldEqual List(
-        firstIncomeDiscount,
-        secondIncomeDiscount,
-      )
-    }
-  }
-
-  it should """return 2 income discounts ordered by creation date
-              |when on second page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
-      incomeDiscounts <- repository.allByIncomeId(income.id, 2, 2)
-    } yield {
-      incomeDiscounts should have length 2
-
-      incomeDiscounts.map(income => income: IncomeDiscount) shouldEqual List(
-        thirdIncomeDiscount,
-        forthIncomeDiscount,
-      )
-    }
-  }
-
-  it should """return an income discount ordered by creation date
-              |when on last page with size 2 and there are 5 incomes""".stripMargin in {
-    for {
-      _ <- DBUtils.insertFinancialContracts(financialContractList)
-      _ <- DBUtils.insertIncomes(incomeList)
-      _ <- DBUtils.insertIncomeDiscounts(incomeDiscountList)
-      incomeDiscounts <- repository.allByIncomeId(income.id, 3, 2)
-    } yield {
-      incomeDiscounts should have length 1
-
-      incomeDiscounts.map(income => income: IncomeDiscount) shouldEqual List(fifthIncomeDiscount)
     }
   }
 

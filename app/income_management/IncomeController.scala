@@ -23,20 +23,8 @@ class IncomeController @Inject()(
   service: RegisterIncomeService,
   auth: AuthorizationHelper
 )(implicit repository: IncomeRepository, ec: ExecutionContext) extends AbstractController(cc) with Logging {
-  def listIncomes(financialContractId: String,
-                  page: Int,
-                  pageSize: Int): Action[AnyContent] = Action.async { implicit request =>
-    auth.authorize(financialContractId)
-      .flatMap { _ =>
-        repository
-          .allByFinancialContractId(financialContractId, page, pageSize)
-          .map(_.map(fc => fc: IncomeResponse))
-          .map(incomes => Ok(toJson(incomes)))
-      } recover treatFailure
-  }
-
   def registerNewIncome(financialContractId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorize(financialContractId) flatMap { _ => {
+    auth.authorizeParent(financialContractId) flatMap { _ => {
       request.body.validate[List[IncomePayload]].asEither match {
         case Right(input) =>
           Future.sequence(
@@ -51,14 +39,14 @@ class IncomeController @Inject()(
     }} recover treatFailure
   }
 
-  def updateIncome(financialContractId: String, id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorize(financialContractId) flatMap { _ => {
+  def updateIncome(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    auth.authorizeObject(id) flatMap { _ => {
       request.body.validate[IncomePayload].asEither match {
         case Right(input) =>
           repository
             .update(id, input)
             .flatMap(_ => repository.getById(id))
-            .map(_.map(maybeIncome => maybeIncome:IncomeResponse))
+            .map(_.map(maybeIncome => maybeIncome: IncomeResponse))
             .map(income => Ok(toJson(income)))
         case Left(e) =>
           badIncomePayload(e)
@@ -66,10 +54,10 @@ class IncomeController @Inject()(
     }}
   }
 
-  def deleteIncome(financialContractId: String, id: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteIncome(id: String): Action[AnyContent] = Action.async { implicit request =>
     (
       for {
-        _ <- auth.authorize(id)
+        _ <- auth.authorizeObject(id)
         _ <- repository.delete(id)
       } yield NoContent
     ) recover treatFailure
