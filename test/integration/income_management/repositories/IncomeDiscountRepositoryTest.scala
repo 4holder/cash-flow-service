@@ -1,8 +1,8 @@
-package integration.income_management
+package integration.income_management.repositories
 
 import domain.IncomeDiscount.IncomeDiscountType
 import domain.{Amount, Currency, FinancialContract, IncomeDiscount}
-import income_management.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
+import income_management.repositories.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
 import utils.builders._

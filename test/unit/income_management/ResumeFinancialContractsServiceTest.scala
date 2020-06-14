@@ -2,7 +2,8 @@ package unit.income_management
 
 import domain.Income.IncomeType
 import domain.{Amount, Occurrences}
-import income_management.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository, ResumeFinancialContractsService}
+import income_management.repositories.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
+import income_management.ResumeFinancialContractsService
 import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import utils.AsyncUnitSpec

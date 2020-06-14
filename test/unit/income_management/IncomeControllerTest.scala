@@ -1,7 +1,8 @@
 package unit.income_management
 
 import authorization.AuthorizationHelper
-import income_management.{IncomeController, IncomeRepository, RegisterIncomeService}
+import income_management.repositories.IncomeRepository
+import income_management.{IncomeController, RegisterIncomeService}
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}

@@ -7,6 +7,7 @@ import domain.Income
 import domain.Income.IncomePayload
 import domain.Occurrences.OccurrencesPayload
 import income_management.IncomeController.IncomeResponse
+import income_management.repositories.IncomeRepository
 import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject

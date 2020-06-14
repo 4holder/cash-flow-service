@@ -26,10 +26,6 @@ case class Amount(
 
   def -(amount: Amount): Try[Amount] = subtract(amount)
 
-  def sum(amount: Try[Amount]): Try[Amount] = {
-    amount.flatMap(_ + this)
-  }
-
   def sum(amounts: Amount*): Try[Amount] = {
     if(amounts.forall(_.currency.equals(this.currency))){
       val amountToSum = amounts.map(_.valueInCents).sum
@@ -41,7 +37,6 @@ case class Amount(
   }
 
   def +(amount: Amount): Try[Amount] = sum(amount)
-  def +(amount: Try[Amount]): Try[Amount] = sum(amount)
 
   def isLessThan(amount: Amount): Try[Boolean] = {
     if (this.currency.equals(amount.currency)) {

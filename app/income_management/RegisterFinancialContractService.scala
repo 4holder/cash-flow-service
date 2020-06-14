@@ -5,6 +5,7 @@ import java.util.UUID.randomUUID
 import com.google.inject.{Inject, Singleton}
 import domain.FinancialContract.{ContractType, FinancialContractPayload}
 import domain.{FinancialContract, User}
+import income_management.repositories.FinancialContractRepository
 import org.joda.time.DateTime
 
 import scala.concurrent.{ExecutionContext, Future}

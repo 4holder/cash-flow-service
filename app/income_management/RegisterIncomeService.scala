@@ -5,7 +5,9 @@ import java.util.UUID.randomUUID
 import com.google.inject.{Inject, Singleton}
 import domain.Income
 import domain.Income.{IncomePayload, IncomeType}
+import income_management.repositories.IncomeRepository
 import org.joda.time.DateTime
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

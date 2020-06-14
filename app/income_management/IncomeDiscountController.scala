@@ -4,6 +4,7 @@ import authorization.AuthorizationHelper
 import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
 import domain.Amount.AmountPayload
 import domain.IncomeDiscount
+import income_management.repositories.IncomeDiscountRepository
 import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
@@ -11,6 +12,7 @@ import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc._
+
 import scala.concurrent.ExecutionContext
 
 class IncomeDiscountController @Inject()(

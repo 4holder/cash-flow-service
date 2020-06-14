@@ -5,9 +5,10 @@ import authorization.exceptions.{AuthorizationException, PermissionDeniedExcepti
 import domain.Amount.AmountPayload
 import domain.FinancialContract.FinancialContractPayload
 import domain.User.UserPayload
-import domain.{FinancialContract, User}
-import income_management.FinancialContractController.{FinancialContractResponse, FinancialContractResumeResponse, adaptToResponse}
+import domain.{Amount, FinancialContract, User}
+import income_management.FinancialMovementsProjectionService.FinancialMovementsProjection
 import income_management.ResumeFinancialContractsService.FinancialContractResume
+import income_management.repositories.FinancialContractRepository
 import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
@@ -16,6 +17,7 @@ import play.api.Logging
 import play.api.libs.json.Json.toJson
 import play.api.libs.json.{JsValue, Json, OWrites}
 import play.api.mvc._
+import income_management.FinancialContractController._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -23,13 +25,20 @@ class FinancialContractController @Inject()(
   cc: ControllerComponents,
   registerService: RegisterFinancialContractService,
   listService: ResumeFinancialContractsService,
+  projectionService: FinancialMovementsProjectionService,
   auth: AuthorizationHelper
 )(implicit ec: ExecutionContext, repository: FinancialContractRepository)
   extends AbstractController(cc) with JodaDateTime with Logging {
-  implicit val financialContractResumeResponse: OWrites[FinancialContractResumeResponse] = Json.writes[FinancialContractResumeResponse]
-  implicit val financialContractResponse: OWrites[FinancialContractResponse] = Json.writes[FinancialContractResponse]
+  implicit val financialContractResumeResponse: OWrites[FinancialContractResumeResponse] =
+    Json.writes[FinancialContractResumeResponse]
+  implicit val financialContractResponse: OWrites[FinancialContractResponse] =
+    Json.writes[FinancialContractResponse]
+  implicit val projectionPointResponse: OWrites[ProjectionPointResponse] =
+    Json.writes[ProjectionPointResponse]
+  implicit val financialMovementsProjectionsProjection: OWrites[FinancialMovementsProjectionResponse] =
+    Json.writes[FinancialMovementsProjectionResponse]
 
-  def listFinancialContracts(page: Int, pageSize: Int): Action[AnyContent] =
+  def listIncomeResumes(page: Int, pageSize: Int): Action[AnyContent] =
     Action.async { implicit request =>
       auth.isLoggedIn.flatMap { user: User =>
       listService
@@ -39,7 +48,18 @@ class FinancialContractController @Inject()(
       } recover treatFailure
     }
 
-  def getFinancialContractById(id: String): Action[AnyContent] = Action.async { implicit request =>
+  def yearlyIncomeProjections(page: Int, pageSize: Int): Action[AnyContent] = {
+    Action.async { implicit request =>
+      auth.isLoggedIn.flatMap { user: User =>
+        projectionService
+          .project(user, page, pageSize)
+          .map(adaptToProjectionResponse)
+          .map(projections => Ok(toJson(projections)))
+      } recover treatFailure
+    }
+  }
+
+  def getIncomeDetails(id: String): Action[AnyContent] = Action.async { implicit request =>
     auth.authorizeObject(id).flatMap { _ =>
       repository
         .getById(id)
@@ -119,6 +139,17 @@ object FinancialContractController {
    yearlyIncomeDiscount: Option[AmountPayload]
   )
 
+  sealed case class ProjectionPointResponse(
+    amount: Amount,
+    dateTime: DateTime
+  )
+
+  sealed case class FinancialMovementsProjectionResponse(
+    label: String,
+    currency: String,
+    financialMovements: Seq[ProjectionPointResponse],
+  )
+
   implicit def adaptToResponse(financialContract: FinancialContract): FinancialContractResponse = {
     FinancialContractResponse(
       id = financialContract.id,
@@ -144,5 +175,20 @@ object FinancialContractController {
         yearlyIncomeDiscount = resume.yearlyIncomeDiscount.map(d => d: AmountPayload)
       )
     )
+  }
+
+  def adaptToProjectionResponse(projections: Seq[FinancialMovementsProjection]): Seq[FinancialMovementsProjectionResponse] = {
+    projections.map { projection =>
+      FinancialMovementsProjectionResponse(
+        projection.label,
+        currency = projection.currency.toString,
+        financialMovements = projection.financialMovements.map(fm =>
+          ProjectionPointResponse(
+            fm.amount,
+            dateTime = fm.dateTime
+          )
+        )
+      )
+    }
   }
 }

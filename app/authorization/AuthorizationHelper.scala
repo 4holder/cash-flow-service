@@ -3,7 +3,7 @@ package authorization
 import authorization.exceptions.{InvalidUserTokenException, PermissionDeniedException, UserTokenMissingException}
 import com.google.inject.{Inject, Singleton}
 import domain.{Repository, User}
-import income_management.FinancialContractRepository
+import income_management.repositories.FinancialContractRepository
 import pdi.jwt.{Jwt, JwtOptions}
 import play.api.Logging
 import play.api.libs.json.Json

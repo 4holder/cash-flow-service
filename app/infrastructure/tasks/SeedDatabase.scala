@@ -7,9 +7,9 @@ import domain.Currency
 import domain.FinancialContract.ContractType
 import domain.Income.IncomeType
 import domain.IncomeDiscount.IncomeDiscountType
-import income_management.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
-import income_management.IncomeDiscountRepository.{IncomeDiscountDbRow, IncomeDiscountTable}
-import income_management.IncomeRepository.{IncomeDbRow, IncomeTable}
+import income_management.repositories.FinancialContractRepository.{FinancialContractDbRow, FinancialContractTable}
+import income_management.repositories.IncomeDiscountRepository.{IncomeDiscountDbRow, IncomeDiscountTable}
+import income_management.repositories.IncomeRepository.{IncomeDbRow, IncomeTable}
 import infrastructure.tasks.DatabaseConnection._
 import org.joda.time.DateTime
 import slick.dbio.DBIO
@@ -19,7 +19,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object SeedDatabase {
-  private val userId = "local-user-id"
+  private val userId = "google-oauth2|110861699425085178289"
   private val now = new Timestamp(DateTime.now.getMillis)
 
   def main(args: Array[String]): Unit = {

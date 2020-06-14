@@ -1,17 +1,17 @@
-package income_management
+package income_management.repositories
 
 import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
 import domain.Income.{IncomePayload, IncomeType}
 import domain._
-import income_management.FinancialContractRepository.financialContracts
-import income_management.IncomeRepository.incomes
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{TableQuery, Tag}
+import FinancialContractRepository.financialContracts
+import IncomeRepository.incomes
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

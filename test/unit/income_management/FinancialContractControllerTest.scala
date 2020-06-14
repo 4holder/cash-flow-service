@@ -5,7 +5,8 @@ import akka.stream.ActorMaterializer
 import authorization.AuthorizationHelper
 import domain.FinancialContract.FinancialContractPayload
 import domain.User
-import income_management.{FinancialContractController, FinancialContractRepository, RegisterFinancialContractService, ResumeFinancialContractsService}
+import income_management.repositories.FinancialContractRepository
+import income_management.{FinancialContractController, FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
 import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
@@ -25,6 +26,7 @@ import scala.concurrent.Future
 class FinancialContractControllerTest extends PlaySpec with Results with MockitoSugar {
   private val registerService = mock[RegisterFinancialContractService]
   private val listService = mock[ResumeFinancialContractsService]
+  private val projectionService = mock[FinancialMovementsProjectionService]
   implicit private val repository = mock[FinancialContractRepository]
   private val auth = mock[AuthorizationHelper]
 
@@ -39,6 +41,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     Helpers.stubControllerComponents(),
     registerService,
     listService,
+    projectionService,
     auth
   )
 
@@ -52,7 +55,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     when(listService.list(user, 1, 2))
       .thenReturn(Future.successful(Seq(firstResume, secondResume)))
 
-    val result = controller.listFinancialContracts(1, 2).apply(request)
+    val result = controller.listIncomeResumes(1, 2).apply(request)
 
     contentType(result) mustBe Some("application/json")
     status(result) mustEqual  OK

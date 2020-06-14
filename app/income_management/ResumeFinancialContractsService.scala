@@ -3,6 +3,8 @@ package income_management
 import com.google.inject.{Inject, Singleton}
 import domain._
 import income_management.ResumeFinancialContractsService.FinancialContractResume
+import income_management.repositories.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
