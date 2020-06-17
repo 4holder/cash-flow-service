@@ -101,7 +101,7 @@ class FinancialMovementsProjectionService @Inject()(
   private def beginningOfTheMonth(month: Int)(implicit now: DateTime): DateTime =
     now
       .withMonthOfYear(month)
-      .withDayOfMonth(1)
+      .withDayOfMonth(5)
       .withTimeAtStartOfDay()
 }
 
