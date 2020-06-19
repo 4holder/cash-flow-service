@@ -3,8 +3,8 @@ package unit.income_management
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import authorization.AuthorizationHelper
-import domain.FinancialContract.FinancialContractPayload
 import domain.User
+import income_management.FinancialContractController.FinancialContractRegisterInput
 import income_management.repositories.FinancialContractRepository
 import income_management.{FinancialContractController, FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
 import infrastructure.reads_and_writes.JodaDateTime
@@ -18,8 +18,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, FinancialContractPayloadBuilder, FinancialContractResumeBuilder}
-
+import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, FinancialContractResumeBuilder}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -88,8 +87,8 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     val financialContract = FinancialContractBuilder(user = user).build
 
     when(auth.isLoggedIn[Any](any[Request[Any]])).thenReturn(Future.successful(user))
-    when(registerService.register(any[FinancialContractPayload], any[String], any[DateTime])(any[User]))
-      .thenReturn(Future.successful(financialContract))
+    when(registerService.register(any[FinancialContractRegisterInput])(any[User], any[DateTime]))
+      .thenReturn(Future.successful((financialContract, null)))
 
     val result = controller.registerNewFinancialContract().apply(request)
 
@@ -106,7 +105,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
   }
 
   "update an user contract" in {
-    val payload = FinancialContractPayloadBuilder().build
+    val payload = FinancialContractRegisterInputBuilder().build
     val body = s"""{
      |	"name":"${payload.name}",
      |	"contractType": "${payload.contractType}",
@@ -125,7 +124,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
 
     val financialContract = FinancialContractBuilder(user = user).build
 
-    // Intellij is an error in next line. It is a highlight error.
+    // Intellij has an error in next line. It is only a highlight error.
     when(auth.authorizeObject[Any](any[String])(any[Request[Any]], any[FinancialContractRepository]))
       .thenReturn(Future.successful(true))
     when(repository.getById(financialContract.id))
@@ -155,7 +154,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
       .withHeaders(Headers(("Authorization", Jwt.encode(jwtBody))))
 
     val financialContract = FinancialContractBuilder(user = user).build
-    // Intellij is an error in next line. It is a highlight error.
+    // Intellij has an error in next line. It is only a highlight error.
     when(auth.authorizeObject[Any](any[String])(any[Request[Any]], any[FinancialContractRepository]))
       .thenReturn(Future.successful(true))
     when(repository.delete(eqTo(financialContract.id)))

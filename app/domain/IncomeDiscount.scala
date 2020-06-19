@@ -11,7 +11,6 @@ case class IncomeDiscount(
   name: String,
   discountType: IncomeDiscountType.Value,
   amount: Amount,
-  aliquot: Double,
   createdAt: DateTime,
   modifiedAt: DateTime,
 )
@@ -26,7 +25,6 @@ object IncomeDiscount {
     name: String,
     discountType: String,
     amount: AmountPayload,
-    aliquot: Double
   )
 
   object IncomeDiscountPayload {
@@ -38,7 +36,6 @@ object IncomeDiscount {
         name = discount.name,
         discountType = discount.discountType.toString,
         amount = discount.amount,
-        aliquot = discount.aliquot
       )
     }
   }

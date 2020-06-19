@@ -13,7 +13,6 @@ object CalculateINSSDiscount {
         "INSS",
         IncomeDiscountType.INSS.toString,
         Amount.ZERO_REAIS,
-        0.0
       ))
     }
 
@@ -22,13 +21,11 @@ object CalculateINSSDiscount {
     discountsTryable
       .map(discounts => {
         val discountInCents = discounts.map(_.valueInCents).sum
-        val percentage = grossSalary.percentsFor(discountInCents)
 
         IncomeDiscountPayload(
           "INSS",
           IncomeDiscountType.INSS.toString,
           Amount(discountInCents, grossSalary.currency),
-          percentage
         )
       })
   }

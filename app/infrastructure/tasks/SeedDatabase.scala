@@ -19,7 +19,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object SeedDatabase {
-  private val userId = "google-oauth2|110861699425085178289"
+  private val userId = "local-user-id"
   private val now = new Timestamp(DateTime.now.getMillis)
 
   def main(args: Array[String]): Unit = {
@@ -99,7 +99,6 @@ object SeedDatabase {
       value_in_cents = 19313,
       currency = Currency.BRL.toString,
       discount_type = IncomeDiscountType.INSS.toString,
-      aliquot = 0.12,
       created_at = now,
       modified_at = now,
     )

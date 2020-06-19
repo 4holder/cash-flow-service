@@ -3,9 +3,15 @@ package income_management
 import authorization.AuthorizationHelper
 import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
 import domain.Amount.AmountPayload
-import domain.FinancialContract.FinancialContractPayload
+import domain.Occurrences.OccurrencesPayload
 import domain.User.UserPayload
-import domain.{Amount, FinancialContract, User}
+import domain.{Amount, FinancialContract, Income, IncomeDiscount, User}
+import income_management.FinancialContractController.{
+  FinancialContractRegisterInput,
+  FinancialContractResponse,
+  adaptToResponse,
+  adaptToProjectionResponse,
+}
 import income_management.FinancialMovementsProjectionService.FinancialMovementsProjection
 import income_management.ResumeFinancialContractsService.FinancialContractResume
 import income_management.repositories.FinancialContractRepository
@@ -15,9 +21,8 @@ import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsValue, Json, OWrites}
+import play.api.libs.json.{JsValue, Json, OWrites, Reads, Writes}
 import play.api.mvc._
-import income_management.FinancialContractController._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,14 +34,6 @@ class FinancialContractController @Inject()(
   auth: AuthorizationHelper
 )(implicit ec: ExecutionContext, repository: FinancialContractRepository)
   extends AbstractController(cc) with JodaDateTime with Logging {
-  implicit val financialContractResumeResponse: OWrites[FinancialContractResumeResponse] =
-    Json.writes[FinancialContractResumeResponse]
-  implicit val financialContractResponse: OWrites[FinancialContractResponse] =
-    Json.writes[FinancialContractResponse]
-  implicit val projectionPointResponse: OWrites[ProjectionPointResponse] =
-    Json.writes[ProjectionPointResponse]
-  implicit val financialMovementsProjectionsProjection: OWrites[FinancialMovementsProjectionResponse] =
-    Json.writes[FinancialMovementsProjectionResponse]
 
   def listIncomeResumes(page: Int, pageSize: Int): Action[AnyContent] =
     Action.async { implicit request =>
@@ -70,11 +67,11 @@ class FinancialContractController @Inject()(
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.isLoggedIn flatMap { implicit user: User => {
-      request.body.validate[FinancialContractPayload].asOpt match {
+      request.body.validate[FinancialContractRegisterInput].asOpt match {
         case Some(input) =>
           registerService
             .register(input)
-            .map(fc => fc: FinancialContractResponse)
+            .map(adaptToResponse)
             .map(financialContract => Ok(toJson(financialContract)))
         case _ => badFinancialInputPayload
       }
@@ -83,7 +80,7 @@ class FinancialContractController @Inject()(
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.authorizeObject(id).flatMap { _ => {
-      request.body.validate[FinancialContractPayload].asOpt match {
+      request.body.validate[FinancialContractRegisterInput].asOpt match {
         case Some(input) =>
           repository
             .update(id, input)
@@ -117,7 +114,85 @@ class FinancialContractController @Inject()(
   }
 }
 
-object FinancialContractController {
+object FinancialContractController extends JodaDateTime {
+  implicit val financialContractResumeResponse: OWrites[FinancialContractResumeResponse] =
+    Json.writes[FinancialContractResumeResponse]
+  implicit val financialContractResponse: OWrites[FinancialContractResponse] =
+    Json.writes[FinancialContractResponse]
+  implicit val projectionPointResponse: OWrites[ProjectionPointResponse] =
+    Json.writes[ProjectionPointResponse]
+  implicit val financialMovementsProjectionsProjection: OWrites[FinancialMovementsProjectionResponse] =
+    Json.writes[FinancialMovementsProjectionResponse]
+  implicit val incomeRegisterDiscountInput: Reads[IncomeRegisterDiscountInput] =
+    Json.reads[IncomeRegisterDiscountInput]
+  implicit val incomeRegisterInput: Reads[IncomeRegisterInput] =
+    Json.reads[IncomeRegisterInput]
+  implicit val financialContractRegisterInput: Reads[FinancialContractRegisterInput] =
+    Json.reads[FinancialContractRegisterInput]
+  implicit val incomeRegisterDiscountResponse: Writes[IncomeRegisterDiscountResponse] =
+    Json.writes[IncomeRegisterDiscountResponse]
+  implicit val incomeRegisterResponse: Writes[IncomeRegisterResponse] =
+    Json.writes[IncomeRegisterResponse]
+  implicit val financialContractRegisterResponse: Writes[FinancialContractRegisterResponse] =
+    Json.writes[FinancialContractRegisterResponse]
+
+  sealed case class IncomeRegisterDiscountInput(
+    name: String,
+    amount: AmountPayload,
+    discountType: String,
+  )
+
+  sealed case class IncomeRegisterInput(
+    name: String,
+    amount: AmountPayload,
+    incomeType: String,
+    occurrences: OccurrencesPayload,
+    discounts: List[IncomeRegisterDiscountInput],
+  )
+
+  sealed case class FinancialContractRegisterInput(
+    name: String,
+    contractType: String,
+    grossAmount: AmountPayload,
+    companyCnpj: Option[String],
+    startDate: DateTime,
+    endDate: Option[DateTime],
+    incomes: List[IncomeRegisterInput],
+  )
+
+  sealed case class IncomeRegisterDiscountResponse(
+    id: String,
+    name: String,
+    amount: AmountPayload,
+    discountType: String,
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
+  sealed case class IncomeRegisterResponse(
+    id: String,
+    name: String,
+    amount: AmountPayload,
+    incomeType: String,
+    occurrences: OccurrencesPayload,
+    discounts: Seq[IncomeRegisterDiscountResponse],
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
+  sealed case class FinancialContractRegisterResponse(
+    id: String,
+    name: String,
+    contractType: String,
+    grossAmount: AmountPayload,
+    companyCnpj: Option[String],
+    startDate: DateTime,
+    endDate: Option[DateTime],
+    incomes: Seq[IncomeRegisterResponse],
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
   sealed case class FinancialContractResponse(
     id: String,
     user: UserPayload,
@@ -190,5 +265,41 @@ object FinancialContractController {
         )
       )
     }
+  }
+
+  def adaptToResponse(fullContract: (FinancialContract, Seq[(Income, Seq[IncomeDiscount])])): FinancialContractRegisterResponse = {
+    val contract = fullContract._1
+
+    FinancialContractRegisterResponse(
+      id = contract.id,
+      name = contract.name,
+      contractType = contract.contractType.toString,
+      grossAmount = contract.grossAmount,
+      companyCnpj = contract.companyCnpj,
+      startDate = contract.startDate,
+      endDate = contract.endDate,
+      incomes = fullContract._2.map {
+        case (income, discounts) =>
+          IncomeRegisterResponse(
+            id = income.id,
+            name = income.name,
+            amount = income.amount,
+            incomeType = income.incomeType.toString,
+            occurrences = income.occurrences,
+            discounts = discounts.map(discount => IncomeRegisterDiscountResponse(
+              id = discount.id,
+              name = discount.name,
+              amount = discount.amount,
+              discountType = discount.discountType.toString,
+              createdAt = discount.createdAt,
+              modifiedAt = discount.modifiedAt,
+            )),
+            createdAt = income.createdAt,
+            modifiedAt = income.modifiedAt,
+          )
+      },
+      createdAt = contract.createdAt,
+      modifiedAt = contract.modifiedAt,
+    )
   }
 }

@@ -1,47 +1,43 @@
 package unit.income_management
 
-import domain.User
-import income_management.RegisterFinancialContractService
+import domain.{FinancialContract, User}
+import income_management.FinancialContractController.IncomeRegisterInput
+import income_management.{RegisterFinancialContractService, RegisterIncomeService}
 import income_management.repositories.FinancialContractRepository
 import org.joda.time.DateTime
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
-import utils.builders.{FinancialContractBuilder, FinancialContractInputBuilder, UserBuilder}
+import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, UserBuilder}
+import org.mockito.Matchers.{any, eq => eqTo}
 
 import scala.concurrent.Future
 
 class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers with MockitoSugar{
-  private implicit val user: User = UserBuilder().build
+  private val user: User = UserBuilder().build
+  private val now = DateTime.now
 
   private val repository = mock[FinancialContractRepository]
-  private val service = new RegisterFinancialContractService(repository)
+  private val registerIncomeService = mock[RegisterIncomeService]
+  private val registerFinancialContractService =
+    new RegisterFinancialContractService(repository, registerIncomeService)
 
   behavior of "register new financial contract"
   it should "register a valid financial contract" in {
-    val now = DateTime.now
-    val expectedFinancialContract = FinancialContractBuilder(
-      user = user,
-      createdAt = now,
-      modifiedAt = now
-    ).build
+    val financialContractInput = FinancialContractRegisterInputBuilder().build
 
-    val financialContractInput = FinancialContractInputBuilder(
-      name = expectedFinancialContract.name,
-      contractType = expectedFinancialContract.contractType,
-      expectedFinancialContract.grossAmount,
-      companyCnpj = expectedFinancialContract.companyCnpj,
-      startDate = expectedFinancialContract.startDate,
-      endDate = expectedFinancialContract.endDate
-    ).build
+    when(repository.register(any[FinancialContract]))
+        .thenReturn(Future{})
+    when(registerIncomeService.addIncomesToFinancialContract(
+      any[String],
+      any[IncomeRegisterInput],
+    )(eqTo(now)),
+    ).thenReturn(Future{null})
 
-    when(repository.register(expectedFinancialContract))
-        .thenReturn(Future {})
-
-    service
-      .register(financialContractInput, expectedFinancialContract.id, now)
+    registerFinancialContractService
+      .register(financialContractInput)(user, now)
       .map(financialContract => {
-        financialContract shouldEqual expectedFinancialContract
+        financialContract._1.name shouldEqual financialContractInput.name
       })
   }
 }

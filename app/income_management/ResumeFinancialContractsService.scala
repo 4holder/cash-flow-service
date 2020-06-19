@@ -28,9 +28,9 @@ class ResumeFinancialContractsService @Inject()(
   }
 
   private def buildResume(
-    financialContract: FinancialContract,
-    incomes: Seq[Income],
-    discounts: Seq[IncomeDiscount]
+                           financialContract: FinancialContract,
+                           incomes: Seq[Income],
+                           discounts: Seq[IncomeDiscount]
   ): FinancialContractResume = {
     val grossAmount = calculateYearlyGrossIncome(incomes)
     val discountAmount = calculateYearlyIncomeDiscount(incomes, discounts)

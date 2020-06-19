@@ -1,32 +1,31 @@
 package clt_contract
 
-import clt_contract.payloads.{CLTContractResponse, CalculateCLTContractInput}
+import clt_contract.payloads.CalculateCLTContractInput
 import javax.inject._
-import play.api.mvc._
-import clt_contract.payloads.CLTContractResponse._
-import play.api.libs.json.{JsValue, Json}
 import play.api.libs.json.Json._
-
-import scala.concurrent.Future
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc._
+import clt_contract.payloads.CLTContractResponse.adaptToResponse
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class CLTCalculatorController @Inject()(
   cc: ControllerComponents,
-  cltCalculator: CLTContractCalculatorService)
+  cltCalculator: CLTContractCalculatorService
+)(implicit ec: ExecutionContext)
   extends AbstractController(cc) {
 
   def calculateCLTContract(): Action[JsValue] = Action.async(parse.json) { request =>
     request.body.validate[CalculateCLTContractInput].asOpt match {
       case Some(input) =>
-        val cltContract: CLTContractResponse = cltCalculator
-          .calculateByGrossSalary(
+        Future
+          .fromTry(cltCalculator.calculateByGrossSalary(
             input.grossSalary,
             input.dependentQuantities,
             input.deductionsAmount
-          )
-          .get
-
-        Future.successful(Ok(toJson(cltContract)))
+          ))
+          .map(adaptToResponse)
+          .map(cltContract => Ok(toJson(cltContract)))
       case _ => Future.successful(BadRequest(Json.obj(
         "error" -> "Missing or invalid input"
       )))

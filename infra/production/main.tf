@@ -11,7 +11,7 @@ variable "replicas" { default = 1 }
 variable "min_replicas" { default = 1 }
 variable "max_replicas" { default = 2 }
 
-variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:933c30da62bc531f86d2ee111cad0ead167e6902" }
+variable "default_cash_flow_service_container" { default = "gcr.io/fin2you/cash-flow-service:db92da27c9aef9e85f65d3c74f0e6cfd5eed9ecb" }
 
 variable "application_secret" {}
 variable "http_application_secret" {}
@@ -19,6 +19,10 @@ variable "http_application_secret" {}
 variable "database_connection_string" {}
 
 variable "gcloud_sql_instance" {}
+
+locals {
+  zone = "${var.region}-a"
+}
 
 provider "google" {
   credentials = file("../credentials/account.json")
@@ -38,7 +42,7 @@ module "cash_flow_service" {
   source                      = "../modules/k8s"
   credentials_file            = var.credentials_file
   gcloud_project_id           = var.gcloud_project_id
-  gcloud_region               = var.region
+  gcloud_region               = local.zone
 
   default_container           = var.default_cash_flow_service_container
   environment                 = var.environment

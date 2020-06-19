@@ -2,7 +2,6 @@ package clt_contract
 
 import domain.Amount
 import domain.IncomeDiscount.{IncomeDiscountPayload, IncomeDiscountType}
-
 import scala.util.{Failure, Success, Try}
 
 object CalculateIRRFDiscount {
@@ -18,13 +17,11 @@ object CalculateIRRFDiscount {
       .flatMap(s => findDiscounts(s))
       .map(discounts => {
         val discountInCents = discounts.map(_.valueInCents).sum
-        val percentage = grossSalary.percentsFor(discountInCents)
 
         IncomeDiscountPayload(
           "IRRF",
           IncomeDiscountType.IRRF.toString,
           Amount(discountInCents, grossSalary.currency),
-          percentage
         )
       })
   }

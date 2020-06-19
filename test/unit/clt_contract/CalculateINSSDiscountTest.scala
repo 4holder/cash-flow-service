@@ -45,7 +45,6 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
       EXPECTED_DISCOUNT_NAME,
       IncomeDiscountType.INSS.toString,
       amount = domain.Amount(15561, BRL),
-      aliquot = 0.0818
     ))
   }
 
@@ -58,7 +57,6 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
       EXPECTED_DISCOUNT_NAME,
       IncomeDiscountType.INSS.toString,
       amount = domain.Amount(55895, BRL),
-      aliquot = 0.1118
     ))
   }
 
@@ -71,7 +69,6 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
       EXPECTED_DISCOUNT_NAME,
       IncomeDiscountType.INSS.toString,
       amount = domain.Amount(71310, BRL),
-      aliquot = 0.0713
     ))
   }
 
@@ -84,7 +81,6 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
       EXPECTED_DISCOUNT_NAME,
       IncomeDiscountType.INSS.toString,
       amount = domain.Amount(71310, BRL),
-      aliquot = 0.0549
     ))
   }
 
@@ -97,7 +93,6 @@ class CalculateINSSDiscountTest extends FlatSpec with Matchers  {
       EXPECTED_DISCOUNT_NAME,
       IncomeDiscountType.INSS.toString,
       amount = domain.Amount.BRL(0),
-      aliquot = 0.0
     ))
   }
 }

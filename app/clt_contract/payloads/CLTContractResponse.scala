@@ -12,7 +12,7 @@ case class CLTContractResponse(
 object CLTContractResponse {
   implicit val cltContractResponseWrites: Writes[CLTContractResponse] = Json.writes[CLTContractResponse]
 
-  implicit def fromCLTContract(cltContract: CLTContract): CLTContractResponse = {
+  def adaptToResponse(cltContract: CLTContract): CLTContractResponse = {
     CLTContractResponse(
       grossSalary = cltContract.grossSalary,
       incomes = cltContract.incomes

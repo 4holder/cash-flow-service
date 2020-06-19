@@ -23,7 +23,6 @@ case class IncomeDiscountBuilder(
     name = name,
     amount = amount,
     discountType = discountType,
-    aliquot = aliquot,
     createdAt = createdAt,
     modifiedAt = modifiedAt,
   )

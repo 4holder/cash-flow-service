@@ -3,7 +3,6 @@ package income_management.repositories
 import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
-import domain.FinancialContract.{ContractType, FinancialContractPayload}
 import domain._
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
@@ -11,6 +10,9 @@ import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{TableQuery, Tag}
 import FinancialContractRepository.financialContracts
+import domain.FinancialContract.ContractType
+import income_management.FinancialContractController.FinancialContractRegisterInput
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -52,7 +54,7 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
   }
 
   def update(id: String,
-             financialContract: FinancialContractPayload,
+             financialContract: FinancialContractRegisterInput,
              now: DateTime = DateTime.now): Future[Int] = {
     db.run(
       financialContracts

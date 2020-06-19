@@ -60,14 +60,12 @@ class IncomeDiscountRepository @Inject()(dbConfigProvider: DatabaseConfigProvide
           incomeDiscount.discount_type,
           incomeDiscount.value_in_cents,
           incomeDiscount.currency,
-          incomeDiscount.aliquot,
           incomeDiscount.modified_at,
         )).update((
         incomeDiscountPayload.name,
         incomeDiscountPayload.discountType.toString,
         incomeDiscountPayload.amount.valueInCents,
         incomeDiscountPayload.amount.currency,
-        incomeDiscountPayload.aliquot,
         new Timestamp(now.getMillis),
       ))
     )
@@ -103,7 +101,6 @@ object IncomeDiscountRepository {
     value_in_cents: Long,
     currency: String,
     discount_type: String,
-    aliquot: Double,
     created_at: Timestamp,
     modified_at: Timestamp,
   )
@@ -117,7 +114,6 @@ object IncomeDiscountRepository {
         value_in_cents = incomeDiscount.amount.valueInCents,
         currency = incomeDiscount.amount.currency.toString,
         discount_type = incomeDiscount.discountType.toString,
-        aliquot = incomeDiscount.aliquot,
         created_at = new Timestamp(incomeDiscount.createdAt.getMillis),
         modified_at = new Timestamp(incomeDiscount.modifiedAt.getMillis),
       )
@@ -133,7 +129,6 @@ object IncomeDiscountRepository {
           incomeDiscountDbRow.value_in_cents,
           Currency.withName(incomeDiscountDbRow.currency)
         ),
-        aliquot = incomeDiscountDbRow.aliquot,
         createdAt = new DateTime(incomeDiscountDbRow.created_at),
         modifiedAt = new DateTime(incomeDiscountDbRow.modified_at)
       )
@@ -147,7 +142,6 @@ object IncomeDiscountRepository {
     def value_in_cents = column[Long]("value_in_cents")
     def currency = column[String]("currency")
     def discount_type = column[String]("discount_type")
-    def aliquot = column[Double]("aliquot")
     def created_at = column[Timestamp]("created_at")
     def modified_at = column[Timestamp]("modified_at")
 
@@ -158,7 +152,6 @@ object IncomeDiscountRepository {
       value_in_cents,
       currency,
       discount_type,
-      aliquot,
       created_at,
       modified_at,
     ) <> ((IncomeDiscountDbRow.apply _).tupled, IncomeDiscountDbRow.unapply)

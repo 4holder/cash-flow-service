@@ -13,6 +13,5 @@ case class IncomeDiscountPayloadBuilder(
     name = name,
     amount = amount,
     discountType = discountType.toString,
-    aliquot = aliquot,
   )
 }

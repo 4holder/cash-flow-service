@@ -27,14 +27,14 @@ class IncomeController @Inject()(
   def registerNewIncome(financialContractId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.authorizeParent(financialContractId) flatMap { _ => {
       request.body.validate[List[IncomePayload]].asEither match {
-        case Right(input) =>
-          Future.sequence(
-            input.map(incomePayload =>
-              service
-                .register(financialContractId, incomePayload)
-                .map(income => income: IncomeResponse)
-            )
-          ).map(incomes => Created(toJson(incomes)))
+        case Right(input) => null
+//          Future.sequence(
+//            input.map(incomePayload =>
+//              service
+//                .addIncomesToFinancialContract(financialContractId, incomePayload)
+//                .map(income => income: IncomeResponse)
+//            )
+//          ).map(incomes => Created(toJson(incomes)))
         case Left(e) => badIncomePayload(e)
       }
     }} recover treatFailure

@@ -6,6 +6,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results
 import play.api.test.Helpers.{contentAsJson, contentType, status, _}
 import play.api.test.{FakeRequest, Helpers}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class CLTCalculatorControllerTest extends PlaySpec with Results {
 

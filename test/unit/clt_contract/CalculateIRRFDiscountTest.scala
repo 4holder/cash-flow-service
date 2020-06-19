@@ -47,7 +47,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       "INSS",
       IncomeDiscountType.INSS.toString,
       domain.Amount(15569, BRL),
-      0.0818
     )
     val grossSalary = domain.Amount(190398, BRL)
 
@@ -63,7 +62,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(0, BRL),
-        0
       )
     )
   }
@@ -74,7 +72,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(17240, BRL),
-      0.0825
     )
     val grossSalary = domain.Amount(208967, BRL)
 
@@ -90,7 +87,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(100, BRL),
-        0.0005
       )
     )
   }
@@ -100,7 +96,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(35269, BRL),
-      0.1000
     )
     val grossSalary = domain.Amount(352665, BRL)
 
@@ -116,7 +111,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(12130, BRL),
-        0.0344
       )
     )
   }
@@ -126,7 +120,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(67095, BRL),
-      0.1157
     )
     val grossSalary = domain.Amount(580000, BRL)
 
@@ -142,7 +135,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(54113, BRL),
-        0.0933
       )
     )
   }
@@ -152,7 +144,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(71308, BRL),
-      0.0648
     )
     val grossSalary = domain.Amount(1100000, BRL)
 
@@ -168,7 +159,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(190741, BRL),
-        0.1734
       )
     )
   }
@@ -178,7 +168,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(71308, BRL),
-      0.0648
     )
     val grossSalary = domain.Amount(1100000, BRL)
 
@@ -194,7 +183,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(185527, BRL),
-        0.1687
       )
     )
   }
@@ -204,7 +192,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(71308, BRL),
-      0.0648
     )
     val grossSalary = domain.Amount(1100000, BRL)
 
@@ -220,7 +207,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(168455, BRL),
-        0.1531
       )
     )
   }
@@ -230,7 +216,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
       IncomeDiscountType.INSS.toString,
       IncomeDiscountType.INSS.toString,
       domain.Amount(71308, BRL),
-      0.0648
     )
     val grossSalary = domain.Amount(3500000, BRL)
 
@@ -246,7 +231,6 @@ class CalculateIRRFDiscountTest extends FlatSpec with Matchers {
         EXPECTED_DISCOUNT_NAME,
         IncomeDiscountType.IRRF.toString,
         domain.Amount(800955, BRL),
-        0.2288
       )
     )
   }

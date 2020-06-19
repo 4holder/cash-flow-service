@@ -13,8 +13,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers.{contentAsJson, contentType, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder}
-
+import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder, IncomeRegisterInputBuilder}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -36,8 +35,8 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
   "Income Controller" should {
     "register new income" in {
-      val firstIncomePayload = IncomePayloadBuilder(name = "first income").build
-      val secondIncomePayload = IncomePayloadBuilder(name = "second income").build
+      val firstIncomePayload = IncomeRegisterInputBuilder(name = "first income").build
+      val secondIncomePayload = IncomeRegisterInputBuilder(name = "second income").build
       val body = s"""[
         |{
         |	"name":"${firstIncomePayload.name}",
@@ -71,13 +70,13 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
       val firstIncome = IncomeBuilder(financialContractId = financialContract.id).build
       val secondIncome = IncomeBuilder(financialContractId = financialContract.id).build
-      // Intellij is point an error in next line. It is a highlight error.
+      // Intellij is pointing an error in next line. It is a highlight error.
       when(auth.authorizeParent[Any](eqTo(financialContract.id))(any[Request[Any]], any[IncomeRepository]))
         .thenReturn(Future.successful(true))
-      when(service.register(eqTo(financialContract.id), eqTo(firstIncomePayload), any[String], any[DateTime]))
-        .thenReturn(Future.successful(firstIncome))
-      when(service.register(eqTo(financialContract.id), eqTo(secondIncomePayload), any[String], any[DateTime]))
-        .thenReturn(Future.successful(secondIncome))
+      when(service.addIncomesToFinancialContract(eqTo(financialContract.id), eqTo(firstIncomePayload))(any[DateTime]))
+        .thenReturn(Future.successful(Seq((firstIncome, Seq()))))
+      when(service.addIncomesToFinancialContract(eqTo(financialContract.id), eqTo(secondIncomePayload))(any[DateTime]))
+        .thenReturn(Future.successful(Seq((secondIncome, Seq()))))
       when(repository.register(firstIncome))
         .thenReturn(Future.successful())
       when(repository.register(secondIncome))
