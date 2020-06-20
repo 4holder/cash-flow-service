@@ -1,8 +1,9 @@
-package unit.income_management
+package unit.income_management.controllers
 
 import authorization.AuthorizationHelper
+import income_management.RegisterIncomeService
+import income_management.controllers.IncomeController
 import income_management.repositories.IncomeRepository
-import income_management.{IncomeController, RegisterIncomeService}
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{times, verify, when}
@@ -13,7 +14,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers.{contentAsJson, contentType, status, _}
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, IncomeBuilder, IncomePayloadBuilder, IncomeRegisterInputBuilder}
+import utils.builders.{IncomeBuilder, IncomePayloadBuilder}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -24,8 +26,6 @@ class IncomeControllerTest extends PlaySpec with Results with MockitoSugar {
 
   private val expectedUserId = "an-user-id"
   private val jwtToken = Jwt.encode(s"""{"sub":"$expectedUserId","iat":1516239022}""")
-
-  private val financialContract = FinancialContractBuilder().build
 
   private val controller = new IncomeController(
     Helpers.stubControllerComponents(),

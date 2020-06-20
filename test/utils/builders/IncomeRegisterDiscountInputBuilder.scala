@@ -3,7 +3,7 @@ package utils.builders
 import domain.Amount
 import domain.Amount.AmountPayload
 import domain.IncomeDiscount.IncomeDiscountType
-import income_management.FinancialContractController.IncomeRegisterDiscountInput
+import income_management.controllers.FinancialContractController.IncomeRegisterDiscountInput
 
 case class IncomeRegisterDiscountInputBuilder(
   name: String = "An Income",

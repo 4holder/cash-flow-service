@@ -3,9 +3,9 @@ package income_management
 import java.util.UUID.randomUUID
 
 import com.google.inject.{Inject, Singleton}
-import domain.{Income, IncomeDiscount}
 import domain.Income.IncomeType
-import income_management.FinancialContractController.IncomeRegisterInput
+import domain.{Income, IncomeDiscount}
+import income_management.controllers.FinancialContractController.IncomeRegisterInput
 import income_management.repositories.IncomeRepository
 import org.joda.time.DateTime
 

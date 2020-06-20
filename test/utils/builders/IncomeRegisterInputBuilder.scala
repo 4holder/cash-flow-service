@@ -5,7 +5,7 @@ import domain.Income.IncomeType
 import domain.IncomeDiscount.IncomeDiscountType
 import domain.Occurrences.OccurrencesPayload
 import domain.{Amount, Occurrences}
-import income_management.FinancialContractController.{IncomeRegisterDiscountInput, IncomeRegisterInput}
+import income_management.controllers.FinancialContractController.{IncomeRegisterDiscountInput, IncomeRegisterInput}
 
 case class IncomeRegisterInputBuilder(
   name: String = "An Income",

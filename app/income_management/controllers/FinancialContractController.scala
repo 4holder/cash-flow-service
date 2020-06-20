@@ -1,28 +1,32 @@
-package income_management
+package income_management.controllers
 
 import authorization.AuthorizationHelper
 import authorization.exceptions.{AuthorizationException, PermissionDeniedException}
 import domain.Amount.AmountPayload
 import domain.Occurrences.OccurrencesPayload
 import domain.User.UserPayload
-import domain.{Amount, FinancialContract, Income, IncomeDiscount, User}
-import income_management.FinancialContractController.{
-  FinancialContractRegisterInput,
-  FinancialContractResponse,
-  FinancialContractUpdateInput,
-  adaptToProjectionResponse,
-  adaptToResponse
-}
+import domain._
 import income_management.FinancialMovementsProjectionService.FinancialMovementsProjection
 import income_management.ResumeFinancialContractsService.FinancialContractResume
+import income_management.controllers.FinancialContractController.{
+  FinancialContractRegisterInput,
+  FinancialContractUpdateInput,
+  adaptToResponse,
+  adaptToProjectionResponse,
+}
 import income_management.repositories.FinancialContractRepository
+import income_management.{
+  FinancialMovementsProjectionService,
+  RegisterFinancialContractService,
+  ResumeFinancialContractsService
+}
 import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError, OWrites, Reads, Writes}
+import play.api.libs.json._
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,7 +65,7 @@ class FinancialContractController @Inject()(
     auth.authorizeObject(id).flatMap { _ =>
       repository
         .getById(id)
-        .map(_.map(fc => fc: FinancialContractResponse))
+        .map(_.map(adaptToResponse))
         .map(financialContract => Ok(toJson(financialContract)))
     } recover treatFailure
   }
@@ -87,7 +91,7 @@ class FinancialContractController @Inject()(
           repository
             .update(id, input)
             .flatMap(_ => repository.getById(id))
-            .map(maybeFc => maybeFc.map(fc => fc: FinancialContractResponse))
+            .map(maybeFc => maybeFc.map(adaptToResponse))
             .map(financialContract => Ok(toJson(financialContract)))
         case Left(validationErrors) => badFinancialInputPayload(validationErrors)
         }
@@ -240,7 +244,7 @@ object FinancialContractController extends JodaDateTime {
     financialMovements: Seq[ProjectionPointResponse],
   )
 
-  implicit def adaptToResponse(financialContract: FinancialContract): FinancialContractResponse = {
+  def adaptToResponse(financialContract: FinancialContract): FinancialContractResponse = {
     FinancialContractResponse(
       id = financialContract.id,
       user = financialContract.user,
@@ -252,18 +256,6 @@ object FinancialContractController extends JodaDateTime {
       endDate = financialContract.endDate,
       createdAt = financialContract.createdAt,
       modifiedAt = financialContract.modifiedAt
-    )
-  }
-
-  def adaptToResponse(resumes: Seq[FinancialContractResume]): Seq[FinancialContractResumeResponse] = {
-    resumes.map(resume =>
-      FinancialContractResumeResponse(
-        id = resume.id,
-        name = resume.name,
-        yearlyGrossIncome = resume.yearlyGrossIncome.map(g => g :AmountPayload),
-        yearlyNetIncome = resume.yearlyNetIncome.map(i => i: AmountPayload),
-        yearlyIncomeDiscount = resume.yearlyIncomeDiscount.map(d => d: AmountPayload)
-      )
     )
   }
 
@@ -280,6 +272,18 @@ object FinancialContractController extends JodaDateTime {
         )
       )
     }
+  }
+
+  def adaptToResponse(resumes: Seq[FinancialContractResume]): Seq[FinancialContractResumeResponse] = {
+    resumes.map(resume =>
+      FinancialContractResumeResponse(
+        id = resume.id,
+        name = resume.name,
+        yearlyGrossIncome = resume.yearlyGrossIncome.map(g => g :AmountPayload),
+        yearlyNetIncome = resume.yearlyNetIncome.map(i => i: AmountPayload),
+        yearlyIncomeDiscount = resume.yearlyIncomeDiscount.map(d => d: AmountPayload)
+      )
+    )
   }
 
   def adaptToResponse(fullContract: (FinancialContract, Seq[(Income, Seq[IncomeDiscount])])): FinancialContractRegisterResponse = {

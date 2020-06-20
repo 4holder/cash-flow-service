@@ -2,7 +2,7 @@ package utils.builders
 
 import domain.Amount
 import domain.FinancialContract.ContractType
-import income_management.FinancialContractController.FinancialContractUpdateInput
+import income_management.controllers.FinancialContractController.FinancialContractUpdateInput
 import org.joda.time.DateTime
 
 case class FinancialContractUpdateInputBuilder(

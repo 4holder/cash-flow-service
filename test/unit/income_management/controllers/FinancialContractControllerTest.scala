@@ -1,12 +1,13 @@
-package unit.income_management
+package unit.income_management.controllers
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import authorization.AuthorizationHelper
 import domain.User
-import income_management.FinancialContractController.FinancialContractRegisterInput
+import income_management.controllers.FinancialContractController
+import income_management.controllers.FinancialContractController.FinancialContractRegisterInput
 import income_management.repositories.FinancialContractRepository
-import income_management.{FinancialContractController, FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
+import income_management.{FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
 import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
@@ -18,7 +19,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, FinancialContractResumeBuilder, FinancialContractUpdateInputBuilder, IncomeBuilder, IncomeDiscountBuilder, IncomeRegisterDiscountInputBuilder, IncomeRegisterInputBuilder}
+import utils.builders._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -1,4 +1,4 @@
-package income_management
+package income_management.controllers
 
 import authorization.AuthorizationHelper
 import authorization.exceptions.{AuthorizationException, PermissionDeniedException}

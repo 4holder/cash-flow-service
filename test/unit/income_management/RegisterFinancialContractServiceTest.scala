@@ -1,15 +1,15 @@
 package unit.income_management
 
 import domain.{FinancialContract, User}
-import income_management.FinancialContractController.IncomeRegisterInput
-import income_management.{RegisterFinancialContractService, RegisterIncomeService}
+import income_management.controllers.FinancialContractController.IncomeRegisterInput
 import income_management.repositories.FinancialContractRepository
+import income_management.{RegisterFinancialContractService, RegisterIncomeService}
 import org.joda.time.DateTime
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
-import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, UserBuilder}
-import org.mockito.Matchers.{any, eq => eqTo}
+import utils.builders.{FinancialContractRegisterInputBuilder, UserBuilder}
 
 import scala.concurrent.Future
 

@@ -5,9 +5,10 @@ import java.util.UUID.randomUUID
 import com.google.inject.{Inject, Singleton}
 import domain.IncomeDiscount
 import domain.IncomeDiscount.IncomeDiscountType
-import income_management.FinancialContractController.IncomeRegisterDiscountInput
+import income_management.controllers.FinancialContractController.IncomeRegisterDiscountInput
 import income_management.repositories.IncomeDiscountRepository
 import org.joda.time.DateTime
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

@@ -3,13 +3,13 @@ GET     /infra/health                                 infrastructure.HealthCheck
 POST    /v1/calculateCLTContract                      clt_contract.CLTCalculatorController.calculateCLTContract
 POST    /v1/calculateExpense                          general_expense.GeneralExpenseController.calculateExpense
 
-GET     /v1/listFinancialContracts                    income_management.FinancialContractController.listIncomeResumes(page: Int, pageSize: Int)
-GET     /v1/getYearlyIncomeProjections                income_management.FinancialContractController.yearlyIncomeProjections(page: Int, pageSize: Int)
-POST    /v1/registerNewFinancialContract              income_management.FinancialContractController.registerNewFinancialContract
-GET     /v1/financialContract/:id                     income_management.FinancialContractController.getIncomeDetails(id: String)
-DELETE  /v1/financialContract/:id                     income_management.FinancialContractController.deleteFinancialContract(id: String)
+GET     /v1/listFinancialContracts                    income_management.controllers.FinancialContractController.listIncomeResumes(page: Int, pageSize: Int)
+GET     /v1/getYearlyIncomeProjections                income_management.controllers.FinancialContractController.yearlyIncomeProjections(page: Int, pageSize: Int)
+POST    /v1/registerNewFinancialContract              income_management.controllers.FinancialContractController.registerNewFinancialContract
+GET     /v1/financialContract/:id                     income_management.controllers.FinancialContractController.getIncomeDetails(id: String)
+DELETE  /v1/financialContract/:id                     income_management.controllers.FinancialContractController.deleteFinancialContract(id: String)
 
-PUT     /v1/financialContract/:id                     income_management.FinancialContractController.updateFinancialContract(id: String)
+PUT     /v1/financialContract/:id                     income_management.controllers.FinancialContractController.updateFinancialContract(id: String)
 
-DELETE  /v1/incomes/:income_id                        income_management.IncomeController.deleteIncome(income_id: String)
-PUT     /v1/incomes/:income_id                        income_management.IncomeController.updateIncome(income_id: String)
+DELETE  /v1/incomes/:income_id                        income_management.controllers.IncomeController.deleteIncome(income_id: String)
+PUT     /v1/incomes/:income_id                        income_management.controllers.IncomeController.updateIncome(income_id: String)

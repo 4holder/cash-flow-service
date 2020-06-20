@@ -3,15 +3,15 @@ package income_management.repositories
 import java.sql.Timestamp
 
 import com.google.inject.{Inject, Singleton}
+import domain.FinancialContract.ContractType
 import domain._
+import income_management.controllers.FinancialContractController.FinancialContractUpdateInput
+import income_management.repositories.FinancialContractRepository.financialContracts
 import org.joda.time.DateTime
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{TableQuery, Tag}
-import FinancialContractRepository.financialContracts
-import domain.FinancialContract.ContractType
-import income_management.FinancialContractController.FinancialContractUpdateInput
 
 import scala.concurrent.{ExecutionContext, Future}
 
