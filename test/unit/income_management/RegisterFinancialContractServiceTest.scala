@@ -9,7 +9,7 @@ import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
-import utils.builders.{FinancialContractRegisterInputBuilder, UserBuilder}
+import utils.builders.{FinancialContractRegisterInputBuilder, IncomeBuilder, IncomeDiscountBuilder, UserBuilder}
 
 import scala.concurrent.Future
 
@@ -25,6 +25,9 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
   behavior of "register new financial contract"
   it should "register a valid financial contract" in {
     val financialContractInput = FinancialContractRegisterInputBuilder().build
+    val income = IncomeBuilder().build
+    val incomeDiscount = IncomeDiscountBuilder().build
+    val expectedIncomeAndDiscounts = Seq((income, Seq(incomeDiscount)))
 
     when(repository.register(any[FinancialContract]))
         .thenReturn(Future{})
@@ -32,12 +35,21 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
       any[String],
       any[IncomeRegisterInput],
     )(eqTo(now)),
-    ).thenReturn(Future{null})
+    ).thenReturn(Future.successful(expectedIncomeAndDiscounts))
 
     registerFinancialContractService
       .register(financialContractInput)(user, now)
       .map(financialContract => {
         financialContract._1.name shouldEqual financialContractInput.name
+        financialContract._1.user.id shouldEqual user.id
+        financialContract._1.contractType.toString shouldEqual financialContractInput.contractType.toString
+        financialContract._1.grossAmount.valueInCents shouldEqual financialContractInput.grossAmount.valueInCents
+        financialContract._1.grossAmount.currency.toString shouldEqual financialContractInput.grossAmount.currency.toString
+        financialContract._1.companyCnpj shouldEqual financialContractInput.companyCnpj
+        financialContract._1.startDate shouldEqual financialContractInput.startDate
+        financialContract._1.endDate shouldEqual financialContractInput.endDate
+
+        financialContract._2 shouldEqual expectedIncomeAndDiscounts
       })
   }
 }
