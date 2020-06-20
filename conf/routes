@@ -11,7 +11,5 @@ DELETE  /v1/financialContract/:id                     income_management.Financia
 
 PUT     /v1/financialContract/:id                     income_management.FinancialContractController.updateFinancialContract(id: String)
 
-POST    /v1/registerNewIncome/:financial_contract_id  income_management.IncomeController.registerNewIncome(financial_contract_id: String)
-
 DELETE  /v1/incomes/:income_id                        income_management.IncomeController.deleteIncome(income_id: String)
 PUT     /v1/incomes/:income_id                        income_management.IncomeController.updateIncome(income_id: String)

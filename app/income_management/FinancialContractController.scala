@@ -9,8 +9,9 @@ import domain.{Amount, FinancialContract, Income, IncomeDiscount, User}
 import income_management.FinancialContractController.{
   FinancialContractRegisterInput,
   FinancialContractResponse,
-  adaptToResponse,
+  FinancialContractUpdateInput,
   adaptToProjectionResponse,
+  adaptToResponse
 }
 import income_management.FinancialMovementsProjectionService.FinancialMovementsProjection
 import income_management.ResumeFinancialContractsService.FinancialContractResume
@@ -21,7 +22,7 @@ import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.Logging
 import play.api.libs.json.Json.toJson
-import play.api.libs.json.{JsValue, Json, OWrites, Reads, Writes}
+import play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError, OWrites, Reads, Writes}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -67,27 +68,28 @@ class FinancialContractController @Inject()(
 
   def registerNewFinancialContract(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.isLoggedIn flatMap { implicit user: User => {
-      request.body.validate[FinancialContractRegisterInput].asOpt match {
-        case Some(input) =>
+      request.body.validate[FinancialContractRegisterInput].asEither match {
+        case Right(input) =>
           registerService
             .register(input)
             .map(adaptToResponse)
-            .map(financialContract => Ok(toJson(financialContract)))
-        case _ => badFinancialInputPayload
+            .map(financialContract => Created(toJson(financialContract)))
+        case Left(validationErrors) =>
+          badFinancialInputPayload(validationErrors)
       }
     }} recover treatFailure
   }
 
   def updateFinancialContract(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.authorizeObject(id).flatMap { _ => {
-      request.body.validate[FinancialContractRegisterInput].asOpt match {
-        case Some(input) =>
+      request.body.validate[FinancialContractUpdateInput].asEither match {
+        case Right(input) =>
           repository
             .update(id, input)
             .flatMap(_ => repository.getById(id))
             .map(maybeFc => maybeFc.map(fc => fc: FinancialContractResponse))
             .map(financialContract => Ok(toJson(financialContract)))
-        case _ => badFinancialInputPayload
+        case Left(validationErrors) => badFinancialInputPayload(validationErrors)
         }
     }} recover treatFailure
   }
@@ -101,8 +103,10 @@ class FinancialContractController @Inject()(
     ) recover treatFailure
   }
 
-  private def badFinancialInputPayload: Future[Result] = {
-    Future.successful(BadRequest(Json.toJson(ErrorResponse("Invalid financial contract input."))))
+  private def badFinancialInputPayload(validationErros: Seq[(JsPath, Seq[JsonValidationError])]): Future[Result] = {
+    Future.successful(BadRequest(Json.toJson(
+      ErrorResponse("Invalid financial contract input.", validationErros)
+    )))
   }
 
   private def treatFailure: PartialFunction[Throwable, Result] = {
@@ -135,6 +139,8 @@ object FinancialContractController extends JodaDateTime {
     Json.writes[IncomeRegisterResponse]
   implicit val financialContractRegisterResponse: Writes[FinancialContractRegisterResponse] =
     Json.writes[FinancialContractRegisterResponse]
+  implicit val financialContractUpdateInput: Reads[FinancialContractUpdateInput] =
+    Json.reads[FinancialContractUpdateInput]
 
   sealed case class IncomeRegisterDiscountInput(
     name: String,
@@ -158,6 +164,15 @@ object FinancialContractController extends JodaDateTime {
     startDate: DateTime,
     endDate: Option[DateTime],
     incomes: List[IncomeRegisterInput],
+  )
+
+  sealed case class FinancialContractUpdateInput(
+    name: String,
+    contractType: String,
+    grossAmount: AmountPayload,
+    companyCnpj: Option[String],
+    startDate: DateTime,
+    endDate: Option[DateTime],
   )
 
   sealed case class IncomeRegisterDiscountResponse(

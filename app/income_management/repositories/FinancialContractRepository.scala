@@ -11,7 +11,7 @@ import slick.jdbc.PostgresProfile.api._
 import slick.lifted.{TableQuery, Tag}
 import FinancialContractRepository.financialContracts
 import domain.FinancialContract.ContractType
-import income_management.FinancialContractController.FinancialContractRegisterInput
+import income_management.FinancialContractController.FinancialContractUpdateInput
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -54,7 +54,7 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
   }
 
   def update(id: String,
-             financialContract: FinancialContractRegisterInput,
+             financialContract: FinancialContractUpdateInput,
              now: DateTime = DateTime.now): Future[Int] = {
     db.run(
       financialContracts

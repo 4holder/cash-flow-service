@@ -4,7 +4,7 @@ import domain.{FinancialContract, User}
 import income_management.repositories.FinancialContractRepository
 import org.joda.time.DateTime
 import org.postgresql.util.PSQLException
-import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, UserBuilder}
+import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, FinancialContractUpdateInputBuilder, UserBuilder}
 import utils.{DBUtils, IntegrationSpec}
 
 class FinancialContractRepositoryTest extends IntegrationSpec {
@@ -194,7 +194,7 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
   behavior of "updating user financial contract"
   it should "update the allowed fields" in {
     val now = DateTime.now
-    val updatePayload = FinancialContractRegisterInputBuilder().build
+    val updatePayload = FinancialContractUpdateInputBuilder().build
 
     for {
       _ <- DBUtils.insertFinancialContracts(List(

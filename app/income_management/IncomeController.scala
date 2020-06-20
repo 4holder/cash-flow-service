@@ -24,22 +24,6 @@ class IncomeController @Inject()(
   service: RegisterIncomeService,
   auth: AuthorizationHelper
 )(implicit repository: IncomeRepository, ec: ExecutionContext) extends AbstractController(cc) with Logging {
-  def registerNewIncome(financialContractId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    auth.authorizeParent(financialContractId) flatMap { _ => {
-      request.body.validate[List[IncomePayload]].asEither match {
-        case Right(input) => null
-//          Future.sequence(
-//            input.map(incomePayload =>
-//              service
-//                .addIncomesToFinancialContract(financialContractId, incomePayload)
-//                .map(income => income: IncomeResponse)
-//            )
-//          ).map(incomes => Created(toJson(incomes)))
-        case Left(e) => badIncomePayload(e)
-      }
-    }} recover treatFailure
-  }
-
   def updateIncome(id: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     auth.authorizeObject(id) flatMap { _ => {
       request.body.validate[IncomePayload].asEither match {

@@ -18,7 +18,8 @@ import play.api.libs.json.Json
 import play.api.mvc.{Headers, Request, Results}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, FinancialContractResumeBuilder}
+import utils.builders.{FinancialContractBuilder, FinancialContractRegisterInputBuilder, FinancialContractResumeBuilder, FinancialContractUpdateInputBuilder, IncomeBuilder, IncomeDiscountBuilder, IncomeRegisterDiscountInputBuilder, IncomeRegisterInputBuilder}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -68,8 +69,37 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     (jsonContent.last \ "yearlyGrossIncome" \ "valueInCents").as[Long] mustEqual secondResume.yearlyGrossIncome.get.valueInCents
   }
 
-  "should insert an user contract" in {
-    val body = """{
+  "should insert an financial contract" in {
+    val firstIncomePayload = IncomeRegisterInputBuilder(name = "first income").build
+    val firstDiscount = IncomeRegisterDiscountInputBuilder().build
+    val discountsInput =s"""
+    |[
+    |  {
+    |   "name": "${firstDiscount.name}",
+    |   "discountType": "${firstDiscount.discountType}",
+    |   "amount": {
+    |     "valueInCents": ${firstDiscount.amount.valueInCents},
+    |     "currency": "${firstDiscount.amount.currency}"
+    |   }
+    |  }
+    |]
+    |""".stripMargin
+    val incomesInput = s"""[
+    |{
+    |	"name":"${firstIncomePayload.name}",
+    |	"incomeType": "${firstIncomePayload.incomeType}",
+    |	"amount": {
+    |		"valueInCents": ${firstIncomePayload.amount.valueInCents},
+    |		"currency": "${firstIncomePayload.amount.currency}"
+    |	},
+    |	"occurrences": {
+    |    "day": ${firstIncomePayload.occurrences.day},
+    |    "months": [${firstIncomePayload.occurrences.months.mkString(",")}]
+    |  },
+    |  "discounts": $discountsInput
+    |}
+    |]""".stripMargin
+    val financialContractInput = s"""{
        |	"name":"New Contract 8",
        |	"contractType": "CLT",
        |	"grossAmount": {
@@ -77,35 +107,56 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
        |		"currency": "BRL"
        |	},
        |	"companyCnpj": "09183746273812",
-       |	"startDate": "2010-05-23T21:22:29.758-0300"
+       |	"startDate": "2010-05-23T21:22:29.758-0300",
+       |  "endDate": "2010-05-23T21:22:29.758-0300",
+       |  "incomes": $incomesInput
        |}""".stripMargin
     val request = FakeRequest()
       .withMethod("POST")
       .withHeaders(Headers(("Authorization", Jwt.encode(jwtBody))))
-      .withBody(Json.parse(body))
+      .withBody(Json.parse(financialContractInput))
 
-    val financialContract = FinancialContractBuilder(user = user).build
+    val financialContract = FinancialContractBuilder().build
+    val income = IncomeBuilder(financialContractId = financialContract.id).build
+    val discount = IncomeDiscountBuilder(incomeId = income.id).build
 
     when(auth.isLoggedIn[Any](any[Request[Any]])).thenReturn(Future.successful(user))
     when(registerService.register(any[FinancialContractRegisterInput])(any[User], any[DateTime]))
-      .thenReturn(Future.successful((financialContract, null)))
+      .thenReturn(Future.successful((financialContract, Seq(
+        (income, Seq(discount))
+      ))))
 
     val result = controller.registerNewFinancialContract().apply(request)
 
     contentType(result) mustBe Some("application/json")
-    status(result) mustEqual OK
+    status(result) mustEqual CREATED
     val jsonContent = contentAsJson(result)
 
     jsonContent("id").as[String] mustEqual financialContract.id
-    (jsonContent \ "user" \ "id").as[String] mustEqual financialContract.user.id
     (jsonContent \ "name").as[String] mustEqual financialContract.name
     (jsonContent \ "companyCnpj").as[String] mustEqual financialContract.companyCnpj.get
     (jsonContent \ "grossAmount" \ "valueInCents").as[Long] mustEqual financialContract.grossAmount.valueInCents
     (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
+
+    val incomeJson = (jsonContent \ "incomes").head
+    incomeJson("id").as[String] mustEqual income.id
+    incomeJson("name").as[String] mustEqual income.name
+    incomeJson("incomeType").as[String] mustEqual income.incomeType.toString
+    (incomeJson \ "amount" \ "valueInCents").as[Long] mustEqual income.amount.valueInCents
+    (incomeJson \ "amount" \ "currency").as[String] mustEqual income.amount.currency.toString
+    (incomeJson \ "occurrences" \ "day").as[Int] mustEqual income.occurrences.day
+    (incomeJson \ "occurrences" \ "months").as[List[Int]] mustEqual income.occurrences.months
+
+    val discountJson = (incomeJson \ "discounts").head
+    discountJson("id").as[String] mustEqual discount.id
+    discountJson("name").as[String] mustEqual discount.name
+    discountJson("discountType").as[String] mustEqual discount.discountType.toString
+    (discountJson \ "amount" \ "valueInCents").as[Long] mustEqual discount.amount.valueInCents
+    (discountJson \ "amount" \ "currency").as[String] mustEqual discount.amount.currency.toString
   }
 
-  "update an user contract" in {
-    val payload = FinancialContractRegisterInputBuilder().build
+  "update an financial contract" in {
+    val payload = FinancialContractUpdateInputBuilder().build
     val body = s"""{
      |	"name":"${payload.name}",
      |	"contractType": "${payload.contractType}",
