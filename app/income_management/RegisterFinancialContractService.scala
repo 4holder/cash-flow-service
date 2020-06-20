@@ -25,7 +25,6 @@ class RegisterFinancialContractService @Inject()(
       name = newFinancialContractInput.name,
       user = User(user.id),
       contractType = ContractType.withName(newFinancialContractInput.contractType),
-      grossAmount = newFinancialContractInput.grossAmount,
       companyCnpj = newFinancialContractInput.companyCnpj,
       startDate = newFinancialContractInput.startDate,
       endDate = newFinancialContractInput.endDate,

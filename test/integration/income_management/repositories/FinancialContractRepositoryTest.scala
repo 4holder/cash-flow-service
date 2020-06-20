@@ -213,8 +213,6 @@ class FinancialContractRepositoryTest extends IntegrationSpec {
       updatedFinancialContract.name shouldEqual updatePayload.name
       updatedFinancialContract.companyCnpj shouldEqual updatePayload.companyCnpj
       updatedFinancialContract.contractType.toString shouldEqual updatePayload.contractType
-      updatedFinancialContract.grossAmount.valueInCents shouldEqual updatePayload.grossAmount.valueInCents
-      updatedFinancialContract.grossAmount.currency.toString shouldEqual updatePayload.grossAmount.currency
       updatedFinancialContract.startDate shouldEqual updatePayload.startDate
       updatedFinancialContract.endDate shouldEqual updatePayload.endDate
       updatedFinancialContract.createdAt shouldEqual firstFinancialContract.createdAt

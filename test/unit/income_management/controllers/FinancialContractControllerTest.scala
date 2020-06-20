@@ -103,10 +103,6 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     val financialContractInput = s"""{
        |	"name":"New Contract 8",
        |	"contractType": "CLT",
-       |	"grossAmount": {
-       |		"valueInCents": 1100000,
-       |		"currency": "BRL"
-       |	},
        |	"companyCnpj": "09183746273812",
        |	"startDate": "2010-05-23T21:22:29.758-0300",
        |  "endDate": "2010-05-23T21:22:29.758-0300",
@@ -136,8 +132,6 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     jsonContent("id").as[String] mustEqual financialContract.id
     (jsonContent \ "name").as[String] mustEqual financialContract.name
     (jsonContent \ "companyCnpj").as[String] mustEqual financialContract.companyCnpj.get
-    (jsonContent \ "grossAmount" \ "valueInCents").as[Long] mustEqual financialContract.grossAmount.valueInCents
-    (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
 
     val incomeJson = (jsonContent \ "incomes").head
     incomeJson("id").as[String] mustEqual income.id
@@ -196,8 +190,6 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     (jsonContent \ "user" \ "id").as[String] mustEqual financialContract.user.id
     (jsonContent \ "name").as[String] mustEqual financialContract.name
     (jsonContent \ "companyCnpj").as[String] mustEqual financialContract.companyCnpj.get
-    (jsonContent \ "grossAmount" \ "valueInCents").as[Long] mustEqual financialContract.grossAmount.valueInCents
-    (jsonContent \ "grossAmount" \ "currency").as[String] mustEqual financialContract.grossAmount.currency.toString
   }
 
   "delete an user contract" in {

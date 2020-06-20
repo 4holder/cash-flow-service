@@ -43,8 +43,6 @@ class RegisterFinancialContractServiceTest extends AsyncFlatSpec with Matchers w
         financialContract._1.name shouldEqual financialContractInput.name
         financialContract._1.user.id shouldEqual user.id
         financialContract._1.contractType.toString shouldEqual financialContractInput.contractType.toString
-        financialContract._1.grossAmount.valueInCents shouldEqual financialContractInput.grossAmount.valueInCents
-        financialContract._1.grossAmount.currency.toString shouldEqual financialContractInput.grossAmount.currency.toString
         financialContract._1.companyCnpj shouldEqual financialContractInput.companyCnpj
         financialContract._1.startDate shouldEqual financialContractInput.startDate
         financialContract._1.endDate shouldEqual financialContractInput.endDate

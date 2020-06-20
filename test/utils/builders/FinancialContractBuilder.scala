@@ -24,7 +24,6 @@ case class FinancialContractBuilder(
       user,
       name,
       contractType,
-      grossAmount,
       companyCnpj,
       startDate,
       endDate,

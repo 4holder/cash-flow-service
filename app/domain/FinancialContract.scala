@@ -8,7 +8,6 @@ case class FinancialContract(
   user: User,
   name: String,
   contractType: ContractType.Value,
-  grossAmount: Amount,
   companyCnpj: Option[String],
   startDate: DateTime,
   endDate: Option[DateTime],

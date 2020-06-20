@@ -33,7 +33,6 @@ case class FinancialContractRegisterInputBuilder(
     FinancialContractRegisterInput(
       name,
       contractType.toString,
-      grossAmount,
       companyCnpj,
       startDate,
       endDate,

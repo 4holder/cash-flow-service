@@ -63,8 +63,6 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
           fc.name,
           fc.company_cnpj,
           fc.contract_type,
-          fc.gross_amount_in_cents,
-          fc.currency,
           fc.start_date,
           fc.end_date,
           fc.modified_at,
@@ -73,8 +71,6 @@ class FinancialContractRepository @Inject()(protected val dbConfigProvider: Data
           financialContract.name,
           financialContract.companyCnpj,
           financialContract.contractType.toString,
-          financialContract.grossAmount.valueInCents,
-          financialContract.grossAmount.currency.toString,
           new Timestamp(financialContract.startDate.getMillis),
           financialContract.endDate.map(ed => new Timestamp(ed.getMillis)),
           new Timestamp(now.getMillis),
@@ -109,9 +105,6 @@ object FinancialContractRepository {
     name: String,
     contract_type: String,
     company_cnpj: Option[String],
-    is_active: Boolean,
-    gross_amount_in_cents: Long,
-    currency: String,
     start_date: Timestamp,
     end_date: Option[Timestamp],
     created_at: Timestamp,
@@ -126,10 +119,6 @@ object FinancialContractRepository {
         name = financialContractDbRow.name,
         contractType = ContractType.withName(financialContractDbRow.contract_type),
         companyCnpj = financialContractDbRow.company_cnpj,
-        grossAmount = Amount(
-          valueInCents = financialContractDbRow.gross_amount_in_cents,
-          currency = Currency.withName(financialContractDbRow.currency)
-        ),
         startDate = new DateTime(financialContractDbRow.start_date),
         endDate = financialContractDbRow.end_date.map(ed => new DateTime(ed)),
         createdAt = new DateTime(financialContractDbRow.created_at),
@@ -144,9 +133,6 @@ object FinancialContractRepository {
         name = financialContract.name,
         contract_type = financialContract.contractType.toString,
         company_cnpj = financialContract.companyCnpj,
-        is_active = true,
-        gross_amount_in_cents = financialContract.grossAmount.valueInCents,
-        currency = financialContract.grossAmount.currency.toString,
         start_date = new Timestamp(financialContract.startDate.getMillis),
         end_date = financialContract.endDate.map(d => new Timestamp(d.getMillis)),
         created_at = new Timestamp(financialContract.createdAt.getMillis),
@@ -161,9 +147,6 @@ object FinancialContractRepository {
     def name = column[String]("name")
     def contract_type = column[String]("contract_type")
     def company_cnpj = column[Option[String]]("company_cnpj")
-    def is_active = column[Boolean]("is_active")
-    def gross_amount_in_cents = column[Long]("gross_amount_in_cents")
-    def currency = column[String]("currency")
     def start_date = column[Timestamp]("start_date")
     def end_date = column[Option[Timestamp]]("end_date")
     def created_at = column[Timestamp]("created_at")
@@ -175,9 +158,6 @@ object FinancialContractRepository {
       name,
       contract_type,
       company_cnpj,
-      is_active,
-      gross_amount_in_cents,
-      currency,
       start_date,
       end_date,
       created_at,
