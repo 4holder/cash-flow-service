@@ -37,6 +37,6 @@ class RegisterIncomeService @Inject()(incomeRepository: IncomeRepository,
       _ <- incomeRepository.register(newIncomeMap.map(_._1):_*)
       discounts <- Future.sequence(newIncomeMap.map(tuple =>
         registerIncomeDiscountService.addDiscountToIncome(tuple._1.id, tuple._2:_*)))
-    } yield newIncomeMap.map(tuple => (tuple._1, discounts.flatten.filter(_.id.equals(tuple._1.id))))
+    } yield newIncomeMap.map(tuple => (tuple._1, discounts.flatten.filter(_.incomeId.equals(tuple._1.id))))
   }
 }
