@@ -32,8 +32,8 @@ object SeedDatabase {
     val financialContracts = List(randomFinancialContract, randomFinancialContract)
     val incomes = financialContracts.flatMap(fc => List(
       randomIncome(fc),
-      randomIncome(fc),
-      randomIncome(fc),
+      randomIncome(fc, IncomeType.THIRTEENTH_SALARY, "20 12"),
+      randomIncome(fc, IncomeType.THIRTEENTH_SALARY_ADVANCE, "20 11"),
     ))
 
     val discounts = incomes.flatMap(income => List(
@@ -70,7 +70,11 @@ object SeedDatabase {
     )
   }
 
-  private def randomIncome(fc: FinancialContractDbRow): IncomeDbRow = {
+  private def randomIncome(
+    fc: FinancialContractDbRow,
+    incomeType: IncomeType.Value = IncomeType.SALARY,
+    occurrences: String = "5 *"
+  ): IncomeDbRow = {
     val id = randomUUID().toString
     println(s"Income Id: $id")
     IncomeDbRow(
@@ -79,8 +83,8 @@ object SeedDatabase {
       name = "A great salary",
       value_in_cents = 1209313,
       currency = Currency.BRL.toString,
-      income_type = IncomeType.SALARY.toString,
-      occurrences = "5 *",
+      income_type = incomeType.toString,
+      occurrences = occurrences,
       created_at = now,
       modified_at = now,
     )
