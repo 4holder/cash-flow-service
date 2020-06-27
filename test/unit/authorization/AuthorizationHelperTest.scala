@@ -7,15 +7,18 @@ import org.mockito.Mockito._
 import org.scalatest.{AsyncFlatSpec, BeforeAndAfterEach, Matchers}
 import org.scalatestplus.mockito.MockitoSugar
 import pdi.jwt.Jwt
+import play.Environment
 import play.api.mvc.{AnyContent, Headers, Request}
 
 class AuthorizationHelperTest extends AsyncFlatSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
   implicit private val request: Request[AnyContent] = mock[Request[AnyContent]]
+  private val env: Environment = mock[Environment]
 
-  private val auth = new AuthorizationHelper()
+  private val auth = new AuthorizationHelper(env)
 
   override def beforeEach {
     Mockito.reset(request)
+    when(env.isDev).thenReturn(false)
   }
 
   behavior of "extraction user info from jwt token"
