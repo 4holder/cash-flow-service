@@ -34,9 +34,11 @@ class FinancialMovementsProjectionService @Inject()(
     FinancialMovementsProjection(
       label = "Gross Income",
       currency = Currency.BRL,
-      financialMovements = (1 to 12).map(month => {
+      financialMovements = (1 to 12).map(index => {
+        val projectionDateTime = beginningOfTheMonth(index)
+
         val incomeAmounts = incomes
-          .filter(_.occurrences.months.contains(month))
+          .filter(_.occurrences.months.contains(projectionDateTime.getMonthOfYear))
           .map(_.amount)
 
         val amount =
@@ -45,7 +47,7 @@ class FinancialMovementsProjectionService @Inject()(
 
         ProjectionPoint(
           amount,
-          beginningOfTheMonth(month),
+          projectionDateTime,
         )
       })
     )
@@ -55,9 +57,11 @@ class FinancialMovementsProjectionService @Inject()(
     FinancialMovementsProjection(
       label = "Net Income",
       currency = Currency.BRL,
-      financialMovements = (1 to 12).map(month => {
+      financialMovements = (1 to 12).map(index => {
+        val projectionDateTime = beginningOfTheMonth(index)
+
         val monthIncomes = incomes
-          .filter(_.occurrences.months.contains(month))
+          .filter(_.occurrences.months.contains(projectionDateTime.getMonthOfYear))
 
         val monthDiscounts = monthIncomes.flatMap(income => {
           discounts
@@ -69,7 +73,7 @@ class FinancialMovementsProjectionService @Inject()(
 
         ProjectionPoint(
           (mountAmount - monthDiscounts).get,
-          beginningOfTheMonth(month),
+          projectionDateTime,
         )
       })
     )
@@ -79,10 +83,12 @@ class FinancialMovementsProjectionService @Inject()(
     FinancialMovementsProjection(
       label = "Discounts",
       currency = Currency.BRL,
-      financialMovements = (1 to 12).map(month => {
+      financialMovements = (1 to 12).map(index => {
+        val projectionDateTime = beginningOfTheMonth(index)
+
         val monthDiscounts =
           incomes
-            .filter(_.occurrences.months.contains(month))
+            .filter(_.occurrences.months.contains(projectionDateTime.getMonthOfYear))
             .flatMap(income => {
               discounts
                 .filter(_.incomeId.equals(income.id))
@@ -92,7 +98,7 @@ class FinancialMovementsProjectionService @Inject()(
 
         ProjectionPoint(
           monthDiscounts,
-          beginningOfTheMonth(month),
+          projectionDateTime,
         )
       })
     )

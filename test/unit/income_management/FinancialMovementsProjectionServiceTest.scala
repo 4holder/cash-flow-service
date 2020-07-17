@@ -120,7 +120,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
       grossIncomeProjection
         .financialMovements
         .map(_.dateTime.getYear)
-        .forall(v => v.equals(now.getYear) || v.equals(now.getYear+1)) shouldEqual true
+        .forall(v => v.equals(now.getYear) || v.equals(now.getYear + 1)) shouldEqual true
 
       grossIncomeProjection
         .financialMovements
@@ -141,7 +141,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
       netIncomeProjection
         .financialMovements
         .map(_.dateTime.getYear)
-        .forall(v => v.equals(now.getYear) || v.equals(now.getYear+1)) shouldEqual true
+        .forall(v => v.equals(now.getYear) || v.equals(now.getYear + 1)) shouldEqual true
 
       netIncomeProjection
         .financialMovements
@@ -161,7 +161,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
       discountsProjection
         .financialMovements
         .map(_.dateTime.getYear)
-        .forall(v => v.equals(now.getYear) || v.equals(now.getYear+1)) shouldEqual true
+        .forall(v => v.equals(now.getYear) || v.equals(now.getYear + 1)) shouldEqual true
 
       discountsProjection
         .financialMovements
@@ -192,20 +192,20 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
       grossIncomeProjection.financialMovements should have length 12
       grossIncomeProjection
         .financialMovements
-        .map(f => (f.dateTime.getMonthOfYear, f.amount)) shouldEqual List(
-        (now.plusMonths(1).getMonthOfYear, salary.amount),
-        (now.plusMonths(2).getMonthOfYear, salary.amount),
-        (now.plusMonths(3).getMonthOfYear, salary.amount),
-        (now.plusMonths(4).getMonthOfYear, salary.amount),
-        (now.plusMonths(5).getMonthOfYear, salary.amount),
-        (now.plusMonths(6).getMonthOfYear, salary.amount),
-        (now.plusMonths(7).getMonthOfYear, salary.amount),
-        (now.plusMonths(8).getMonthOfYear, salary.amount),
-        (now.plusMonths(9).getMonthOfYear, salary.amount),
-        (now.plusMonths(10).getMonthOfYear, salary.amount),
-        (now.plusMonths(11).getMonthOfYear, (salary.amount + thirteenthSalaryAdvance.amount).get),
-        (now.plusMonths(12).getMonthOfYear, (salary.amount + thirteenthSalary.amount).get),
-      )
+        .map(f => (f.dateTime.getMonthOfYear, f.amount))
+        .zipWithIndex.map(p => {
+          val month = p._1._1
+          val amount = p._1._2
+          val index = p._2
+          if (month == 11) {
+            amount shouldEqual (salary.amount + thirteenthSalaryAdvance.amount).get
+          } else if (month == 12) {
+            amount shouldEqual (salary.amount + thirteenthSalary.amount).get
+          } else {
+            amount shouldEqual salary.amount
+            month shouldEqual now.plusMonths(index + 1).getMonthOfYear
+          }
+        })
 
       val netIncomeProjection = projections.find(_.label.equals("Net Income")).get
 
@@ -215,44 +215,42 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
       val expectedNetThirteenSalary = (thirteenthSalary.amount subtract(thirteenthSalaryINSSDiscount.amount, thirteenthSalaryIRRFDiscount.amount)).get
       netIncomeProjection
         .financialMovements
-        .map(f => (f.dateTime.getMonthOfYear, f.amount)) shouldEqual List(
-        (now.plusMonths(1).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(2).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(3).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(4).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(5).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(6).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(7).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(8).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(9).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(10).getMonthOfYear, expectedMonthlyNetIncome),
-        (now.plusMonths(11).getMonthOfYear, (expectedMonthlyNetIncome + thirteenthSalaryAdvance.amount).get),
-        (now.plusMonths(12).getMonthOfYear, (expectedMonthlyNetIncome + expectedNetThirteenSalary).get),
-      )
+        .map(f => (f.dateTime.getMonthOfYear, f.amount))
+        .zipWithIndex.map(p => {
+          val month = p._1._1
+          val amount = p._1._2
+          val index = p._2
+          if (month == 11) {
+            amount shouldEqual (expectedMonthlyNetIncome + thirteenthSalaryAdvance.amount).get
+          } else if (month == 12) {
+            amount shouldEqual (expectedMonthlyNetIncome + expectedNetThirteenSalary).get
+          } else {
+            amount shouldEqual expectedMonthlyNetIncome
+            month shouldEqual now.plusMonths(index + 1).getMonthOfYear
+          }
+        })
 
       val discountsProjection = projections.find(_.label.equals("Discounts")).get
-
-      discountsProjection.currency shouldEqual Currency.BRL
-      discountsProjection.financialMovements should have length 12
 
       val monthlyDiscount = (salaryINSSDiscount.amount + salaryIRRFDiscount.amount).get
       val decemberDiscount = (thirteenthSalaryINSSDiscount.amount + thirteenthSalaryIRRFDiscount.amount).get
       discountsProjection
         .financialMovements
-        .map(f => (f.dateTime.getMonthOfYear, f.amount)) shouldEqual List(
-        (now.plusMonths(1).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(2).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(3).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(4).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(5).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(6).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(7).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(8).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(9).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(10).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(11).getMonthOfYear, monthlyDiscount),
-        (now.plusMonths(12).getMonthOfYear, (monthlyDiscount + decemberDiscount).get),
-      )
+        .map(f => (f.dateTime.getMonthOfYear, f.amount))
+        .zipWithIndex.map(p => {
+          val month = p._1._1
+          val amount = p._1._2
+          val index = p._2
+          if (month == 12) {
+            amount shouldEqual (monthlyDiscount + decemberDiscount).get
+          } else {
+            amount shouldEqual monthlyDiscount
+            month shouldEqual now.plusMonths(index + 1).getMonthOfYear
+          }
+        })
+
+      discountsProjection.currency shouldEqual Currency.BRL
+      discountsProjection.financialMovements should have length 12
     }
   }
 }
