@@ -26,13 +26,13 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
   private val firstFinancialContract = FinancialContractBuilder().build
   private val salary = IncomeBuilder(
     financialContractId = firstFinancialContract.id,
-    amount = Amount.BRL(100000),
+    amount = Amount.BRL(85000),
     occurrences = Occurrences.builder.day(5).allMonths.build,
     incomeType = IncomeType.SALARY
   ).build
   private val thirteenthSalary = IncomeBuilder(
     financialContractId = firstFinancialContract.id,
-    amount = Amount.BRL(50000),
+    amount = Amount.BRL(35000),
     occurrences = Occurrences.builder.day(20).month(12).build,
     incomeType = IncomeType.THIRTEENTH_SALARY
   ).build
@@ -91,8 +91,8 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
   it should
     """return yearly net income R$11050,00
       |when the financial contract is CLT
-      |with R$1000,00 month salary
-      |with  R$150,00 discounts monthly""".stripMargin in {
+      |with R$1000,00 monthly gross salary
+      |with R$150,00 monthly discounts""".stripMargin in {
     when(financialContractRepository.allByUser(anUser.id, 1, 20))
       .thenReturn(Future.successful(Seq(firstFinancialContract)))
 
@@ -140,9 +140,9 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
 
         cltResume.id shouldEqual firstFinancialContract.id
         cltResume.name shouldEqual firstFinancialContract.name
-        cltResume.yearlyGrossIncome shouldEqual Some(Amount.BRL(1300000))
+        cltResume.yearlyGrossIncome shouldEqual Some(Amount.BRL(1105000))
         cltResume.yearlyIncomeDiscount shouldEqual None
-        cltResume.yearlyNetIncome shouldEqual Some(Amount.BRL(1300000))
+        cltResume.yearlyNetIncome shouldEqual Some(Amount.BRL(1105000))
       }
   }
 
@@ -153,7 +153,7 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
     when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id)))
       .thenReturn(Future.successful(Seq()))
 
-    when(incomeDiscountRepository.allByIncomeIds(firstFinancialContractIncomes.map(_.id)))
+    when(incomeDiscountRepository.allByIncomeIds(Seq()))
       .thenReturn(Future.successful(Seq()))
 
     service

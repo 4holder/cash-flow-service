@@ -32,8 +32,8 @@ class ResumeFinancialContractsService @Inject()(
                            incomes: Seq[Income],
                            discounts: Seq[IncomeDiscount]
   ): FinancialContractResume = {
-    val grossAmount = calculateYearlyGrossIncome(incomes)
     val discountAmount = calculateYearlyIncomeDiscount(incomes, discounts)
+    val grossAmount = calculateYearlyGrossIncome(incomes, discountAmount)
     val netDiscount = calculateYearlyNetIncome(discountAmount, grossAmount)
 
     FinancialContractResume(
@@ -58,21 +58,21 @@ class ResumeFinancialContractsService @Inject()(
       .orElse(grossAmount)
   }
 
-  private def calculateYearlyGrossIncome(incomes: Seq[Income]): Option[Amount] =
-    Try {
-      incomes
-        .map(income => Try(income.yearlyGrossAmount))
-        .reduce((current, previous) =>
-          // To ignore this possible error from mismatch currencies could lead us to a funny issue
-          // However we are going to support only BRL for a few months
-          // TODO: Once we need to support more currencies, it should be revisited
-          for {
-            c <- current
-            p <- previous
-            sum <- c + p
-          } yield sum
-        )
-    }.flatten.toOption
+  private def calculateYearlyGrossIncome(incomes: Seq[Income], discountAmount: Option[Amount]): Option[Amount] = {
+    incomes
+      .map(income => Try(income.yearlyAmount))
+      .reduceOption((current, previous) =>
+        // To ignore this possible error from mismatch currencies could lead us to a funny issue
+        // However we are going to support only BRL for a few months
+        // TODO: Once we need to support more currencies, it should be revisited
+        for {
+          c <- current
+          p <- previous
+          sum <- c + p
+        } yield sum
+      ).flatMap(_.toOption)
+        .flatMap(amount => (discountAmount.getOrElse(Amount.ZERO_REAIS) + amount).toOption)
+  }
 
   private def calculateYearlyIncomeDiscount(
     incomes: Seq[Income],

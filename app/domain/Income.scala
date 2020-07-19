@@ -16,7 +16,7 @@ case class Income(
   createdAt: DateTime,
   modifiedAt: DateTime,
 ) {
-  def yearlyGrossAmount = amount * occurrences.months.length
+  def yearlyAmount = amount * occurrences.months.length
 }
 
 object Income {
