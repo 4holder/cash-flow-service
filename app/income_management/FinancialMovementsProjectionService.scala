@@ -1,6 +1,7 @@
 package income_management
 
 import com.google.inject.{Inject, Singleton}
+import domain.Amount.ZERO_REAIS
 import domain._
 import income_management.FinancialMovementsProjectionService.{FinancialMovementsProjection, ProjectionPoint}
 import income_management.repositories.{FinancialContractRepository, IncomeDiscountRepository, IncomeRepository}
@@ -24,13 +25,16 @@ class FinancialMovementsProjectionService @Inject()(
       allIncomes <- incomeRepository.allByFinancialContractIds(financialContracts.map(_.id))
       allIncomeDiscounts <- incomeDiscountRepository.allByIncomeIds(allIncomes.map(_.id))
     } yield Seq(
-      projectGrossIncome(allIncomes),
-      projectNetIncome(allIncomes, allIncomeDiscounts),
+      projectNetIncome(allIncomes),
+      projectGrossIncome(allIncomes, allIncomeDiscounts),
       projectDiscounts(allIncomes, allIncomeDiscounts)
     )
   }
 
-  private def projectGrossIncome(incomes: Seq[Income])(implicit now: DateTime) = {
+  private def projectGrossIncome(
+    incomes: Seq[Income],
+    discounts: Seq[IncomeDiscount]
+  )(implicit now: DateTime) = {
     FinancialMovementsProjection(
       label = "Gross Income",
       currency = Currency.BRL,
@@ -39,21 +43,31 @@ class FinancialMovementsProjectionService @Inject()(
 
         val incomeAmounts = incomes
           .filter(_.occurrences.months.contains(projectionDateTime.getMonthOfYear))
-          .map(_.amount)
 
-        val amount =
+        val monthlyDiscount =
           incomeAmounts
-            .fold(Amount.ZERO_REAIS)((c, p) => (c + p).get)
+            .flatMap(income =>
+              discounts
+                .filter(g => g.incomeId.equals(income.id))
+                .map(_.amount)
+            )
+            .fold(ZERO_REAIS)((c, p) => (c + p).getOrElse(ZERO_REAIS))
+
+        val grossAmount =
+          (incomeAmounts
+            .map(_.amount)
+            .fold(ZERO_REAIS)((c, p) => (c + p).getOrElse(ZERO_REAIS)) + monthlyDiscount)
+              .getOrElse(ZERO_REAIS)
 
         ProjectionPoint(
-          amount,
+          grossAmount,
           projectionDateTime,
         )
       })
     )
   }
 
-  private def projectNetIncome(incomes: Seq[Income], discounts: Seq[IncomeDiscount])(implicit now: DateTime) = {
+  private def projectNetIncome(incomes: Seq[Income])(implicit now: DateTime): FinancialMovementsProjection = {
     FinancialMovementsProjection(
       label = "Net Income",
       currency = Currency.BRL,
@@ -63,16 +77,10 @@ class FinancialMovementsProjectionService @Inject()(
         val monthIncomes = incomes
           .filter(_.occurrences.months.contains(projectionDateTime.getMonthOfYear))
 
-        val monthDiscounts = monthIncomes.flatMap(income => {
-          discounts
-            .filter(_.incomeId.equals(income.id))
-            .map(_.amount)
-        }).fold(Amount.ZERO_REAIS)((c, p) => (c + p).get)
-
-        val mountAmount = monthIncomes.map(_.amount).fold(Amount.ZERO_REAIS)((c, p) => (c + p).get)
+        val monthlyAmount = monthIncomes.map(_.amount).fold(ZERO_REAIS)((c, p) => (c + p).get)
 
         ProjectionPoint(
-          (mountAmount - monthDiscounts).get,
+          monthlyAmount,
           projectionDateTime,
         )
       })
@@ -94,7 +102,7 @@ class FinancialMovementsProjectionService @Inject()(
                 .filter(_.incomeId.equals(income.id))
                 .map(_.amount)
             })
-            .fold(Amount.ZERO_REAIS)((c, p) => (c + p).get)
+            .fold(ZERO_REAIS)((c, p) => (c + p).get)
 
         ProjectionPoint(
           monthDiscounts,

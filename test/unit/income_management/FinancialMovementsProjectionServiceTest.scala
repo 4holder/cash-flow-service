@@ -27,13 +27,13 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
   private val firstFinancialContract = FinancialContractBuilder().build
   private val salary = IncomeBuilder(
     financialContractId = firstFinancialContract.id,
-    amount = Amount.BRL(100000),
+    amount = Amount.BRL(85000),
     occurrences = Occurrences.builder.day(5).allMonths.build,
     incomeType = IncomeType.SALARY
   ).build
   private val thirteenthSalary = IncomeBuilder(
     financialContractId = firstFinancialContract.id,
-    amount = Amount.BRL(50000),
+    amount = Amount.BRL(35000),
     occurrences = Occurrences.builder.day(20).month(12).build,
     incomeType = IncomeType.THIRTEENTH_SALARY
   ).build
@@ -198,11 +198,21 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
           val amount = p._1._2
           val index = p._2
           if (month == 11) {
-            amount shouldEqual (salary.amount + thirteenthSalaryAdvance.amount).get
+            amount shouldEqual salary.amount.sum(
+              thirteenthSalaryAdvance.amount,
+              salaryINSSDiscount.amount,
+              salaryIRRFDiscount.amount,
+            ).get
           } else if (month == 12) {
-            amount shouldEqual (salary.amount + thirteenthSalary.amount).get
+            amount shouldEqual salary.amount.sum(
+              thirteenthSalary.amount,
+              thirteenthSalaryINSSDiscount.amount,
+              thirteenthSalaryIRRFDiscount.amount,
+              salaryINSSDiscount.amount,
+              salaryIRRFDiscount.amount,
+            ).get
           } else {
-            amount shouldEqual salary.amount
+            amount shouldEqual salary.amount.sum(salaryINSSDiscount.amount, salaryIRRFDiscount.amount).get
             month shouldEqual now.plusMonths(index + 1).getMonthOfYear
           }
         })
@@ -211,8 +221,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
 
       netIncomeProjection.currency shouldEqual Currency.BRL
       netIncomeProjection.financialMovements should have length 12
-      val expectedMonthlyNetIncome = (salary.amount subtract(salaryINSSDiscount.amount, salaryIRRFDiscount.amount)).get
-      val expectedNetThirteenSalary = (thirteenthSalary.amount subtract(thirteenthSalaryINSSDiscount.amount, thirteenthSalaryIRRFDiscount.amount)).get
+
       netIncomeProjection
         .financialMovements
         .map(f => (f.dateTime.getMonthOfYear, f.amount))
@@ -221,11 +230,11 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
           val amount = p._1._2
           val index = p._2
           if (month == 11) {
-            amount shouldEqual (expectedMonthlyNetIncome + thirteenthSalaryAdvance.amount).get
+            amount shouldEqual (salary.amount + thirteenthSalaryAdvance.amount).get
           } else if (month == 12) {
-            amount shouldEqual (expectedMonthlyNetIncome + expectedNetThirteenSalary).get
+            amount shouldEqual (salary.amount + thirteenthSalary.amount).get
           } else {
-            amount shouldEqual expectedMonthlyNetIncome
+            amount shouldEqual salary.amount
             month shouldEqual now.plusMonths(index + 1).getMonthOfYear
           }
         })
