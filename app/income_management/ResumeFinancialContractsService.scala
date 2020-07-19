@@ -28,37 +28,24 @@ class ResumeFinancialContractsService @Inject()(
   }
 
   private def buildResume(
-                           financialContract: FinancialContract,
-                           incomes: Seq[Income],
-                           discounts: Seq[IncomeDiscount]
+    financialContract: FinancialContract,
+    incomes: Seq[Income],
+    discounts: Seq[IncomeDiscount]
   ): FinancialContractResume = {
     val discountAmount = calculateYearlyIncomeDiscount(incomes, discounts)
-    val grossAmount = calculateYearlyGrossIncome(incomes, discountAmount)
-    val netDiscount = calculateYearlyNetIncome(discountAmount, grossAmount)
+    val netIncomeAmount = calculateYearlyNetIncome(incomes)
+    val grossAmount = calculateYearlyGrossIncome(netIncomeAmount, discountAmount)
 
     FinancialContractResume(
       id = financialContract.id,
       name = financialContract.name,
       yearlyGrossIncome = grossAmount,
       yearlyIncomeDiscount = discountAmount,
-      yearlyNetIncome = netDiscount,
+      yearlyNetIncome = netIncomeAmount,
     )
   }
 
-  private def calculateYearlyNetIncome(
-    discountAmount: Option[Amount],
-    grossAmount: Option[Amount]
-  ): Option[Amount] = {
-    discountAmount
-      .flatMap(d =>
-        // To ignore this possible error from mismatch currencies could lead us to a funny issue
-        // However we are going to support only BRL for a few months
-        // TODO: Once we need to support more currencies, it should be revisited
-        grossAmount.flatMap(g => (g - d).toOption))
-      .orElse(grossAmount)
-  }
-
-  private def calculateYearlyGrossIncome(incomes: Seq[Income], discountAmount: Option[Amount]): Option[Amount] = {
+  private def calculateYearlyNetIncome(incomes: Seq[Income]): Option[Amount] = {
     incomes
       .map(income => Try(income.yearlyAmount))
       .reduceOption((current, previous) =>
@@ -71,7 +58,13 @@ class ResumeFinancialContractsService @Inject()(
           sum <- c + p
         } yield sum
       ).flatMap(_.toOption)
-        .flatMap(amount => (discountAmount.getOrElse(Amount.ZERO_REAIS) + amount).toOption)
+  }
+
+  private def calculateYearlyGrossIncome(
+    netIncomeAmount: Option[Amount],
+    discountAmount: Option[Amount]
+  ): Option[Amount] = {
+    netIncomeAmount.flatMap(n => (n + discountAmount.getOrElse(Amount.ZERO_REAIS)).toOption)
   }
 
   private def calculateYearlyIncomeDiscount(
