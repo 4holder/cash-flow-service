@@ -6,7 +6,7 @@ POST    /v1/calculateExpense                          general_expense.GeneralExp
 GET     /v1/listFinancialContracts                    income_management.controllers.FinancialContractController.listIncomeResumes(page: Int, pageSize: Int)
 GET     /v1/getYearlyIncomeProjections                income_management.controllers.FinancialContractController.yearlyIncomeProjections(page: Int, pageSize: Int)
 POST    /v1/registerNewFinancialContract              income_management.controllers.FinancialContractController.registerNewFinancialContract
-GET     /v1/financialContract/:id                     income_management.controllers.FinancialContractController.getIncomeDetails(id: String)
+GET     /v1/detailedFinancialContract/:id             income_management.controllers.FinancialContractController.details(id: String)
 DELETE  /v1/financialContract/:id                     income_management.controllers.FinancialContractController.deleteFinancialContract(id: String)
 
 PUT     /v1/financialContract/:id                     income_management.controllers.FinancialContractController.updateFinancialContract(id: String)

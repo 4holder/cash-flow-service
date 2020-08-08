@@ -17,7 +17,7 @@ class ResumeFinancialContractsService @Inject()(
   def list(user: User, page: Int, pageSize: Int): Future[Seq[FinancialContractResume]] = {
     for {
       financialContracts <- financialContractRepository.allByUser(user.id, page, pageSize)
-      allIncomes <- incomeRepository.allByFinancialContractIds(financialContracts.map(_.id))
+      allIncomes <- incomeRepository.allByFinancialContractIds(financialContracts.map(_.id):_*)
       allIncomeDiscounts <- incomeDiscountRepository.allByIncomeIds(allIncomes.map(_.id))
     } yield financialContracts.map { financialContract =>
       val incomes = allIncomes.filter(_.financialContractId.equals(financialContract.id))

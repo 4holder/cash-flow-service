@@ -24,7 +24,7 @@ class IncomeRepository @Inject()(dbConfigProvider: DatabaseConfigProvider,
   import dbConfig._
   import profile.api._
 
-  def allByFinancialContractIds(financialContractIds: Seq[String]): Future[Seq[Income]] = {
+  def allByFinancialContractIds(financialContractIds: String*): Future[Seq[Income]] = {
     val query =
       incomes
         .filter(_.financial_contract_id inSet financialContractIds)

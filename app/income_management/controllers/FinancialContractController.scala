@@ -6,20 +6,12 @@ import domain.Amount.AmountPayload
 import domain.Occurrences.OccurrencesPayload
 import domain.User.UserPayload
 import domain._
+import income_management.DetailFinancialContractService.DetailedFinancialContract
 import income_management.FinancialMovementsProjectionService.FinancialMovementsProjection
 import income_management.ResumeFinancialContractsService.FinancialContractResume
-import income_management.controllers.FinancialContractController.{
-  FinancialContractRegisterInput,
-  FinancialContractUpdateInput,
-  adaptToResponse,
-  adaptToProjectionResponse,
-}
+import income_management.controllers.FinancialContractController.{FinancialContractRegisterInput, FinancialContractUpdateInput, adaptToProjectionResponse, adaptToResponse}
 import income_management.repositories.FinancialContractRepository
-import income_management.{
-  FinancialMovementsProjectionService,
-  RegisterFinancialContractService,
-  ResumeFinancialContractsService
-}
+import income_management.{DetailFinancialContractService, FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
 import infrastructure.ErrorResponse
 import infrastructure.reads_and_writes.JodaDateTime
 import javax.inject.Inject
@@ -32,11 +24,12 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class FinancialContractController @Inject()(
-  cc: ControllerComponents,
-  registerService: RegisterFinancialContractService,
-  listService: ResumeFinancialContractsService,
-  projectionService: FinancialMovementsProjectionService,
-  auth: AuthorizationHelper
+                                             cc: ControllerComponents,
+                                             registerService: RegisterFinancialContractService,
+                                             listService: ResumeFinancialContractsService,
+                                             projectionService: FinancialMovementsProjectionService,
+                                             detailService: DetailFinancialContractService,
+                                             auth: AuthorizationHelper,
 )(implicit ec: ExecutionContext, repository: FinancialContractRepository)
   extends AbstractController(cc) with JodaDateTime with Logging {
 
@@ -61,12 +54,12 @@ class FinancialContractController @Inject()(
     }
   }
 
-  def getIncomeDetails(id: String): Action[AnyContent] = Action.async { implicit request =>
+  def details(id: String): Action[AnyContent] = Action.async { implicit request =>
     auth.authorizeObject(id).flatMap { _ =>
-      repository
-        .getById(id)
+      detailService
+        .details(id)
         .map(_.map(adaptToResponse))
-        .map(financialContract => Ok(toJson(financialContract)))
+        .map(details => Ok(toJson(details)))
     } recover treatFailure
   }
 
@@ -125,8 +118,8 @@ class FinancialContractController @Inject()(
 object FinancialContractController extends JodaDateTime {
   implicit val financialContractResumeResponse: OWrites[FinancialContractResumeResponse] =
     Json.writes[FinancialContractResumeResponse]
-  implicit val financialContractResponse: OWrites[FinancialContractResponse] =
-    Json.writes[FinancialContractResponse]
+  implicit val financialContractResponse: OWrites[IsolatedFinancialContractResponse] =
+    Json.writes[IsolatedFinancialContractResponse]
   implicit val projectionPointResponse: OWrites[ProjectionPointResponse] =
     Json.writes[ProjectionPointResponse]
   implicit val financialMovementsProjectionsProjection: OWrites[FinancialMovementsProjectionResponse] =
@@ -137,14 +130,20 @@ object FinancialContractController extends JodaDateTime {
     Json.reads[IncomeRegisterInput]
   implicit val financialContractRegisterInput: Reads[FinancialContractRegisterInput] =
     Json.reads[FinancialContractRegisterInput]
-  implicit val incomeRegisterDiscountResponse: Writes[IncomeRegisterDiscountResponse] =
-    Json.writes[IncomeRegisterDiscountResponse]
-  implicit val incomeRegisterResponse: Writes[IncomeRegisterResponse] =
-    Json.writes[IncomeRegisterResponse]
-  implicit val financialContractRegisterResponse: Writes[FinancialContractRegisterResponse] =
-    Json.writes[FinancialContractRegisterResponse]
+  implicit val incomeRegisterDiscountResponse: Writes[IncomeDiscountResponse] =
+    Json.writes[IncomeDiscountResponse]
+  implicit val incomeRegisterResponse: Writes[IncomeResponse] =
+    Json.writes[IncomeResponse]
+  implicit val financialContractRegisterResponse: Writes[FinancialContractResponse] =
+    Json.writes[FinancialContractResponse]
   implicit val financialContractUpdateInput: Reads[FinancialContractUpdateInput] =
     Json.reads[FinancialContractUpdateInput]
+  implicit val detailedIncomeDiscountResponse: Writes[DetailedIncomeDiscountResponse] =
+    Json.writes[DetailedIncomeDiscountResponse]
+  implicit val detailedIncomeResponse: Writes[DetailedIncomeResponse] =
+    Json.writes[DetailedIncomeResponse]
+  implicit val detailedFinancialContractResponse: Writes[DetailedFinancialContractResponse] =
+    Json.writes[DetailedFinancialContractResponse]
 
   sealed case class IncomeRegisterDiscountInput(
     name: String,
@@ -178,7 +177,7 @@ object FinancialContractController extends JodaDateTime {
     endDate: Option[DateTime],
   )
 
-  sealed case class IncomeRegisterDiscountResponse(
+  sealed case class IncomeDiscountResponse(
     id: String,
     name: String,
     amount: AmountPayload,
@@ -187,30 +186,30 @@ object FinancialContractController extends JodaDateTime {
     modifiedAt: DateTime,
   )
 
-  sealed case class IncomeRegisterResponse(
+  sealed case class IncomeResponse(
     id: String,
     name: String,
     amount: AmountPayload,
     incomeType: String,
     occurrences: OccurrencesPayload,
-    discounts: Seq[IncomeRegisterDiscountResponse],
+    discounts: Seq[IncomeDiscountResponse],
     createdAt: DateTime,
     modifiedAt: DateTime,
   )
 
-  sealed case class FinancialContractRegisterResponse(
+  sealed case class FinancialContractResponse(
     id: String,
     name: String,
     contractType: String,
     companyCnpj: Option[String],
     startDate: DateTime,
     endDate: Option[DateTime],
-    incomes: Seq[IncomeRegisterResponse],
+    incomes: Seq[IncomeResponse],
     createdAt: DateTime,
     modifiedAt: DateTime,
   )
 
-  sealed case class FinancialContractResponse(
+  sealed case class IsolatedFinancialContractResponse(
     id: String,
     user: UserPayload,
     name: String,
@@ -241,8 +240,44 @@ object FinancialContractController extends JodaDateTime {
     financialMovements: Seq[ProjectionPointResponse],
   )
 
-  def adaptToResponse(financialContract: FinancialContract): FinancialContractResponse = {
-    FinancialContractResponse(
+  case class DetailedIncomeDiscountResponse(
+    id: String,
+    name: String,
+    discountType: String,
+    amount: AmountPayload,
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
+  case class DetailedIncomeResponse(
+    id: String,
+    name: String,
+    grossAmount: AmountPayload,
+    netAmount: AmountPayload,
+    incomeType: String,
+    occurrences: Occurrences,
+    discounts: Seq[DetailedIncomeDiscountResponse],
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
+  case class DetailedFinancialContractResponse(
+    id: String,
+    name: String,
+    contractType: String,
+    companyCnpj: Option[String],
+    incomes: Seq[DetailedIncomeResponse],
+    totalYearlyGrossAmount: AmountPayload,
+    totalYearlyNetAmount: AmountPayload,
+    totalYearlyDiscountAmount: AmountPayload,
+    startDate: DateTime,
+    endDate: Option[DateTime],
+    createdAt: DateTime,
+    modifiedAt: DateTime,
+  )
+
+  def adaptToResponse(financialContract: FinancialContract): IsolatedFinancialContractResponse = {
+    IsolatedFinancialContractResponse(
       id = financialContract.id,
       user = financialContract.user,
       name = financialContract.name,
@@ -282,10 +317,10 @@ object FinancialContractController extends JodaDateTime {
     )
   }
 
-  def adaptToResponse(fullContract: (FinancialContract, Seq[(Income, Seq[IncomeDiscount])])): FinancialContractRegisterResponse = {
+  def adaptToResponse(fullContract: (FinancialContract, Seq[(Income, Seq[IncomeDiscount])])): FinancialContractResponse = {
     val contract = fullContract._1
 
-    FinancialContractRegisterResponse(
+    FinancialContractResponse(
       id = contract.id,
       name = contract.name,
       contractType = contract.contractType.toString,
@@ -294,13 +329,13 @@ object FinancialContractController extends JodaDateTime {
       endDate = contract.endDate,
       incomes = fullContract._2.map {
         case (income, discounts) =>
-          IncomeRegisterResponse(
+          IncomeResponse(
             id = income.id,
             name = income.name,
             amount = income.amount,
             incomeType = income.incomeType.toString,
             occurrences = income.occurrences,
-            discounts = discounts.map(discount => IncomeRegisterDiscountResponse(
+            discounts = discounts.map(discount => IncomeDiscountResponse(
               id = discount.id,
               name = discount.name,
               amount = discount.amount,
@@ -314,6 +349,40 @@ object FinancialContractController extends JodaDateTime {
       },
       createdAt = contract.createdAt,
       modifiedAt = contract.modifiedAt,
+    )
+  }
+
+  def adaptToResponse(detailedFinancialContract: DetailedFinancialContract): DetailedFinancialContractResponse = {
+    DetailedFinancialContractResponse(
+      id = detailedFinancialContract.id,
+      name = detailedFinancialContract.name,
+      contractType = detailedFinancialContract.contractType.toString,
+      companyCnpj = detailedFinancialContract.companyCnpj,
+      totalYearlyDiscountAmount = detailedFinancialContract.totalYearlyDiscountAmount,
+      totalYearlyGrossAmount = detailedFinancialContract.totalYearlyGrossAmount,
+      totalYearlyNetAmount = detailedFinancialContract.totalYearlyNetAmount,
+      incomes = detailedFinancialContract.incomes.map(income => DetailedIncomeResponse(
+        id = income.id,
+        name = income.name,
+        grossAmount = income.grossAmount,
+        netAmount = income.netAmount,
+        incomeType = income.incomeType.toString,
+        discounts = income.discounts.map(discount => DetailedIncomeDiscountResponse(
+          id = discount.id,
+          name = discount.name,
+          discountType = discount.discountType.toString,
+          amount = discount.amount,
+          createdAt = discount.createdAt,
+          modifiedAt = discount.modifiedAt,
+        )),
+        occurrences = income.occurrences,
+        createdAt = income.createdAt,
+        modifiedAt = income.modifiedAt,
+      )),
+      startDate = detailedFinancialContract.startDate,
+      endDate = detailedFinancialContract.endDate,
+      createdAt = detailedFinancialContract.createdAt,
+      modifiedAt = detailedFinancialContract.modifiedAt,
     )
   }
 }

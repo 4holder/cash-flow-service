@@ -22,7 +22,7 @@ class FinancialMovementsProjectionService @Inject()(
   (implicit now: DateTime = DateTime.now): Future[Seq[FinancialMovementsProjection]] = {
     for {
       financialContracts <- financialContractRepository.allByUser(user.id, page, pageSize)
-      allIncomes <- incomeRepository.allByFinancialContractIds(financialContracts.map(_.id))
+      allIncomes <- incomeRepository.allByFinancialContractIds(financialContracts.map(_.id):_*)
       allIncomeDiscounts <- incomeDiscountRepository.allByIncomeIds(allIncomes.map(_.id))
     } yield Seq(
       projectNetIncome(allIncomes),

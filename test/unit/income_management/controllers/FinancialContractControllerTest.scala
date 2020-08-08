@@ -7,7 +7,7 @@ import domain.User
 import income_management.controllers.FinancialContractController
 import income_management.controllers.FinancialContractController.FinancialContractRegisterInput
 import income_management.repositories.FinancialContractRepository
-import income_management.{FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
+import income_management.{DetailFinancialContractService, FinancialMovementsProjectionService, RegisterFinancialContractService, ResumeFinancialContractsService}
 import infrastructure.reads_and_writes.JodaDateTime
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
@@ -28,6 +28,7 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
   private val registerService = mock[RegisterFinancialContractService]
   private val listService = mock[ResumeFinancialContractsService]
   private val projectionService = mock[FinancialMovementsProjectionService]
+  private val detailsService = mock[DetailFinancialContractService]
   implicit private val repository = mock[FinancialContractRepository]
   private val auth = mock[AuthorizationHelper]
 
@@ -43,7 +44,8 @@ class FinancialContractControllerTest extends PlaySpec with Results with Mockito
     registerService,
     listService,
     projectionService,
-    auth
+    detailsService,
+    auth,
   )
 
   "should list contracts from user" in {

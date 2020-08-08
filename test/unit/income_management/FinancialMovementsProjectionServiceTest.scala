@@ -97,7 +97,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
     val emptyResponse = Future.successful(Seq())
     when(financialContractRepository.allByUser(anUser.id, 1, 10))
       .thenReturn(emptyResponse)
-    when(incomeRepository.allByFinancialContractIds(Seq()))
+    when(incomeRepository.allByFinancialContractIds(Seq():_*))
       .thenReturn(emptyResponse)
     when(incomeDiscountRepository.allByIncomeIds(Seq()))
       .thenReturn(emptyResponse)
@@ -176,7 +176,7 @@ class FinancialMovementsProjectionServiceTest extends AsyncUnitSpec {
     implicit val now: DateTime = DateTime.now
     when(financialContractRepository.allByUser(anUser.id, 1, 10))
       .thenReturn(Future.successful(Seq(firstFinancialContract)))
-    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id)))
+    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id):_*))
       .thenReturn(Future.successful(firstFinancialContractIncomes))
     when(incomeDiscountRepository.allByIncomeIds(firstFinancialContractIncomes.map(_.id)))
       .thenReturn(Future.successful(firstFinancialContractIncomeDiscounts))

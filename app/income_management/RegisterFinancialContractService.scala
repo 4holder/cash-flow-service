@@ -18,7 +18,8 @@ class RegisterFinancialContractService @Inject()(
 )
 (implicit ec: ExecutionContext){
   def register(newFinancialContractInput: FinancialContractRegisterInput)
-              (implicit user: User, now: DateTime = DateTime.now): Future[(FinancialContract, Seq[(Income, Seq[IncomeDiscount])])] = {
+              (implicit user: User, now: DateTime = DateTime.now)
+  : Future[(FinancialContract, Seq[(Income, Seq[IncomeDiscount])])] = {
     val financialContractId = randomUUID().toString
     val financialContract = FinancialContract(
       id = financialContractId,

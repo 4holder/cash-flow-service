@@ -60,7 +60,7 @@ class IncomeRepositoryTest extends IntegrationSpec {
       _ <- DBUtils.insertFinancialContracts(financialContractList)
       _ <- DBUtils.insertIncomes(incomeList)
       incomes <- repository.allByFinancialContractIds(
-        List(firstFinancialContract.id, secondFinancialContract.id)
+        List(firstFinancialContract.id, secondFinancialContract.id):_*
       )
     } yield {
       incomes should have length 5

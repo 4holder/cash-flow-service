@@ -75,7 +75,7 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
     when(financialContractRepository.allByUser(anUser.id, 1, 30))
       .thenReturn(Future.successful(Seq()))
 
-    when(incomeRepository.allByFinancialContractIds(Seq()))
+    when(incomeRepository.allByFinancialContractIds(Seq():_*))
       .thenReturn(Future.successful(Seq()))
 
     when(incomeDiscountRepository.allByIncomeIds(Seq()))
@@ -96,7 +96,7 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
     when(financialContractRepository.allByUser(anUser.id, 1, 20))
       .thenReturn(Future.successful(Seq(firstFinancialContract)))
 
-    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id)))
+    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id):_*))
       .thenReturn(Future.successful(firstFinancialContractIncomes))
 
     when(incomeDiscountRepository.allByIncomeIds(firstFinancialContractIncomes.map(_.id)))
@@ -125,7 +125,7 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
     when(financialContractRepository.allByUser(anUser.id, 1, 20))
       .thenReturn(Future.successful(Seq(firstFinancialContract)))
 
-    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id)))
+    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id):_*))
       .thenReturn(Future.successful(firstFinancialContractIncomes))
 
     when(incomeDiscountRepository.allByIncomeIds(firstFinancialContractIncomes.map(_.id)))
@@ -150,7 +150,7 @@ class ResumeFinancialContractsServiceTest extends AsyncUnitSpec with MockitoSuga
     when(financialContractRepository.allByUser(anUser.id, 1, 20))
       .thenReturn(Future.successful(Seq(firstFinancialContract)))
 
-    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id)))
+    when(incomeRepository.allByFinancialContractIds(Seq(firstFinancialContract.id):_*))
       .thenReturn(Future.successful(Seq()))
 
     when(incomeDiscountRepository.allByIncomeIds(Seq()))
