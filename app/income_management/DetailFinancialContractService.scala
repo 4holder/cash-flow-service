@@ -85,7 +85,9 @@ class DetailFinancialContractService @Inject()(
   }
 
   private def calculateNetYearlyAmount(incomes: Seq[Income]) = {
-    incomes.map(_.amount).fold(ZERO_REAIS)((p, c) => (p + c).getOrElse(ZERO_REAIS))
+    incomes
+      .map(income => income.amount * income.occurrences.months.length)
+      .fold(ZERO_REAIS)((p, c) => (p + c).getOrElse(ZERO_REAIS))
   }
 
   def calculateYearlyDiscountAmount(
