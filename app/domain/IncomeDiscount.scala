@@ -19,6 +19,10 @@ object IncomeDiscount {
   case object IncomeDiscountType extends Enumeration {
     val INSS: IncomeDiscountType.Value = Value("INSS")
     val IRRF: IncomeDiscountType.Value = Value("IRRF")
+    val PARKING: IncomeDiscountType.Value = Value("PARKING")
+    val MEALS: IncomeDiscountType.Value = Value("MEALS")
+    val HEALTH_CARE: IncomeDiscountType.Value = Value("HEALTH_CARE")
+    val OTHER: IncomeDiscountType.Value = Value("OTHER")
   }
 
   case class IncomeDiscountPayload(
