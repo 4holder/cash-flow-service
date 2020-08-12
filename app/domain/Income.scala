@@ -25,6 +25,7 @@ object Income {
     val THIRTEENTH_SALARY: IncomeType.Value = Value("THIRTEENTH_SALARY")
     val THIRTEENTH_SALARY_ADVANCE: IncomeType.Value = Value("THIRTEENTH_SALARY_ADVANCE")
     val PROFIT_SHARING: IncomeType.Value = Value("PROFIT_SHARING")
+    val OTHER: IncomeType.Value = Value("OTHER")
   }
 
   case class IncomePayload(
